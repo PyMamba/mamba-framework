@@ -13,7 +13,7 @@ from mamba import _version as _mamba_version
 from mamba.application import controller, appstyles
 from mamba.utils import borg
 
-_app_ver = versions.Version('Application', 12, 1, 0)
+_app_ver = versions.Version('Application', 12, 3, 0)
 _app_project_ver = versions.Version('Project', 0, 1, 0) 
 
 class ApplicationError(Exception):

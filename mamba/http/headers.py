@@ -19,20 +19,31 @@ class Headers(object):
     _doc_types={
         'html'      : {
             'html5'         : '<!DOCTYPE html>',
-            'strict'        : '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">',
-            'transitional'  : '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">',
-            'frameset'      : '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">'
+            'strict'        : ('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML '
+                '4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">'),
+            'transitional'  : ('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 '
+                'Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">'),
+            'frameset'      : ('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 '
+                'Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">')
         },
         'xhtml'     : {
             'xhtml5'        : '<!DOCTYPE html>',
-            'strict'        : '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
-            'transitional'  : '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">',
-            'frameset'      : '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">'
+            'strict'        : ('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 '
+                'Strict//EN" '
+                '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'),
+            'transitional'  : ('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 '
+                'Transitional//EN" '
+                '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'),
+            'frameset'      : ('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 '
+                'Frameset//EN" '
+                '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">')
         }
     }
 
-    html_element='<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'
-    content_type='<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
+    html_element= \
+        '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">'
+    content_type= \
+        '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />'
     description='Non Description'
     language='en'
     favicon='favicon.ico'
@@ -69,17 +80,22 @@ class Headers(object):
 
     
     def get_generator_content(self):        
-        return '<meta name="generator" content="Mamba Web Application Framework version %s" />' % version.short()
+        return ('<meta name="generator" '
+            'content="Mamba Web Application Framework'
+            ' version %s" />') % version.short()
 
     
     def get_mamba_content(self):
         if platform_debug:
-            return '<meta name="mamba-content" content="Platform: %s;Version: %s;Arch: %s" />' % (platform.system(), platform.release(), platform.machine())
+            return ('<meta name="mamba-content" content="Platform: %s;'
+                    'Version: %s;Arch: %s" />') % (
+                    platform.system(), platform.release(), platform.machine())
         else:
             return '<meta name="mamba-content" content="Platform: Web" />'
 
     
     def get_favicon_content(self, media='/media'):
-        return '<link rel="shortcut icon" href="%s/%s" />' % (media, self._favicon)
+        return '<link rel="shortcut icon" href="%s/%s" />' % (
+            media, self._favicon)
 
 
