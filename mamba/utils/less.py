@@ -6,62 +6,86 @@
 Mamba less compiler
 """
 
-import subprocess
+import os
 
 from twisted.web import resource, server
-from twisted.internet import threads
+from twisted.internet import utils
 from twisted.python import filepath
 
 
 class LessResource(resource.Resource):
-	"""
-	Mamba LessResource class define a web accesible LESS script
-	"""
+    """
+    Mamba LessResource class define a web accesible LESS script
+    """
 
-	isLeaf = True    
-	def render_GET(self, request):
-		"""
-		Try to compile a LESS file and then serve it as CSS
-		"""
+    isLeaf = True    
+    def render_GET(self, request):
+        """
+        Try to compile a LESS file and then serve it as CSS
+        """
 
-		self.less_compiler = LessCompiler(request.postpath[0])		
-		self.less_compiler.compile()
-		
-		return self.less_compiler.get_script()		
+        self.less_compiler = LessCompiler(request.postpath[0])
+        d = self.less_compiler.compile()
+
+        def cb_sendback(resp):
+            """
+            Write result from callback
+            """
+            request.write(resp)
+            request.finish()        
+
+
+        d.addCallback(cb_sendback)        
+        
+        return server.NOT_DONE_YET      
 
 
 class LessCompiler(object):
-	"""
-	Compile LESS scripts if LESS NodeJS compiler is present. Otherwise adds the
-	less.js JavaScript compiler at page.
-	"""
+    """
+    Compile LESS scripts if LESS NodeJS compiler is present. Otherwise adds the
+    less.js JavaScript compiler to the page.
+    """
 
 
-	def __init__(self, style):
-		super(LessCompiler, self).__init__()
-		self.stylesheet = style		
-			
-	
-	def compile(self):
-		"""
-		Compile a LESS script
-		"""
-		
-		try:
-			p = subprocess.Popen(['lessc', self.stylesheet],
-				stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-			self.out, errors = p.communicate()
-		except OSError:
-			from mamba.application import app
-			mamba_app = app.Application()
-			mamba_app.lessjs = True
-			mgr = stylesheet.StylesheetManager()					
-			self.out = filepath.FilePath(self.stylesheet).getContent()
-	
+    def __init__(self, style):
+        super(LessCompiler, self).__init__()
+        self.stylesheet = style     
+            
+    
+    def compile(self):
+        """
+        Compile a LESS script
+        """
+        
+        d = utils.getProcessOutput('lessc', [self.stylesheet], os.environ)
+        d.addCallbacks(self._get_compiled, self._get_script)
 
-	def get_script(self):
-		"""
-		Return the result script
-		"""
+        return d        
+    
 
-		return self.out.decode('utf-8')
+    def _get_compiled(self, resp):
+        """
+        Return the result compiled LESS script
+        """
+
+        return resp.decode('utf-8')
+
+    
+    def _get_script(self, ignore):
+        """
+        Return the LESS script and set Application use of LESS compiler script
+        as True
+        """
+
+        from mamba.application import app
+        mamba_app = app.Application()
+        mamba_app.lessjs = True
+        mgr = stylesheet.StylesheetManager()                    
+        
+        return filepath.FilePath(self.stylesheet).getContent().decode('utf-8')  
+
+
+
+__all__ = [
+    "LessResource", "LessCompiler"
+]

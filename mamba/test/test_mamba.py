@@ -65,18 +65,13 @@ class MambaTest(unittest.TestCase):
             dummy.DummyController in controller.ControllerProvider.plugins)
     
 
-    def test_dummy_controller_get_register_path(self):    
-        #curr_dir = filepath.os.getcwd()        
-        #filepath.os.chdir(filepath.dirname(__file__))
+    def test_dummy_controller_get_register_path(self):
         r = dummy.DummyController()         
         request = DummyRequest([''])
         request.args = {'action' : ['get_register_path']}
         request.prepath = []
         request.method = 'POST'
         self.assertEqual('dummy', r.render(request))
-    
-
-
     
 
 if __name__ == '__main__':

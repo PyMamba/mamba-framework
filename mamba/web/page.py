@@ -122,4 +122,8 @@ class Page(resource.Resource):
         self._scripts.append(script)
         self.putChild(script.get_prefix(), static.File(script.get_path()))
         
-    
+
+
+__all__ = [
+    "Page"
+]

@@ -9,10 +9,6 @@ This system is based on the really nice idea from Marty Alchin about plugins
 systems using metaclasses that was exposed on his awesome book Pro Python.
 """
 
-import re
-
-from twisted.python import filepath
-
 
 class ExtensionPoint(type):
     """
