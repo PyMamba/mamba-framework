@@ -11,7 +11,6 @@ import json
 from collections import OrderedDict
 
 from zope.interface import Interface, Attribute
-from twisted.plugin import getPlugins
 from twisted.web import resource
 
 from mamba import plugin
@@ -27,48 +26,11 @@ class ControllerProvider:
     """
     Mount point for plugins which refer to Controllers for our applications.
     
-    Controllers implementing this reference should provide the following
-    attributes:    
-    ============== =======================================================
-    name           The controller name
-    desc           The controller description
-    register_path  The URL to connect with the controller
-    loaded         Flag that indicates if controller is already loaded
-    ============== =======================================================
+    Controllers implementing this reference should implements the IController
+    interface
     """
     
     __metaclass__ = plugin.ExtensionPoint
-
-
-class IController(Interface):
-    """
-    Manba Controllers interface.
-
-    Every controller will implement this interface
-    """
-
-
-    def get_register_path():
-        """
-        Return the controller register path for URL Rewriting
-        """
-
-    name = Attribute("""
-        @type name: C{string}
-        @ivar name: Controller's name
-    """)    
-
-    desc = Attribute("""
-        @type desc: C{string}
-        @ivar desc: Controller's description
-    """)
-
-    loaded = Attribute("""
-        @type loaded: C{boolean}
-        @ivar loaded: Returns true if the controller has been loaded, otherwise
-                      returns false
-    """)
-
 
 
 class Controller(resource.Resource):
@@ -173,6 +135,5 @@ class ControllerManager(module.ModuleManager):
 
 
 __all__ = [
-    'ControllerError', 'ControllerProvider', 'IController', 'Controller',
-    'ControllerProvider', 'ControllerManager'
+    'ControllerError', 'ControllerProvider', 'Controller', 'ControllerManager'
 ]

@@ -10,6 +10,7 @@ import json
 
 from zope.interface import implements
 
+from mamba.core import interfaces
 from mamba.application import controller
 
 class DummyController(controller.ControllerProvider, controller.Controller):
@@ -18,7 +19,7 @@ class DummyController(controller.ControllerProvider, controller.Controller):
 	"""
 
 
-	implements(controller.IController)
+	implements(interfaces.IController)
 	name = 'Dummy'
 	desc = 'I am a dummy controller created for tests purposes'
 	loaded = False

@@ -20,6 +20,7 @@ from pyDoubles.matchers import *
 from mamba.test.application.controller import dummy
 from mamba.application import controller
 from mamba.plugin import ExtensionPoint
+from mamba.core import interfaces
 from mamba import __version__
 
 
@@ -51,13 +52,13 @@ class MambaTest(unittest.TestCase):
     
 
     def test_dummy_controller_implements_icontroller(self):
-    	self.assertTrue(controller.IController.implementedBy(
+    	self.assertTrue(interfaces.IController.implementedBy(
     		dummy.DummyController))
     
 
     def test_dummy_controller_instance_provide_icontroller(self):
     	dcontroller = dummy.DummyController()
-    	self.assertTrue(controller.IController.providedBy(dcontroller))
+    	self.assertTrue(interfaces.IController.providedBy(dcontroller))
     
 
     def test_dummy_controller_is_a_plugin(self):
