@@ -67,7 +67,7 @@ class StylesheetManager(object):
 				filepath.FilePath(self._styles_store),
 				callbacks=[self._notify]
 			)
-			self._watchinf = True
+			self._watching = True
 		except INotifyError:
 			self._watching = False 
     

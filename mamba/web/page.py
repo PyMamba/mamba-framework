@@ -67,8 +67,8 @@ class Page(resource.Resource):
         a = _page.append
         
         # Create the page headers
-        a('{0}\n'.format(self._header.get_doc_type(self._options['doctype']))
-        a('{0}\n'.format(self._header.get_html_element())
+        a('{0}\n'.format(self._header.get_doc_type(self._options['doctype'])))
+        a('{0}\n'.format(self._header.get_html_element()))
         a('    <head>\n')
         a('        {0}\n'.format(self._header.get_content_type()))
         a('        {0}\n'.format(self._header.get_generator_content()))

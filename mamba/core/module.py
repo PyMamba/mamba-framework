@@ -15,18 +15,19 @@ from twisted.python import filepath
 
 from mamba.core import inotifier
 
-class ModuleError(Exception):    
+
+class ModuleError(Exception):
+
     pass
 
 
 class ModuleManager(object):
     """
-    Every module manager class inherits from me 
+    Every module manager class inherits from me
     """
     implements(inotifier.INotifier)
 
-    
-    def __init__(self):                   
+    def __init__(self):
         # Initialize the ExtensionLoader parent object
         super(ModuleManager, self).__init__()
            
@@ -129,9 +130,9 @@ class ModuleManager(object):
         
         if mask is inotify.IN_MODIFY:
             if not self.is_valid_file(file_path):
-                return;
-            
-            module = filepath.splitext(file_path.basename())[0]            
+                return
+        
+            module = filepath.splitext(file_path.basename())[0]
             if module in self._modules:
                 self.reload(module)
         
