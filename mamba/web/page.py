@@ -54,7 +54,7 @@ class Page(resource.Resource):
     def getChild(self, path, request):
         """L{twisted.web.resource.Resource.getChild} overwrite"""
         
-        if path == '' or path == None or path == 'index' or path == 'app':
+        if path == '' or path is None or path == 'index' or path == 'app':
             return self
         
         return resource.Resource.getChild(self, path, request)
@@ -67,34 +67,34 @@ class Page(resource.Resource):
         a = _page.append
         
         # Create the page headers
-        a('%s\n' % self._header.get_doc_type(self._options['doctype']))
-        a('%s\n' % self._header.get_html_element())
+        a('{0}\n'.format(self._header.get_doc_type(self._options['doctype']))
+        a('{0}\n'.format(self._header.get_html_element())
         a('    <head>\n')
-        a('        %s\n' % format(self._header.get_content_type()))
-        a('        %s\n' % format(self._header.get_generator_content()))
-        a('        %s\n' % format(self._header.get_description_content()))
-        a('        %s\n' % format(self._header.get_language_content()))
-        a('        %s\n' % format(self._header.get_mamba_content()))
+        a('        {0}\n'.format(self._header.get_content_type()))
+        a('        {0}\n'.format(self._header.get_generator_content()))
+        a('        {0}\n'.format(self._header.get_description_content()))
+        a('        {0}\n'.format(self._header.get_language_content()))
+        a('        {0}\n'.format(self._header.get_mamba_content()))
 
         if 'resPath' in self._options and 'media' in self._options['resPath']:
             media=self._options['resPath']['media']
         else:
             media='media'
-        a('        %s\n' % (self._header.get_favicon_content(media)))
+        a('        {0}\n'.format(self._header.get_favicon_content(media)))
 
         # Iterate over the defined meta keys and add it to the header's page
         for meta in self._options['meta']:
-            a('        %s\n' % (meta))
+            a('        {0}\n'.format(meta))
 
         # Iterate over the defined styles and add it to the header's page
         for style in self._stylesheets:
-            a('        %s\n' % (style.data))
+            a('        {0}\n'.format(style.data))
 
         # Iterate over the defined scripts and add it to the header's page
         for script in self._scripts:
-            a('        %s\n' % (script.data))
+            a('        {0}\n'.format(script.data))
 
-        a('        <title>%s</title>\n' % (self._options['title']))
+        a('        <title>{0}</title>\n'.format(self._options['title']))
         a('    </head>\n')
         a('</html>')
 
