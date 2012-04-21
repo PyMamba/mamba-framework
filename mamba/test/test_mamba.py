@@ -66,4 +66,4 @@ class MambaTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    print 'Use trial to run this tests: trial mamba.test.test_mamba'
+    print('Use trial to run this tests: trial mamba.test.test_mamba')

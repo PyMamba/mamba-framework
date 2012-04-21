@@ -94,7 +94,6 @@ class LessCompilerTests(unittest.TestCase):
     def test_less_compile_to_css(self):
 
         def cb_fail(ignore):
-            print ignore
             raise unittest.SkipTest('LESS Compiler can not be found')
 
         def cb_success(resp):
