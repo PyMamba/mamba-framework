@@ -6,12 +6,11 @@
 Copyright information about Mamba
 """
 
-from mamba import __version__ as version
 
-copyright="""Copyright (c) Oscar Campos <oscar.campos@member.fsf.org>
+copyright = """Copyright (c) Oscar Campos <oscar.campos@member.fsf.org>
 See LICENSE for details"""
 
-disclaimer="""
+disclaimer = """
 Mamba the RAD Web Applications Framework for Twisted Web
 %s
 

@@ -5,4 +5,3 @@
 """
 Test package for L{mamba.http.headers}.
 """
-        

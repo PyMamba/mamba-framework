@@ -12,10 +12,9 @@ from mamba.web import stylesheet
 
 
 class StylesheetTest(unittest.TestCase):
-	"""
-	Tests for L{mamba.web.stylesheet}
-	"""
+    """
+    Tests for L{mamba.web.stylesheet}
+    """
 
-
-	def setUp(self):
-		pass
+    def setUp(self):
+        pass

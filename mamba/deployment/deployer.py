@@ -12,17 +12,17 @@ from mamba import plugin
 from mamba.utils import borg
 from mamba.core import module
 
+
 class DeployerError(Exception):
-	pass
+    pass
 
 
 class DeployerProvider:
-	"""
-	Mount point for plugins which refer to Deploters for out applications.
+    """
+    Mount point for plugins which refer to Deploters for out applications.
 
-	Deployers implementing this reference should implement the IDeployer
-	interface
-	"""
+    Deployers implementing this reference should implement the IDeployer
+    interface
+    """
 
-	__metaclass__ = plugin.ExtensionPoint
-
+    __metaclass__ = plugin.ExtensionPoint

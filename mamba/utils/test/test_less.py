@@ -12,13 +12,12 @@ import tempfile
 from twisted.web import server
 from twisted.trial import unittest
 from twisted.python import filepath
-from twisted.internet import utils, reactor
+from twisted.internet import utils
 from twisted.web.test.test_web import DummyRequest
-from twisted.protocols.policies import WrappingFactory
 
 from mamba.utils import less
 
-less_file  = ('#functions {\n'
+less_file = ('#functions {\n'
     '  @var: 10;\n'
     '  color: _color("evil red"); // #660000\n'
     '  width: increment(15);\n'
@@ -76,26 +75,22 @@ class LessCompilerTests(unittest.TestCase):
     Tests for L{mamba.utils.less}
     """
 
-
-    def setUp(self):                
-        self.file = tempfile.NamedTemporaryFile(delete=False)       
+    def setUp(self):
+        self.file = tempfile.NamedTemporaryFile(delete=False)
         self.file.write(less_file)
         self.file.close()
 
         self._fp = filepath.FilePath(self.file.name)
-    
 
     def tearDown(self):
         self._fp.remove()
-                            
-    
+
     def test_less_compiles(self):
         lc = less.LessCompiler(self.file.name)
         d = lc.compile()
-        
+
         return d.addCallback(self.assertNotEqual, less_file)
-    
-    
+
     def test_less_compile_to_css(self):
 
         def cb_fail(ignore):
@@ -109,7 +104,7 @@ class LessCompilerTests(unittest.TestCase):
             return d.addCallback(self.assertEqual, resp)
 
         return utils.getProcessOutput('lessc',
-            [self.file.name], os.environ).addCallbacks(cb_success, cb_fail)      
+            [self.file.name], os.environ).addCallbacks(cb_success, cb_fail)
 
 
 class LessResourceTest(unittest.TestCase):
@@ -124,39 +119,35 @@ class LessResourceTest(unittest.TestCase):
         self.fd.close()
         self._fp = filepath.FilePath(self.fd.name)
 
-    
     def tearDown(self):
-        self._fp.remove()    
+        self._fp.remove()
 
-
-    def test_is_leaf(self):        
+    def test_is_leaf(self):
         self.assertTrue(self.r.isLeaf)
-
 
     def test_render(self):
         request = DummyRequest([self.fd.name])
         d = self._render(self.r, request)
-        
-        def rendered(resp):            
+
+        def rendered(resp):
             resp = "".join(resp.written)
             lc = less.LessCompiler(self.fd.name)
             d = lc.compile()
 
-            return d.addCallback(self.assertEqual, resp)           
-        
+            return d.addCallback(self.assertEqual, resp)
+
         return d.addCallback(rendered)
 
-
     def _render(self, resource, request):
-        result = resource.render(request)        
+        result = resource.render(request)
         if isinstance(result, str):
             request.write(result)
-            request.finish()            
-            return succeed(request)
-        elif result is server.NOT_DONE_YET:            
+            request.finish()
+            return self.succeed(request)
+        elif result is server.NOT_DONE_YET:
             if request.finished:
-                return succeed(request)
-            else:                
+                return self.succeed(request)
+            else:
                 return request.notifyFinish().addCallback(lambda _: request)
         else:
             raise ValueError("Unxpected return value: %r" % (result,))

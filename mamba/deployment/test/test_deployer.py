@@ -10,14 +10,12 @@ from twisted.python import unittest
 
 
 class DeployerTest(unittest.TestCase):
-	"""
-	Tests for L{mamba.deployment.deployer}
-	"""
+    """
+    Tests for L{mamba.deployment.deployer}
+    """
 
+    def setUp(self):
+        pass
 
-	def setUp(self):
-		pass
-
-
-	def tearDown(self):
-		pass
+    def tearDown(self):
+        pass
