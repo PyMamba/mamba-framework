@@ -6,7 +6,7 @@
 """
 Mamba is a high-level RAD Web Applications framework based on Twisted Web
 with lot of steroids. You can use ExtJS4 or Sencha2 as frontend for your
-web applications. HTML output is available too using the Twisted Templating
+web applications. HTML output is available too using the Jinja2 Templating
 System.
 
 To get detailed documentation visit: http://mamba.deliriumcoder.com

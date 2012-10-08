@@ -11,13 +11,12 @@ from twisted.web import resource
 
 from mamba.application import controller
 
+
 class ResourceTest(unittest.TestCase):
     """Tests for L{mamba.application.controller}"""
-    
+
     def setUp(self):
         self.spy = resource.Resource()
-    
-    def test_class_inherits_twisted_web_resource(self):        
+
+    def test_class_inherits_twisted_web_resource(self):
         self.assertTrue(issubclass(controller.Controller, resource.Resource))
-    
-    

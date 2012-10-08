@@ -3,7 +3,13 @@
 # Ses LICENSE for more details
 
 """
-Controllers for web projects that encapsulates twisted low-level resources.
+.. module:: plugin
+    :platform: Unix, Windows
+    :synopsys: Controllers for web projects that encapsulates twisted
+               low-level resources.
+
+.. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
+
 """
 
 import json
@@ -33,6 +39,8 @@ class ControllerProvider:
 class Controller(resource.Resource):
     """
     Mamba Controller Class define a web accesible resource and its actions.
+
+    .. versionadded:: 0.1
     """
 
     def __init__(self):
@@ -46,11 +54,12 @@ class Controller(resource.Resource):
         First checks if a resource was manually added using putChild, and then
         call getChild to check for dynamic resources.
 
-        @param name: a strign, describing the child
-
-        @param request: a L{twisted.web.server.Request} specifying
+        :param name: a strign, describing the child
+        :type name: str
+        :param request: a :class:`~twisted.web.server.request` specifying
                         meta-information about the request that is being made
                         for this child.
+        :type request: :class:`~twisted.web.server.request`
         """
 
         if hasattr(self, name):
@@ -59,13 +68,18 @@ class Controller(resource.Resource):
 
     def render(self, request):
         """
-        Render a given resource. See L{IResource}'s render method.
+        Render a given resource.
+        See :class:`~twisted.web.resource.IResource`'s render method.
 
         I try to render an action from myself, if action does not exists just
-        return the L{resource.Resource.render} result from Twisted.
+        return the :class:`~twisted.resource.Resource.render` result
+        from Twisted.
 
         If action_name exists but no action is defined I'll return result for
-        L{resource.Resource.render}.
+        :class:`~twisted.resource.Resource.render`.
+
+        :param request: the HTTP request
+        :type request: :class:`~twisted.web.server.Request`
         """
 
         kwargs = {}
@@ -84,6 +98,11 @@ class Controller(resource.Resource):
     def senderrback(self, request, error):
         """
         Send back errors to the browser
+
+        :param request: the HTTP request
+        :type request: :class:`~twisted.web.server.Request`
+        :param error: the error dict containing `message` and `number`
+        :type error: dict
         """
         request.write(json.dumps({
             'success': False,
@@ -94,7 +113,12 @@ class Controller(resource.Resource):
 
     def sendback(self, request, result):
         """
-        Send back a result to the browser.
+        Send back a result to the browser
+
+        :param request: the HTTP request
+        :type request: :class:`~twisted.web.server.Request`
+        :param result: the result for send back to the browser
+        :type result: dict
         """
         d = asyncjson.AsyncJSON(result).begin(request)
         d.addCallback(lambda ignored: request.finish())
@@ -103,6 +127,8 @@ class Controller(resource.Resource):
 class ControllerManager(module.ModuleManager):
     """
     Uses a ControllerProvider to load, store and reload Mamba Controllers
+
+    .. versionadded:: 0.1
     """
 
     def __init__(self):
@@ -117,7 +143,12 @@ class ControllerManager(module.ModuleManager):
         return self._modules
 
     def is_valid_file(self, file_path):
-        """Check if a file is a Mamba controller file"""
+        """
+        Check if a file is a Mamba controller file
+
+        :param file_path: the file path of the file to check
+        :type file_path: str
+        """
 
         return self.__is_valid(file_path, 'mamba-controller')
 

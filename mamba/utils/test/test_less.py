@@ -149,4 +149,4 @@ class LessResourceTest(unittest.TestCase):
             else:
                 return request.notifyFinish().addCallback(lambda _: request)
         else:
-            raise ValueError("Unxpected return value: %r" % (result,))
+            raise ValueError("Unxpected return value: {0}".format(result))

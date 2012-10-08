@@ -18,6 +18,7 @@ from mamba.core import inotifier
 from mamba.utils import filevariables
 
 
+
 class ModuleError(Exception):
     """ModuleError Exception"""
 

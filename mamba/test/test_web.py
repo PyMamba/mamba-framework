@@ -8,7 +8,7 @@ Tests for L{mamba.web}
 
 from twisted.trial import unittest
 
-from mamba.web import stylesheet
+from mamba.web import stylesheet, page, asyncjson
 
 
 class StylesheetTest(unittest.TestCase):

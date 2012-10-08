@@ -6,11 +6,8 @@
 The Page object is the main web application entry point.
 """
 
-import os
+from twisted.web import resource, static
 
-from twisted.web import resource
-
-from mamba._version import version
 from mamba.http import headers
 
 

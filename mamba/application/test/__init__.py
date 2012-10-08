@@ -3,5 +3,8 @@
 # Ses LICENSE for more details
 
 """
-Test package for L{mamba.application}.
+Test package for ..py:module:: mamba.application.
+
+.. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
+
 """

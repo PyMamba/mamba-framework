@@ -6,11 +6,7 @@
 Mamba deployer
 """
 
-from zope.interface import Interface, Attribute
-
 from mamba import plugin
-from mamba.utils import borg
-from mamba.core import module
 
 
 class DeployerError(Exception):

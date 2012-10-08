@@ -13,7 +13,7 @@ from mamba import _version as _mamba_version
 from mamba.application import controller, appstyles
 from mamba.utils import borg
 
-_app_ver = versions.Version('Application', 12, 3, 0)
+_app_ver = versions.Version('Application', 0, 1, 0)
 _app_project_ver = versions.Version('Project', 0, 1, 0)
 
 
@@ -27,11 +27,18 @@ class Application(borg.Borg):
     """
     Mamba Application Manager.
 
-    Mamba only works on GNU/Linux operating system.
+    Mamba only works on GNU/Linux operating system (for now).
+
+    .. versionadded:: 0.1
     """
 
     def __init__(self, options=None):
-        """L{mamba.application.app.Application} constructor"""
+        """
+        Application constructor
+
+        :param options: options to initialize the application with
+        :type options: dict
+        """
 
         super(Application, self).__init__()
         self._install_paths = dict()
@@ -44,7 +51,7 @@ class Application(borg.Borg):
         self.name = 'Mamba Webservice v%s' % _mamba_version.version.short()
         self.description = \
             'Mamba %s is a Web applications framework that works ' \
-            'over Twisted using ExtJS or Sencha as GUI enhancement ' \
+            'over Twisted using JavaScript libraries as GUI enhancement ' \
             'Mamba has been developed by Oscar Campos ' \
             '<oscar.campos@member.fsf.org>' % _mamba_version.version.short()
         self.file = 'my_mamba_app.tac'

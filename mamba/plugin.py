@@ -3,10 +3,12 @@
 # See LICENSE for more details
 
 """
-Mamba Plugins System
+.. module:: plugin
+    :platform: Unix, Windows
+    :synopsys: Mamba Plugins System
 
-This system is based on the really nice idea from Marty Alchin about plugins
-systems using metaclasses that was exposed on his awesome book Pro Python.
+.. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
+
 """
 
 
@@ -63,6 +65,13 @@ class ExtensionPoint(type):
     def __init__(cls, name, bases, attrs):
         """
         I will process the mount point itself and register plugins as well
+
+        :param name: the class name
+        :type name: str
+        :param bases: the class base classes
+        :type bases: tuple
+        :param attrs: the class namespace dictionary
+        :type attrs: dict
         """
 
         if not hasattr(cls, 'plugins'):

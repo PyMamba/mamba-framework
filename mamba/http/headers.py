@@ -94,15 +94,15 @@ class Headers(object):
 
         if self.platform_debug:
             return ('<meta name="mamba-content" content="Platform: %s;'
-                    'Version: %s;Arch: %s" />') % (
-                    platform.system(), platform.release(), platform.machine())
+                    'Version: {0};Arch: {1}" />'.format(
+                    platform.system(), platform.release(), platform.machine()))
         else:
             return '<meta name="mamba-content" content="Platform: Web" />'
 
     def get_favicon_content(self, media='/media'):
         """Returns the favicon"""
 
-        return '<link rel="shortcut icon" href="%s/%s" />' % (
+        return '<link rel="shortcut icon" href="{0}/{1}" />'.format(
             media, self.favicon)
 
 

@@ -2,9 +2,24 @@
 # Copyright (c) 2012 - Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 
+"""
+.. module:: borg
+    :platform: Unix, Windows
+    :synopsys: Stupid class that just offers stupid CamelCase functionality
+
+.. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
+
+"""
+
 
 class CamelCase(object):
-    """Stupid class that just offers stupid CamelCase funcionallity"""
+    """
+    Stupid class that just offers stupid CamelCase funcionallity
+
+    :param camelize: the string to camelize
+    :type camelize: str
+    .. versionadded:: 0.1
+    """
 
     def __init__(self, camelize):
         self._camelized = None
@@ -12,7 +27,13 @@ class CamelCase(object):
         super(CamelCase, self).__init__()
 
     def camelize(self, union=False):
-        """Camelize and return camelized string"""
+        """
+        Camelize and return camelized string
+
+        :param union: if true is will use a space between words
+        :type union: bool
+        .. versionadded:: 0.1
+        """
 
         if not union:
             joiner = ' '
