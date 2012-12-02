@@ -15,15 +15,15 @@ class AsyncJSON(object):
     """
     Asynchronous JSON response.
 
-    I use a cooperate Twisted task in order to create a produces that send
-    huge amounts of JSON data in an asynchronous way.
+    I use a cooperate Twisted task in order to create a producer that
+    send huge amounts of JSON data in an asynchronous way.
 
-    If the data being serialized into JSON is huge, the serialization process
-    can take longest than the browser waiting response and can block itself the
-    web server, preventing other requests from being serviced. This class
-    prevents that type of inconveniences.
+    If the data being serialized into JSON is huge, the serialization
+    process can take longest than the browser waiting response and can
+    block itself the web server, preventing other requests from being
+    serviced. This class prevents that type of inconveniences.
 
-    This class is based on JCalderone post at:
+    This class is based on Jean Paul Calderone post at:
         http://jcalderone.livejournal.com/55680.html
     """
 

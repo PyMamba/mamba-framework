@@ -3,7 +3,12 @@
 # Ses LICENSE for more details
 
 """
-Module base class
+.. module:: module
+    :platform: Linux
+    :synopsys: Loadable pyton modules base class
+
+.. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
+
 """
 
 import re
@@ -18,16 +23,19 @@ from mamba.core import inotifier
 from mamba.utils import filevariables
 
 
+__all__ = ['ModuleError', 'ModuleManager']
+
 
 class ModuleError(Exception):
     """ModuleError Exception"""
-
     pass
 
 
 class ModuleManager(object):
     """
     Every module manager class inherits from me
+
+    .. versionadded:: 0.1
     """
     implements(inotifier.INotifier)
 
@@ -36,6 +44,7 @@ class ModuleManager(object):
         super(ModuleManager, self).__init__()
 
         self._modules = OrderedDict()
+        self._extension = '.py'
 
         # Create and setup the Linux iNotify mechanism
         self.notifier = inotify.INotify()
@@ -60,9 +69,9 @@ class ModuleManager(object):
         try:
             files = filepath.listdir(self._module_store)
             pattern = re.compile('[^_?]\.py$', re.IGNORECASE)
-            for file in filter(pattern.search, files):
-                if self.is_valid_file(file):
-                    self.load(file)
+            for py_file in filter(pattern.search, files):
+                if self.is_valid_file(py_file):
+                    self.load(py_file)
         except OSError:
             pass
 
@@ -74,7 +83,7 @@ class ModuleManager(object):
         module_name = filepath.splitext(filepath.basename(filename))[0]
         module_path = '%s.%s' % (self._module_store, module_name)
         if module_name in self._modules:
-            self._reload(module_name)
+            self.reload(module_name)
 
         objs = [module_name]
         temp_module = __import__(module_path, globals(), locals(), objs)
@@ -97,13 +106,12 @@ class ModuleManager(object):
 
         temp_object = self.lookup(module)
         if not temp_object or not temp_object.get('object').loaded:
-            raise ModuleError('Tried to reload %s that is not yet loaded' %
-                module
-            )
+            raise ModuleError(
+                'Tried to reload %s that is not yet loaded' % module)
 
         reload(temp_object.get('module'))
-        del self._controllers[module]['object']
-        self._controllers[module]['object'] = getattr(
+        del self._modules[module]['object']
+        self._modules[module]['object'] = getattr(
             temp_object.get('module'), temp_object.get('module_path'))()
 
     def lookup(self, module):
@@ -113,14 +121,20 @@ class ModuleManager(object):
 
         return self._modules.get(module, dict())
 
-    def lenght(self):
+    def length(self):
         """
         Returns the controller pool length
         """
 
         return len(self._modules)
 
-    def _notify(self, wd, file_path, mask):
+    def is_valid_file(self, file_path):
+        """
+        Must be implemented by subclasses
+        """
+        raise NotImplementedError("Not implemented yet!")
+
+    def _notify(self, ignore, file_path, mask):
         """
         Notifies the changes on resources file_path
         """
@@ -145,13 +159,8 @@ class ModuleManager(object):
 
         basename = filepath.basename(file_path)
         if filepath.splitext(basename)[1] == self._extension:
-            fv = filevariables.FileVariables(file_path)
-            if fv.get_value('mamba-file-type') == file_type:
+            filevars = filevariables.FileVariables(file_path)
+            if filevars.get_value('mamba-file-type') == file_type:
                 return True
 
         return False
-
-
-__all__ = [
-    'ModuleError', 'ModuleManager'
-]

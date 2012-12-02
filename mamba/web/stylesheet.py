@@ -3,7 +3,11 @@
 # Ses LICENSE for more details
 
 """
-Mamnba page stylesheet
+.. module: stylesheet
+    :platform: Linux
+    :synopsis: Mamba page stylesheets IResources
+
+.. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 """
 
 import re
@@ -12,10 +16,12 @@ from zope.interface import implements
 from twisted.internet import inotify
 from twisted.python._inotify import INotifyError
 from twisted.python import filepath
-from twisted.web import resource
 
 from mamba.core import inotifier
-from mamba.utils import filevariables, less
+from mamba.utils import filevariables
+
+
+__all__ = ['StylesheetError', 'Stylesheet', 'StylesheetManager']
 
 
 class StylesheetError(Exception):
@@ -37,8 +43,8 @@ class Stylesheet(object):
         if self._fp.exists():
             basename = filepath.basename(self.path)
             extension = filepath.splitext(basename)[1]
-            if not basename.startswith('.') and (
-                extension == '.css' or extension == '.less'):
+            if not basename.startswith('.') and (extension == '.css' or
+                                                 extension == '.less'):
                 file_variables = filevariables.FileVariables(self.path)
                 filetype = file_variables.get_value('mamba-file-type')
                 if filetype != 'css' or filetype != 'less':
@@ -124,19 +130,6 @@ class StylesheetManager(object):
         # TODO: Make client to reload the CSS
         pass
 
-    def _notify(self, wd, file_path, mask):
-        """Notifies the changes on stylesheets file_path """
-
-        if mask is inotify.IN_MODIFY:
-            style = filepath.splitext(file_path.basename())[0]
-            if style in self._stylesheets:
-                self.reload(style)
-
-        if mask is inotify.IN_CREATE:
-            if file_path.exists():
-                if self.is_valid_file(file_path):
-                    self.load(file_path)
-
     def lookup(self, key):
         """
         Find and return a stylesheet from the pool
@@ -150,7 +143,15 @@ class StylesheetManager(object):
         filetype = file_variables.get_value('mamba-file-type')
         return (filetype == 'css' or filetype == 'less')
 
+    def _notify(self, wd, file_path, mask):
+        """Notifies the changes on stylesheets file_path """
 
-__all__ = [
-    'StylesheetError', 'Stylesheet', 'StylesheetManager'
-]
+        if mask is inotify.IN_MODIFY:
+            style = filepath.splitext(file_path.basename())[0]
+            if style in self._stylesheets:
+                self.reload(style)
+
+        if mask is inotify.IN_CREATE:
+            if file_path.exists():
+                if self.is_valid_file(file_path):
+                    self.load(file_path)

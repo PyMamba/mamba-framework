@@ -3,10 +3,17 @@
 # Ses LICENSE for more details
 
 """
-Mamba deployer
+.. module:: deployer
+    :platform: Linux
+    :synopsis: Deployment pluggable system for Mamba.
+
+.. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 """
 
 from mamba import plugin
+
+
+__all__ = ['DeployerError', 'DeployerProvider']
 
 
 class DeployerError(Exception):
@@ -15,7 +22,7 @@ class DeployerError(Exception):
 
 class DeployerProvider:
     """
-    Mount point for plugins which refer to Deploters for out applications.
+    Mount point for plugins which refer to Deployers for our applications.
 
     Deployers implementing this reference should implement the IDeployer
     interface

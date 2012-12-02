@@ -1,12 +1,12 @@
 # -*- test-case-name: mamba.test.test_mamba -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
-# Ses LICENSE for more details
+# See LICENSE for more details
 
 """
-.. module:: plugin
-    :platform: Unix, Windows
-    :synopsys: Controllers for web projects that encapsulates twisted
-               low-level resources.
+.. module:: controller
+    :platform: Linux
+    :synopsis: Controllers for web projects that encapsulates twisted
+               low-level resources using werkzeug routing system.
 
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 
@@ -14,11 +14,18 @@
 
 import json
 
+from zope.interface import implements
 from twisted.web import resource
 
 from mamba import plugin
 from mamba.web import asyncjson
 from mamba.core import module
+from mamba.core import interfaces
+
+
+__all__ = [
+    'ControllerError', 'ControllerProvider', 'Controller', 'ControllerManager'
+]
 
 
 class ControllerError(Exception):
@@ -42,6 +49,7 @@ class Controller(resource.Resource):
 
     .. versionadded:: 0.1
     """
+    implements(interfaces.IController)
 
     def __init__(self):
         """Initialize."""
@@ -49,10 +57,10 @@ class Controller(resource.Resource):
 
     def getChild(self, name, request):
         """
-        This method retrieves a static or dynamic 'child' resource from object.
+        This method retrieves a static or dynamic 'child' resource from it.
 
-        First checks if a resource was manually added using putChild, and then
-        call getChild to check for dynamic resources.
+        First checks if a resource was manually added using putChild, and
+        then call getChild to check for dynamic resources.
 
         :param name: a strign, describing the child
         :type name: str
@@ -151,8 +159,3 @@ class ControllerManager(module.ModuleManager):
         """
 
         return self.__is_valid(file_path, 'mamba-controller')
-
-
-__all__ = [
-    'ControllerError', 'ControllerProvider', 'Controller', 'ControllerManager'
-]

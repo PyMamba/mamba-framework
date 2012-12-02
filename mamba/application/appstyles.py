@@ -1,13 +1,18 @@
-# -*- test-case-name: mamba.test.test_application -*-
+# -*- test-case-name: mamba.test.test_appstyles -*-
 # Copyright (c) 2012 - Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 
 from mamba.web import stylesheet
 
 
+__all__ = ['AppStyles']
+
+
 class AppStyles(stylesheet.StylesheetManager):
     """
     Manager for Application Stylesheets
+
+    .. versionadded:: 0.1
     """
 
     def __init__(self):
@@ -24,8 +29,3 @@ class AppStyles(stylesheet.StylesheetManager):
         """
 
         return self.stylesheets
-
-
-__all__ = [
-    'AppStyles'
-]

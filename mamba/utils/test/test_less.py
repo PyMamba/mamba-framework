@@ -17,7 +17,8 @@ from twisted.web.test.test_web import DummyRequest
 
 from mamba.utils import less
 
-less_file = ('#functions {\n'
+less_file = (
+    '#functions {\n'
     '  @var: 10;\n'
     '  color: _color("evil red"); // #660000\n'
     '  width: increment(15);\n'
@@ -102,7 +103,8 @@ class LessCompilerTests(unittest.TestCase):
 
             return d.addCallback(self.assertEqual, resp)
 
-        return utils.getProcessOutput('lessc',
+        return utils.getProcessOutput(
+            'lessc',
             [self.file.name], os.environ).addCallbacks(cb_success, cb_fail)
 
 

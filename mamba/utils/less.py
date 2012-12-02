@@ -13,6 +13,9 @@ from twisted.internet import utils
 from twisted.python import filepath
 
 
+__all__ = ["LessResource", "LessCompiler"]
+
+
 class LessResource(resource.Resource):
     """
     Mamba LessResource class define a web accesible LESS script
@@ -42,8 +45,8 @@ class LessResource(resource.Resource):
 
 class LessCompiler(object):
     """
-    Compile LESS scripts if LESS NodeJS compiler is present. Otherwise adds the
-    less.js JavaScript compiler to the page.
+    Compile LESS scripts if LESS NodeJS compiler is present. Otherwise
+    adds the less.js JavaScript compiler to the page.
     """
 
     def __init__(self, style):
@@ -69,8 +72,8 @@ class LessCompiler(object):
 
     def _get_script(self, ignore):
         """
-        Return the LESS script and set Application use of LESS compiler script
-        as True
+        Return the LESS script and set Application use of LESS compiler
+        script as True
         """
 
         from mamba.application import app
@@ -79,8 +82,3 @@ class LessCompiler(object):
         #mgr = self.stylesheet.StylesheetManager()
 
         return filepath.FilePath(self.stylesheet).getContent().decode('utf-8')
-
-
-__all__ = [
-    "LessResource", "LessCompiler"
-]

@@ -3,12 +3,18 @@
 # Ses LICENSE for more details
 
 """
-The Page object is the main web application entry point.
+.. module: stylesheet
+    :platform: Unix, Windows
+    :synopsis: The Page object is the main web application entry point
+
+.. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 """
 
 from twisted.web import resource, static
 
 from mamba.http import headers
+
+__all__ = ['Page']
 
 
 class Page(resource.Resource):
@@ -112,8 +118,3 @@ class Page(resource.Resource):
 
         self._scripts.append(script)
         self.putChild(script.get_prefix(), static.File(script.get_path()))
-
-
-__all__ = [
-    "Page"
-]

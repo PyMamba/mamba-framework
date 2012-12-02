@@ -45,15 +45,21 @@ class ApplicationTests(unittest.TestCase):
         self.set_get_attribute('port', 8080)
 
     def test_not_numeric_port_raises_exception(self):
-        self.failUnlessRaises(app.ApplicationError,
-            self.set_get_attribute, key='port', value='8080')
+        self.failUnlessRaises(
+            app.ApplicationError,
+            self.set_get_attribute,
+            key='port', value='8080'
+        )
 
     def test_set_get_log_file(self):
         self.set_get_attribute('log', '/tmp/logfile.log')
 
     def test_set_log_file_raises_exception(self):
-        self.failUnlessRaises(app.ApplicationError, self.set_get_attribute,
-            key='log_file', value='/dontexists/logfile.php')
+        self.failUnlessRaises(
+            app.ApplicationError,
+            self.set_get_attribute,
+            key='log_file', value='/dontexists/logfile.php'
+        )
 
     def test_set_get_file_name(self):
         self.set_get_attribute('file', 'test.tac')
@@ -61,11 +67,14 @@ class ApplicationTests(unittest.TestCase):
     def test_set_get_app_project_ver(self):
         from twisted.python import versions
         self.set_get_attribute('project_ver',
-                                    versions.Version('Project', 2, 0, 0))
+                               versions.Version('Project', 2, 0, 0))
 
     def test_set_app_project_ver_raises_when_non_twisted_version(self):
-        self.failUnlessRaises(app.ApplicationError, self.set_get_attribute,
-            key='project_ver', value='2.0')
+        self.failUnlessRaises(
+            app.ApplicationError,
+            self.set_get_attribute,
+            key='project_ver', value='2.0'
+        )
 
     def test_set_get_js_dir(self):
         self.set_get_attribute('js_dir', 'app')
@@ -101,4 +110,3 @@ class ApplicationTests(unittest.TestCase):
 #        self.assertNotEqual(app_config, None)
 #        self.assertNotEqual(self.app.get_template('tac'), None)
 #        self.assertNotEqual(self.app.get_template('home'), None)
-

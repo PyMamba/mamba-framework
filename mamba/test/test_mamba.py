@@ -35,8 +35,8 @@ class MambaTest(unittest.TestCase):
     def test_version_has_almost_major_and_minor(self):
         self.assertGreaterEqual(len(__version__.split('.')), 2)
 
-    def test_version_is_12_03(self):
-        self.assertEqual(__version__, '12.3.0')
+    def test_version_is_correct(self):
+        self.assertEqual(__version__, '0.1.0')
 
     def test_controller_provider(self):
         self.assertTrue(controller.ControllerProvider, ExtensionPoint)

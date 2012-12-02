@@ -3,7 +3,12 @@
 # Ses LICENSE for more details
 
 """
-Interface documentation.
+.. module:: interfaces
+    :platform: Unix, Windows
+    :synopsys: Interfaces Documentation
+
+.. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
+
 """
 
 from zope.interface import Interface, Attribute
@@ -12,22 +17,26 @@ from zope.interface import Interface, Attribute
 class INotifier(Interface):
     """
     Every Inotifier class will implement this interface
+
+    .. versionadded:: 0.1
     """
 
-    def _notify(wd, file_path, mask):
+    def _notify(ignore, file_path, mask):
         """
         Notifies the chages on file_path filesystem directory
-        The 'wd' param is ignored
+        The 'ignore' param is ignored
 
-        @param file_path: L{twisted.python.filepath.FilePath} on which the
-        event happened
-        @param mask: inotify event as hexadecimal mask
+        :param file_path: :class:`~twisted.python.filepath.FilePath` on which
+                          the event happened`
+        :type file_path: :class:`~twisted.python.filepath.FilePath`
+        :param mask: inotify event as hexadecimal mask
+        :type mask: int
         """
 
     notifier = Attribute(
         """
-        @type notifier: C{twisted.internet.inotify.INotify}
-        @ivar notifier: A notifier to start watching a FilePath
+        :param notifier: A notifier to start watching a FilePath
+        :type notifier: :class:`~twistd.internet.inotify.INotify`
         """
     )
 
@@ -37,36 +46,31 @@ class IController(Interface):
     Manba Controllers interface.
 
     Every controller will implement this interface
+
+    .. versionadded:: 0.1
     """
 
     name = Attribute(
         """
-        @type name: C{string}
-        @ivar name: Controller's name
+        :param name: Controller's name
+        :type name: str
         """
     )
 
     desc = Attribute(
         """
-        @type desc: C{string}
-        @ivar desc: Controller's description
+        :param desc: Controller's description
+        :type desc: str
         """
     )
 
     loaded = Attribute(
         """
-        @type loaded: C{boolean}
-        @ivar loaded: Returns true if the controller has been loaded, otherwise
-                      returns false
+        :param loaded: True if the controller has been loaded, otherwise
+                       returns False
+        :type loaded: bool
         """
     )
-
-    def get_register_path():
-        """
-        Return the controller register path for URL Rewriting
-
-        @return a C{string}
-        """
 
 
 class IDeployer(Interface):
@@ -74,12 +78,6 @@ class IDeployer(Interface):
     Mamba Deployers interface.
 
     Every deployer will implement this interface
-    """
 
-    mode = Attribute(
-        """
-        @type mode: C{string}
-        @ivar mode: Deployer mode can be "local" or "remote" if unknown local
-                    is assumed
-        """
-    )
+    .. versionadded:: 0.1
+    """

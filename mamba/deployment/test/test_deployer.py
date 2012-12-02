@@ -6,7 +6,7 @@
 Tests for L{mamba.deployment.deployer}
 """
 
-from twisted.python import unittest
+from twisted.trial import unittest
 
 
 class DeployerTest(unittest.TestCase):

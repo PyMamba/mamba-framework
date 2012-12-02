@@ -1,4 +1,4 @@
-# -*- test-case-name: mamba.test.test_application,mamba.test.test_mamba -*-
+# -*- test-case-name: mamba.test.test_application mamba.test.test_mamba -*-
 # Copyright (c) 2012 - Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 
@@ -13,13 +13,14 @@ from mamba import _version as _mamba_version
 from mamba.application import controller, appstyles
 from mamba.utils import borg
 
+__all__ = ['Application', 'ApplicationError']
+
 _app_ver = versions.Version('Application', 0, 1, 0)
 _app_project_ver = versions.Version('Project', 0, 1, 0)
 
 
 class ApplicationError(Exception):
     """ApplicationError raises when an error occurs"""
-
     pass
 
 
@@ -49,11 +50,12 @@ class Application(borg.Borg):
         self._project_ver = _app_project_ver.short()
 
         self.name = 'Mamba Webservice v%s' % _mamba_version.version.short()
-        self.description = \
-            'Mamba %s is a Web applications framework that works ' \
-            'over Twisted using JavaScript libraries as GUI enhancement ' \
-            'Mamba has been developed by Oscar Campos ' \
+        self.description = (
+            'Mamba %s is a Web applications framework that works '
+            'over Twisted using JavaScript libraries as GUI enhancement '
+            'Mamba has been developed by Oscar Campos '
             '<oscar.campos@member.fsf.org>' % _mamba_version.version.short()
+        )
         self.file = 'my_mamba_app.tac'
         self.js_dir = 'js'
         self.language = os.environ['LANG'].split('_')[0]
@@ -86,8 +88,8 @@ class Application(borg.Borg):
     def log_file(self, file):
         path = filepath.FilePath(file)
         if not filepath.exists(path.dirname()):
-            raise ApplicationError("%s" % (
-                "Given directory %s don\t exists" % path.dirname())
+            raise ApplicationError('%s' % (
+                'Given directory %s don\t exists' % path.dirname())
             )
 
         self._log_file = file
@@ -99,7 +101,7 @@ class Application(borg.Borg):
     @project_ver.setter
     def project_ver(self, ver):
         if type(ver) is not versions.Version:
-            raise ApplicationError("%s expected, get %s" % (
+            raise ApplicationError('%s expected, get %s' % (
                 'twisted.python.versions.Version', type(ver))
             )
 
@@ -120,8 +122,3 @@ class Application(borg.Borg):
     @ver.setter
     def ver(self, value):
         raise ApplicationError("'ver' is readonly")
-
-
-__all__ = [
-    'Application', 'ApplicationError'
-]
