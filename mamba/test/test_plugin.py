@@ -6,7 +6,6 @@ Tests for L{mamba.plugin}
 """
 
 from twisted.trial import unittest
-from pyDoubles.framework import *
 
 from mamba import plugin
 

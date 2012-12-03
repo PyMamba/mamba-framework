@@ -3,7 +3,7 @@
 # Ses LICENSE for more details
 
 from twisted.trial import unittest
-from pyDoubles.framework import *
+from doublex import ProxySpy, assert_that, called, is_
 
 from mamba.http import headers
 
@@ -12,9 +12,10 @@ class HeadersTest(unittest.TestCase):
     """Test for L{mamba.http.headers}"""
 
     def setUp(self):
-        self.spy = proxy_spy(headers.Headers())
+        with ProxySpy(headers.Headers()) as spy:
+            self.spy = spy
 
     def test_get_doctype(self):
-        self.assertEqual(
-            self.spy.get_doc_type('html-html5'), '<!DOCTYPE html>')
-        assert_that_method(self.spy.get_doc_type).was_called()
+        assert_that(
+            self.spy.get_doc_type('html-html5'), is_('<!DOCTYPE html>'))
+        assert_that(self.spy.get_doc_type, called().times(1))

@@ -14,9 +14,6 @@ from twisted.web.test.test_web import DummyRequest
 from twisted.trial import unittest
 from twisted.web import resource
 
-from pyDoubles.framework import *
-from pyDoubles.matchers import *
-
 from mamba.test.application.controller import dummy
 from mamba.application import controller
 from mamba.plugin import ExtensionPoint

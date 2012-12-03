@@ -152,7 +152,7 @@ class ModuleManager(object):
                 if self.is_valid_file(file_path):
                     self.load(file_path)
 
-    def __valid_file(self, file_path, file_type):
+    def _valid_file(self, file_path, file_type):
         """
         Check if a file is a valid Mamba file
         """

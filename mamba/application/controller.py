@@ -158,4 +158,4 @@ class ControllerManager(module.ModuleManager):
         :type file_path: str
         """
 
-        return self.__is_valid(file_path, 'mamba-controller')
+        return self._valid_file(file_path, 'mamba-controller')

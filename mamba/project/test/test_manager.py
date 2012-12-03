@@ -8,9 +8,6 @@ Tests for L{mamba.project.manager}
 
 from twisted.trial import unittest
 
-from pyDoubles.framework import *
-from pyDoubles.matchers import *
-
 from mamba.utils import borg
 from mamba.project import manager
 
@@ -19,7 +16,7 @@ class ProjectManagerTest(unittest.TestCase):
     """Tests for L{mamba.project.manager}"""
 
     def setUp(self):
-        self.spy = proxy_spy(manager.ProjectManager({}))
+        pass
 
     def test_class_inherits_borg(self):
         mgr = manager.ProjectManager({})
