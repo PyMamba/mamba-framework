@@ -8,7 +8,7 @@ Tests for L{mamba.application.app}
 
 from twisted.trial import unittest
 
-from mamba.application import app
+from mamba.application import app, controller, appstyles
 
 
 class ApplicationTests(unittest.TestCase):
@@ -21,7 +21,7 @@ class ApplicationTests(unittest.TestCase):
         self.addCleanup(
             self.app._managers.get('styles').notifier.loseConnection)
 
-    def test_construct_overwrite_options(self):
+    def test_constructor_overwrite_options(self):
         name1 = self.app.name
         app_tmp = app.Application({'name': 'Test'})
         self.addCleanup(
@@ -58,7 +58,7 @@ class ApplicationTests(unittest.TestCase):
         self.failUnlessRaises(
             app.ApplicationError,
             self.set_get_attribute,
-            key='log_file', value='/dontexists/logfile.php'
+            key='log_file', value='/dontexists/logfile.log'
         )
 
     def test_set_get_file_name(self):
@@ -89,6 +89,14 @@ class ApplicationTests(unittest.TestCase):
         from mamba import _version
 
         self.assertEqual(_version.version.short(), self.app.mamba_ver)
+
+    def test_controller_manager_is_instanced(self):
+        manager = self.app._managers.get('controller')
+        self.assertIsInstance(manager, controller.ControllerManager)
+
+    def test_appstyles_manager_is_instanced(self):
+        manager = self.app._managers.get('styles')
+        self.assertIsInstance(manager, appstyles.AppStyles)
 
 
 #    def test_get_template_was_called(self):

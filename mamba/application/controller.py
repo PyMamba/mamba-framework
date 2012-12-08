@@ -14,13 +14,11 @@
 
 import json
 
-from zope.interface import implements
 from twisted.web import resource
 
 from mamba import plugin
 from mamba.web import asyncjson
 from mamba.core import module
-from mamba.core import interfaces
 
 
 __all__ = [
@@ -49,7 +47,6 @@ class Controller(resource.Resource):
 
     .. versionadded:: 0.1
     """
-    implements(interfaces.IController)
 
     def __init__(self):
         """Initialize."""
@@ -130,6 +127,15 @@ class Controller(resource.Resource):
         """
         d = asyncjson.AsyncJSON(result).begin(request)
         d.addCallback(lambda ignored: request.finish())
+
+        return d
+
+    def get_register_path(self, request, **kwargs):
+        """
+        Return the controller register path for URL Rewritting
+        """
+
+        return self.__route__
 
 
 class ControllerManager(module.ModuleManager):

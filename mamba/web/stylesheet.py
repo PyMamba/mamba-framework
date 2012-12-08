@@ -17,7 +17,7 @@ from twisted.internet import inotify
 from twisted.python._inotify import INotifyError
 from twisted.python import filepath
 
-from mamba.core import inotifier
+from mamba.core.interfaces import INotifier
 from mamba.utils import filevariables
 
 
@@ -63,7 +63,7 @@ class StylesheetManager(object):
     """
     Manager for Stylesheets
     """
-    implements(inotifier.INotifier)
+    implements(INotifier)
 
     _stylesheets = dict()
 

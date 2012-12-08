@@ -23,6 +23,7 @@ class DummyController(controller.ControllerProvider, controller.Controller):
     name = 'Dummy'
     desc = 'I am a dummy controller created for tests purposes'
     loaded = False
+    __route__ = 'dummy'
 
     def __init__(self):
         """
@@ -38,10 +39,3 @@ class DummyController(controller.ControllerProvider, controller.Controller):
         """Process POST Request."""
 
         return json.dumps({'success': False, 'error': 'Not implemented yet.'})
-
-    def get_register_path(self, request, **kwargs):
-        """
-        Return the controller register path for URL Rewritting
-        """
-
-        return 'dummy'

@@ -72,11 +72,6 @@ class IController(Interface):
         """
     )
 
-    def get_register_path():
-        """
-        Return the controller register path for URL Rewriting
-        """
-
 
 class IDeployer(Interface):
     """

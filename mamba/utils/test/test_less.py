@@ -3,7 +3,7 @@
 # Ses LICENSE for more details
 
 """
-Tests for L{mamba.utils.less}
+Tests for mamba.utils.less
 """
 
 import os
@@ -110,7 +110,7 @@ class LessCompilerTests(unittest.TestCase):
 
 class LessResourceTest(unittest.TestCase):
     """
-    Tests for L{mamba.utils.less.LessResource}
+    Tests for mamba.utils.less.LessResource
     """
 
     def setUp(self):

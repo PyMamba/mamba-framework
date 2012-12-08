@@ -5,7 +5,7 @@
 """
 .. module:: module
     :platform: Linux
-    :synopsys: Loadable pyton modules base class
+    :synopsys: Loadable python modules base class
 
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 
@@ -15,11 +15,12 @@ import re
 from collections import OrderedDict
 
 from zope.interface import implements
+from twisted.python import filepath
 from twisted.internet import inotify
 from twisted.python._inotify import INotifyError
-from twisted.python import filepath
 
-from mamba.core import inotifier
+from mamba.core.interfaces import INotifier
+from mamba.plugin import ExtensionPoint
 from mamba.utils import filevariables
 
 
@@ -37,7 +38,7 @@ class ModuleManager(object):
 
     .. versionadded:: 0.1
     """
-    implements(inotifier.INotifier)
+    implements(INotifier)
 
     def __init__(self):
         # Initialize the ExtensionLoader parent object
@@ -81,14 +82,26 @@ class ModuleManager(object):
         """
 
         module_name = filepath.splitext(filepath.basename(filename))[0]
-        module_path = '%s.%s' % (self._module_store, module_name)
+        module_path = '%s.%s' % (
+            self._module_store.replace('/', '.'),
+            module_name
+        )
+
         if module_name in self._modules:
             self.reload(module_name)
 
         objs = [module_name]
         temp_module = __import__(module_path, globals(), locals(), objs)
         # instance the object
-        temp_object = getattr(temp_module, objs[0])()
+        try:
+            temp_object = getattr(temp_module, objs[0])()
+        except AttributeError:
+            for member in dir(temp_module):
+                tmp_member = getattr(temp_module, member)
+                if type(tmp_member) is ExtensionPoint:
+                    temp_object = tmp_member()
+                    break
+
         temp_object.loaded = True
 
         self._modules.update({
