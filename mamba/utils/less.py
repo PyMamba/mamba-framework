@@ -8,9 +8,9 @@ Mamba less compiler
 
 import os
 
-from twisted.web import resource, server
 from twisted.internet import utils
 from twisted.python import filepath
+from twisted.web import resource, server
 
 
 __all__ = ["LessResource", "LessCompiler"]

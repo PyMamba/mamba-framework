@@ -7,13 +7,13 @@ Tests for mamba.application.controller
 """
 
 import sys
-import json
 from collections import OrderedDict
 
 from twisted.trial import unittest
 from twisted.web import resource
 from doublex import Spy, assert_that, is_, ANY_ARG, called
 
+from mamba.web.response import Ok
 from mamba.application import controller
 from mamba.core.interfaces import INotifier
 
@@ -32,25 +32,8 @@ class ControllerTest(unittest.TestCase):
     def test_class_inherits_twisted_web_resource(self):
         self.assertTrue(issubclass(controller.Controller, resource.Resource))
 
-    def test_is_not_leaf(self):
-        self.assertFalse(self.c.isLeaf)
-
-    def test_send_errback_works(self):
-        with Spy() as request:
-            request.finish()
-            request.write(ANY_ARG)
-
-        error = {
-            'message': 'Test error message', 'number': '7327'
-        }
-
-        assert_that(self.c.senderrback(request, error), is_(None))
-        assert_that(request.write, called().with_args(json.dumps({
-            'success': False,
-            'message': error['message'],
-            'error': error['number']
-        })).times(1))
-        assert_that(request.finish, called().times(1))
+    def test_is_leaf(self):
+        self.assertTrue(self.c.isLeaf)
 
     def test_send_back_works(self):
 
@@ -63,14 +46,16 @@ class ControllerTest(unittest.TestCase):
             request.registerProducer(ANY_ARG)
             request.unregisterProducer()
             request.write(ANY_ARG)
+            request.setResponseCode(ANY_ARG)
+            request.setHeader(ANY_ARG)
 
-        result = {'message': 'Testing environment'}
+        result = Ok(
+            {'name': 'Testing Environment'},
+            {'content-type': 'application/json'}
+        )
 
-        d = self.c.sendback(request, result)
+        d = self.c.sendback(result, request)
         d.addCallback(cb_assert_request, request)
-
-    def test_register_path_raise_attribute_error(self):
-        self.failUnlessRaises(AttributeError, self.c.get_register_path, None)
 
 
 class ControllerManagerTest(unittest.TestCase):
@@ -106,4 +91,3 @@ class ControllerManagerTest(unittest.TestCase):
         self.assertTrue(dummy.name == 'Dummy')
         self.assertTrue('I am a dummy controller' in dummy.desc)
         self.assertTrue(dummy.loaded)
-        self.assertTrue(dummy.get_register_path(None) == 'dummy')

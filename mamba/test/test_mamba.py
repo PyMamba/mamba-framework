@@ -6,11 +6,6 @@
 Tests for L{mamba.application.app} and L{mamba.scripts.mamba}
 """
 
-#from zope.interface import implements
-#from zope.interface.verify import verifyObject
-
-from twisted.web.test.test_web import DummyRequest
-#from twisted.python import filepath
 from twisted.trial import unittest
 from twisted.web import resource
 
@@ -52,14 +47,6 @@ class MambaTest(unittest.TestCase):
     def test_dummy_controller_is_a_plugin(self):
         self.assertTrue(
             dummy.DummyController in controller.ControllerProvider.plugins)
-
-    def test_dummy_controller_get_register_path(self):
-        r = dummy.DummyController()
-        request = DummyRequest([''])
-        request.args = {'action': ['get_register_path']}
-        request.prepath = []
-        request.method = 'POST'
-        self.assertEqual('dummy', r.render(request))
 
 
 if __name__ == '__main__':

@@ -6,6 +6,8 @@ import fnmatch
 import sys
 import os
 
+from twisted.web import server
+from twisted.internet import reactor
 from twisted.python import versions, log, filepath
 from twisted.python.dist import twisted_subprojects
 
@@ -122,3 +124,18 @@ class Application(borg.Borg):
     @ver.setter
     def ver(self, value):
         raise ApplicationError("'ver' is readonly")
+
+    def run(self, port=8080):
+        """
+        Method to run the application within Twisted reactor
+
+        This method exists for testing purposes only and fast
+        controller test-development-test workflow. In production you
+        should use twistd
+
+        :param port: the port to listen
+        :type port: number
+        """
+        factory = server.Site(self)
+        reactor.listenTCP(port, factory)
+        reactor.run()

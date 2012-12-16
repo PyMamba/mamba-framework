@@ -77,7 +77,38 @@ class IDeployer(Interface):
     """
     Mamba Deployers interface.
 
-    Every deployer will implement this interface
+    Every deployer must implement this interface
 
     .. versionadded:: 0.1
     """
+
+
+class IResponse(Interface):
+    """
+    Mamba Web Response interface.
+
+    Every web response must implement this interface.
+
+    .. versionadded:: 0.1
+    """
+
+    code = Attribute(
+        """
+        :param code: the HTTP response code
+        :type code: number
+        """
+    )
+
+    body = Attribute(
+        """
+        :param body: the HTTP response body
+        :type body: string
+        """
+    )
+
+    headers = Attribute(
+        """
+        :param headers: the HTTP response headers
+        :type headers: dict
+        """
+    )

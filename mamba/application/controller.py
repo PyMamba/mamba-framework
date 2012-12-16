@@ -12,13 +12,17 @@
 
 """
 
-import json
-
+from twisted.web import http
+from twisted.python import log
+from twisted.web import server
 from twisted.web import resource
+from twisted.internet import reactor
 
 from mamba import plugin
-from mamba.web import asyncjson
+from mamba.web import routing
 from mamba.core import module
+from mamba.web import asyncjson
+from mamba.utils.output import bold
 
 
 __all__ = [
@@ -48,75 +52,76 @@ class Controller(resource.Resource):
     .. versionadded:: 0.1
     """
 
+    isLeaf = True
+    __router = routing.Router()
+
     def __init__(self):
         """Initialize."""
+
         resource.Resource.__init__(self)
+        self.__router.install_routes(self)
 
     def getChild(self, name, request):
         """
-        This method retrieves a static or dynamic 'child' resource from it.
+        This method is not supposed to be called because we are overriden
+        the full route dispatching mechanism already built in Twisted.
 
-        First checks if a resource was manually added using putChild, and
-        then call getChild to check for dynamic resources.
+        Class variable level isLeaf is supposed to be always True but some
+        user can override it in his Controller implementation so we make
+        sure that the native twisted behavior is never executed.
 
-        :param name: a strign, describing the child
-        :type name: str
+        If you need Twisted native url dispatching in your site you should
+        use :class:`~twisted.web.resource.Resource` class directly in your
+        code.
+
+        :param name: ignored
+        :type name: string
         :param request: a :class:`~twisted.web.server.request` specifying
                         meta-information about the request that is being made
-                        for this child.
+                        for this child that is ignored at all.
         :type request: :class:`~twisted.web.server.request`
         """
 
-        if hasattr(self, name):
-            return self
-        return resource.Resource.getChild(self, name, request)
+        # someone is using Controller wrong
+        msg = (
+            '\n\n'
+            '===============================================================\n'
+            '                             WARNING\n'
+            '===============================================================\n'
+            'getChild method has been called by Twisted in the {controller}\n'
+            'Controller. That means that you are defining the class level \n'
+            'variable `isLeaf` as False, this cause Twisted try to dispatch \n'
+            'routes with its own built mechanism instead of mamba routing.\n\n'
+            'This is not a fatal error but you should revise your Controller\n'
+            'because should be probable that your routing dispatching does\n'
+            'not work at all (even the Twisted ones)\n'
+            '===============================================================\n'
+            '                             WARNING\n'
+            '===============================================================\n'
+            ''.format(controller=self.__class__.__name__)
+        )
+        log.msg(bold(msg))
+
+        return self
 
     def render(self, request):
         """
         Render a given resource.
         See :class:`~twisted.web.resource.IResource`'s render method.
 
-        I try to render an action from myself, if action does not exists just
-        return the :class:`~twisted.resource.Resource.render` result
-        from Twisted.
-
-        If action_name exists but no action is defined I'll return result for
-        :class:`~twisted.resource.Resource.render`.
+        I try to render a router response from the routing mechanism.
 
         :param request: the HTTP request
         :type request: :class:`~twisted.web.server.Request`
         """
 
-        kwargs = {}
-        for k, v in request.args.iteritems():
-            kwargs[k] = v
-        if len(request.prepath) > 1:
-            return getattr(self, request.prepath[1])(request, **kwargs)
-        action_name = kwargs.get('action', None)
-        if not action_name:
-            return resource.Resource.render(self, request)
-        action = getattr(self, action_name[0], None)
-        if not action:
-            return resource.Resource.render(self, request)
-        return action(request, **kwargs)
+        try:
+            return self.route_dispatch(request)
+        except Exception, error:
+            self.prepare_headers(request, http.INTERNAL_SERVER_ERROR, {})
+            return str(error)
 
-    def senderrback(self, request, error):
-        """
-        Send back errors to the browser
-
-        :param request: the HTTP request
-        :type request: :class:`~twisted.web.server.Request`
-        :param error: the error dict containing `message` and `number`
-        :type error: dict
-        """
-        request.write(json.dumps({
-            'success': False,
-            'message': error['message'],
-            'error': error['number']
-        }))
-        request.finish()
-
-    def sendback(self, request, result):
+    def sendback(self, result, request):
         """
         Send back a result to the browser
 
@@ -125,17 +130,75 @@ class Controller(resource.Resource):
         :param result: the result for send back to the browser
         :type result: dict
         """
-        d = asyncjson.AsyncJSON(result).begin(request)
-        d.addCallback(lambda ignored: request.finish())
 
-        return d
+        self.prepare_headers(request, result.code, result.headers)
 
-    def get_register_path(self, request, **kwargs):
+        try:
+            if type(result.subject) is not str:
+                d = asyncjson.AsyncJSON(result.subject).begin(request)
+                d.addCallback(lambda ignored: request.finish())
+                return d
+            else:
+                request.write(result.subject)
+                request.finish()
+        except Exception, e:
+            log.error(e)
+            request.setResponseCode(http.INTERNAL_SERVER_ERROR)
+            request.write(e)
+            request.finish()
+
+        return
+
+    def prepare_headers(self, request, code, headers):
+        """
+        Prepare the back response headers
+
+        :param request: the HTTP request
+        :type request: :class:`~twisted.web.server.Request`
+        :param code: the HTTP response code
+        :type code: number
+        :param headers: the HTTP headers
+        :type headers: dict
+        """
+        request.setResponseCode(code)
+        for header, value in headers.iteritems():
+            request.setHeader(header, value)
+
+    def route_dispatch(self, request):
+        """
+        Dispatch a route if any through the routing dispatcher.
+
+        :param request: the HTTP request
+        :type request: :class:`~twisted.web.server.Request`
+        :returns: :class:`twisted.internet.defer.Deferred` or
+                  :class:`mamba.web.response.WebResponse`
+        """
+
+        result = self.__router.dispatch(self, request)
+
+        result.addCallback(self.sendback, request)
+        return server.NOT_DONE_YET
+
+    def get_register_path(self):
         """
         Return the controller register path for URL Rewritting
         """
 
-        return self.__route__
+        try:
+            return self.__route__
+        except AttributeError:
+            return ''
+
+    def run(self, port=8080):
+        """
+        This method is used as a helper for testing purposes while you
+        are developing your controllers.
+
+        You should never use this in production.
+        """
+        factory = server.Site(self)
+        reactor.listenTCP(port, factory)
+        reactor.run()
 
 
 class ControllerManager(module.ModuleManager):
