@@ -45,7 +45,7 @@ class ApplicationTests(unittest.TestCase):
         self.set_get_attribute('port', 8080)
 
     def test_not_numeric_port_raises_exception(self):
-        self.failUnlessRaises(
+        self.assertRaises(
             app.ApplicationError,
             self.set_get_attribute,
             key='port', value='8080'
@@ -55,7 +55,7 @@ class ApplicationTests(unittest.TestCase):
         self.set_get_attribute('log', '/tmp/logfile.log')
 
     def test_set_log_file_raises_exception(self):
-        self.failUnlessRaises(
+        self.assertRaises(
             app.ApplicationError,
             self.set_get_attribute,
             key='log_file', value='/dontexists/logfile.log'
@@ -70,7 +70,7 @@ class ApplicationTests(unittest.TestCase):
                                versions.Version('Project', 2, 0, 0))
 
     def test_set_app_project_ver_raises_when_non_twisted_version(self):
-        self.failUnlessRaises(
+        self.assertRaises(
             app.ApplicationError,
             self.set_get_attribute,
             key='project_ver', value='2.0'

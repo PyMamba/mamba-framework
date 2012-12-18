@@ -11,6 +11,7 @@
 """
 
 import re
+import sys
 import json
 import inspect
 import logging
@@ -37,7 +38,6 @@ class UrlRegex(object):
     type_regex = {
         'int': r'(?P<type>\d+)',
         'float': r'(?P<type>\d+.?\d*)',
-        'bool': r'(?P<type>([YES-yes]|[NO-no]+))',
         '': r'(?P<type>([^/]+))'
     }
     html_regex = re.compile(
@@ -143,7 +143,7 @@ class Router(object):
     I store, lookup, cache and dispatch routes for Mamba
 
     A route is stores as:
-        [methods][Controller.__class__.__name__][route]
+        [methods][route][Controller.__class__.__name__]
     """
 
     def __init__(self):
@@ -202,10 +202,12 @@ class Router(object):
                 str(e),
                 {'content-type': 'text/plain'}
             ))
-        except Exception, e:
-            log.err(e)
+        except:
+            log.err(sys.exc_info())
             result = response.InternalServerError(
-                'ERROR 500: Internal server error: {}\n\t{}'.format(type(e), e)
+                'ERROR 500: Internal server error: {}\n\t{}'.format(
+                    sys.exc_type, sys.exc_value
+                )
             )
 
         return result
@@ -402,3 +404,8 @@ class RouteDispatcher(object):
                 for key, value in data_json.iteritems():
                     if key not in route.callback_args:
                         route.callback_args.update({key: value})
+
+    def __repr__(self):
+        return 'RouteDispatcher({})'.format(', '.join(
+            map(repr, [self.router, self.request, self.controller, self.url]))
+        )

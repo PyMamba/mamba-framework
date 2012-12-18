@@ -123,9 +123,10 @@ class ModuleManager(object):
                 'Tried to reload %s that is not yet loaded' % module)
 
         reload(temp_object.get('module'))
+        object_name = temp_object.get('object').__class__.__name__
         del self._modules[module]['object']
         self._modules[module]['object'] = getattr(
-            temp_object.get('module'), temp_object.get('module_path'))()
+            temp_object.get('module'), object_name)()
 
     def lookup(self, module):
         """

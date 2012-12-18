@@ -13,6 +13,9 @@ from mamba.core.module import ModuleManager
 
 
 class ModuleManagerTest(unittest.TestCase):
+    """
+    This is a pure base class so it's hardly tested in its inheritors
+    """
 
     def test_module_manager_implements_inotifier(self):
         self.assertTrue(INotifier.implementedBy(ModuleManager))

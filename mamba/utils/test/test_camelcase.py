@@ -3,7 +3,7 @@
 # Ses LICENSE for more details
 
 """
-Tests for L{mamba.utils.camelcase}
+Tests for mamba.utils.camelcase
 """
 
 from twisted.trial import unittest
@@ -43,4 +43,4 @@ class TestCamelCase(unittest.TestCase):
 
     def test_camelcase_unknown_type_raises(self):
         camel = camelcase.CamelCase({'test': 'case'})
-        self.failUnlessRaises(ValueError, camel.camelize)
+        self.assertRaises(ValueError, camel.camelize)

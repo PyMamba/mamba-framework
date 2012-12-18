@@ -7,15 +7,37 @@ Tests for mamba.application.controller
 """
 
 import sys
+import urllib
+from cStringIO import StringIO
 from collections import OrderedDict
 
+from twisted.internet import defer
 from twisted.trial import unittest
-from twisted.web import resource
-from doublex import Spy, assert_that, is_, ANY_ARG, called
+from twisted.web import resource, server
+from twisted.web.http_headers import Headers
+from twisted.web.test.test_web import DummyRequest
+from doublex import Spy, ProxySpy, assert_that, ANY_ARG, called
+
+from mamba.web.routing import Router
+from mamba.test.application.controller.dummy import DummyController
 
 from mamba.web.response import Ok
 from mamba.application import controller
 from mamba.core.interfaces import INotifier
+
+
+class ControllerRequest(DummyRequest):
+    """
+    Dummy Request object needed to routing system
+    """
+
+    def __init__(self, postpath, params, session=None):
+        self.content = StringIO()
+        self.content.write(urllib.urlencode(params))
+        self.content.seek(0, 0)
+        self.requestHeaders = Headers()
+
+        DummyRequest.__init__(self, postpath, session)
 
 
 class ControllerTest(unittest.TestCase):
@@ -26,21 +48,10 @@ class ControllerTest(unittest.TestCase):
     """
 
     def setUp(self):
-        self.spy = resource.Resource()
+        self.resource = Spy(resource.Resource)
         self.c = controller.Controller()
 
-    def test_class_inherits_twisted_web_resource(self):
-        self.assertTrue(issubclass(controller.Controller, resource.Resource))
-
-    def test_is_leaf(self):
-        self.assertTrue(self.c.isLeaf)
-
-    def test_send_back_works(self):
-
-        def cb_assert_request(ignore, request):
-            assert_that(request.registerProducer, called().times(1))
-            assert_that(request.unregisterProducer, called())
-            assert_that(request.write, called())
+    def get_request(self):
 
         with Spy() as request:
             request.registerProducer(ANY_ARG)
@@ -49,13 +60,68 @@ class ControllerTest(unittest.TestCase):
             request.setResponseCode(ANY_ARG)
             request.setHeader(ANY_ARG)
 
-        result = Ok(
-            {'name': 'Testing Environment'},
-            {'content-type': 'application/json'}
+        return request
+
+    def test_class_inherits_twisted_web_resource(self):
+        self.assertTrue(issubclass(controller.Controller, resource.Resource))
+
+    def test_is_leaf(self):
+        self.assertTrue(self.c.isLeaf)
+
+    def test_getchild_returns_itself_always(self):
+        request = self.get_request()
+        self.assertIdentical(self.c.getChild('test', request), self.c)
+        self.c.isLeaf = False
+        self.assertIdentical(self.c.getChild('test', request), self.c)
+
+    @defer.inlineCallbacks
+    def test_send_back(self):
+
+        request = DummyRequest(['/test'], '')
+        result = Ok('Testing', {'content-type': 'application/json'})
+
+        request = request
+        result = yield self.c.sendback(result, request)
+
+        self.assertEqual(result, None)
+        self.assertEqual(request.written[0], 'Testing')
+
+    def test_register_path_returns_empty(self):
+        self.assertEquals(self.c.get_register_path(), '')
+
+    @defer.inlineCallbacks
+    def test_controller_render_delegates_on_routing(self):
+
+        c = DummyController()
+        router = ProxySpy(Router())
+        c._router = router
+        # request = self.get_request()
+        request = ControllerRequest(['/test'], {})
+        r = yield self._render(c, request)
+
+        assert_that(router.dispatch, called().times(1))
+        self.assertEqual(r.written[0], 'ERROR 404: /test not found')
+
+    def test_prepare_headers_works(self):
+
+        request = self.get_request()
+        self.c.prepare_headers(request, 200, {'content-type': 'x-test'})
+
+        assert_that(request.setResponseCode, called().with_args(200).times(1))
+        assert_that(
+            request.setHeader,
+            called().with_args('content-type', 'x-test').times(1)
         )
 
-        d = self.c.sendback(result, request)
-        d.addCallback(cb_assert_request, request)
+    def _render(self, controller, request):
+        result = controller.render(request)
+        if result is server.NOT_DONE_YET:
+            if request.finished:
+                return defer.succeed(request)
+            else:
+                return request.notifyFinish().addCallback(lambda _: request)
+        else:
+            raise ValueError('Unexpected return value: {}'.format(result))
 
 
 class ControllerManagerTest(unittest.TestCase):
@@ -66,6 +132,10 @@ class ControllerManagerTest(unittest.TestCase):
     def setUp(self):
         self.mgr = controller.ControllerManager()
         self.addCleanup(self.mgr.notifier.loseConnection)
+
+    def load_manager(self):
+        sys.path.append('../mamba/test')
+        self.mgr.load('../mamba/test/application/controller/dummy.py')
 
     def test_inotifier_provided_by_controller_manager(self):
         self.assertTrue(INotifier.providedBy(self.mgr))
@@ -83,11 +153,25 @@ class ControllerManagerTest(unittest.TestCase):
     def test_is_valid_file_works_on_invalid(self):
         self.assertFalse(self.mgr.is_valid_file('./test.log'))
 
-    def test_is_loading_modules_and_lookup_works(self):
-        sys.path.append('../mamba/test')
-        self.mgr.load('../mamba/test/application/controller/dummy.py')
+    def test_is_loading_modules_works(self):
+        self.load_manager()
         self.assertTrue(self.mgr.length() != 0)
+
+    def test_lookup(self):
+        unknown = self.mgr.lookup('unkwnown')
+        self.assertEquals(unknown, {})
+
+        self.load_manager()
         dummy = self.mgr.lookup('dummy').get('object')
         self.assertTrue(dummy.name == 'Dummy')
         self.assertTrue('I am a dummy controller' in dummy.desc)
         self.assertTrue(dummy.loaded)
+
+    def test_reload(self):
+        self.load_manager()
+        dummy = self.mgr.lookup('dummy').get('object')
+
+        self.mgr.reload('dummy')
+        dummy2 = self.mgr.lookup('dummy').get('object')
+
+        self.assertNotEqual(dummy, dummy2)

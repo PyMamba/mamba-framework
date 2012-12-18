@@ -11,6 +11,7 @@ import json
 from zope.interface import implements
 from twisted.internet import defer
 
+from mamba.web.response import Ok
 from mamba.core import interfaces
 from mamba.application import controller, route
 
@@ -40,3 +41,7 @@ class DummyController(controller.Controller, controller.ControllerProvider):
         """Process POST Request."""
 
         return json.dumps({'success': False, 'error': 'Not implemented yet.'})
+
+    @route('/dummy_test')
+    def dumm_test(self, request):
+        return Ok('Dummy Test', {'content-type': 'plain/text'})

@@ -12,7 +12,7 @@ import tempfile
 from twisted.web import server
 from twisted.trial import unittest
 from twisted.python import filepath
-from twisted.internet import utils
+from twisted.internet import utils, defer
 from twisted.web.test.test_web import DummyRequest
 
 from mamba.utils import less
@@ -86,26 +86,22 @@ class LessCompilerTests(unittest.TestCase):
     def tearDown(self):
         self._fp.remove()
 
+    @defer.inlineCallbacks
     def test_less_compiles(self):
         lc = less.LessCompiler(self.file.name)
-        d = lc.compile()
+        result = yield lc.compile()
 
-        return d.addCallback(self.assertNotEqual, less_file)
+        self.assertNotEqual(result, less_file)
 
+    @defer.inlineCallbacks
     def test_less_compile_to_css(self):
 
-        def cb_fail(ignore):
-            raise unittest.SkipTest('LESS Compiler can not be found')
+        result = yield utils.getProcessOutput(
+            'lessc', [self.file.name], os.environ)
+        lc = less.LessCompiler(self.file.name)
+        retval = yield lc.compile()
 
-        def cb_success(resp):
-            lc = less.LessCompiler(self.file.name)
-            d = lc.compile()
-
-            return d.addCallback(self.assertEqual, resp)
-
-        return utils.getProcessOutput(
-            'lessc',
-            [self.file.name], os.environ).addCallbacks(cb_success, cb_fail)
+        self.assertEqual(retval, result)
 
 
 class LessResourceTest(unittest.TestCase):
@@ -126,18 +122,15 @@ class LessResourceTest(unittest.TestCase):
     def test_is_leaf(self):
         self.assertTrue(self.r.isLeaf)
 
+    @defer.inlineCallbacks
     def test_render(self):
         request = DummyRequest([self.fd.name])
-        d = self._render(self.r, request)
+        result = yield self._render(self.r, request)
+        result = ''.join(result.written)
+        lc = less.LessCompiler(self.fd.name)
+        retval = yield lc.compile()
 
-        def rendered(resp):
-            resp = "".join(resp.written)
-            lc = less.LessCompiler(self.fd.name)
-            d = lc.compile()
-
-            return d.addCallback(self.assertEqual, resp)
-
-        return d.addCallback(rendered)
+        self.assertEquals(retval, result)
 
     def _render(self, resource, request):
         result = resource.render(request)

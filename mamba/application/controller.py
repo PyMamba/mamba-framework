@@ -53,13 +53,13 @@ class Controller(resource.Resource):
     """
 
     isLeaf = True
-    __router = routing.Router()
+    _router = routing.Router()
 
     def __init__(self):
         """Initialize."""
 
         resource.Resource.__init__(self)
-        self.__router.install_routes(self)
+        self._router.install_routes(self)
 
     def getChild(self, name, request):
         """
@@ -142,7 +142,8 @@ class Controller(resource.Resource):
                 request.write(result.subject)
                 request.finish()
         except Exception, e:
-            log.error(e)
+            print e
+            log.err(e)
             request.setResponseCode(http.INTERNAL_SERVER_ERROR)
             request.write(e)
             request.finish()
@@ -174,7 +175,7 @@ class Controller(resource.Resource):
                   :class:`mamba.web.response.WebResponse`
         """
 
-        result = self.__router.dispatch(self, request)
+        result = self._router.dispatch(self, request)
 
         result.addCallback(self.sendback, request)
         return server.NOT_DONE_YET
