@@ -17,17 +17,17 @@ class ApplicationTests(unittest.TestCase):
     def setUp(self):
         self.app = app.Application()
         self.addCleanup(
-            self.app._managers.get('controller').notifier.loseConnection)
+            self.app.managers.get('controller').notifier.loseConnection)
         self.addCleanup(
-            self.app._managers.get('styles').notifier.loseConnection)
+            self.app.managers.get('styles').notifier.loseConnection)
 
     def test_constructor_overwrite_options(self):
         name1 = self.app.name
         app_tmp = app.Application({'name': 'Test'})
         self.addCleanup(
-            app_tmp._managers.get('controller').notifier.loseConnection)
+            app_tmp.managers.get('controller').notifier.loseConnection)
         self.addCleanup(
-            self.app._managers.get('styles').notifier.loseConnection)
+            self.app.managers.get('styles').notifier.loseConnection)
 
         self.assertNotEqual(name1, app_tmp.name)
 
@@ -91,11 +91,11 @@ class ApplicationTests(unittest.TestCase):
         self.assertEqual(_version.version.short(), self.app.mamba_ver)
 
     def test_controller_manager_is_instanced(self):
-        manager = self.app._managers.get('controller')
+        manager = self.app.managers.get('controller')
         self.assertIsInstance(manager, controller.ControllerManager)
 
     def test_appstyles_manager_is_instanced(self):
-        manager = self.app._managers.get('styles')
+        manager = self.app.managers.get('styles')
         self.assertIsInstance(manager, appstyles.AppStyles)
 
 

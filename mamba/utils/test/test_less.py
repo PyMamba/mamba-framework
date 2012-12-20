@@ -84,6 +84,7 @@ class LessCompilerTests(unittest.TestCase):
         self._fp = filepath.FilePath(self.file.name)
 
     def tearDown(self):
+        self.flushLoggedErrors()
         self._fp.remove()
 
     @defer.inlineCallbacks
@@ -103,6 +104,27 @@ class LessCompilerTests(unittest.TestCase):
 
         self.assertEqual(retval, result)
 
+    @defer.inlineCallbacks
+    def test_less_compile_fallbacks(self):
+
+        def _get_script(self, ignore):
+            return filepath.FilePath(self.stylesheet).getContent().decode(
+                'utf-8'
+            )
+
+        # Monkeypatch to avoid unclean reactor state from mamba.app
+        self.patch(less.LessCompiler, '_get_script', _get_script)
+        lc = less.LessCompiler(self.file.name, exe='lessc-fail')
+
+        retval = yield lc.compile()
+
+        self.assertEquals(
+            filepath.FilePath(self.file.name).getContent().decode('utf-8'),
+            retval
+        )
+
+        self.flushLoggedErrors()
+
 
 class LessResourceTest(unittest.TestCase):
     """
@@ -117,6 +139,7 @@ class LessResourceTest(unittest.TestCase):
         self._fp = filepath.FilePath(self.fd.name)
 
     def tearDown(self):
+        self.flushLoggedErrors()
         self._fp.remove()
 
     def test_is_leaf(self):

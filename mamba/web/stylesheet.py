@@ -11,6 +11,7 @@
 """
 
 import re
+from os.path import normpath
 
 from zope.interface import implements
 from twisted.internet import inotify
@@ -25,7 +26,19 @@ __all__ = ['StylesheetError', 'Stylesheet', 'StylesheetManager']
 
 
 class StylesheetError(Exception):
-    pass
+    """Generic class for Stylesheet exceptions"""
+
+
+class InvalidFileExtension(StylesheetError):
+    """Fired if the file has not a valid extension (.css or .less)"""
+
+
+class InvalidFile(StylesheetError):
+    """Fired if a file is lacking the mamba css or less headers"""
+
+
+class FileDontExists(StylesheetError):
+    """Raises if the file does not exists"""
 
 
 class Stylesheet(object):
@@ -47,16 +60,28 @@ class Stylesheet(object):
                                                  extension == '.less'):
                 file_variables = filevariables.FileVariables(self.path)
                 filetype = file_variables.get_value('mamba-file-type')
-                if filetype != 'css' or filetype != 'less':
-                    raise StylesheetError("%s" % (
-                        "File %s is not a valid CSS or LESS file" % self.path
-                    ))
+                if filetype != 'mamba-css' and filetype != 'mamba-less':
+                    raise InvalidFile(
+                        'File {} is not a valid CSS or LESS mamba file'.format(
+                            self.path
+                        )
+                    )
 
-                res = '%s/%s' % (self.prefix, self._fp.basename())
-                self.data = '%s' % (
+                res = '{}/{}'.format(self.prefix, self._fp.basename())
+                self.data = '{}'.format(
                     '<link rel="stylesheet" type="text/css" href="%s" />' % res
                 )
                 self.name = self._fp.basename()
+            else:
+                raise InvalidFileExtension(
+                    'File {} has not a valid extension (.css or .less)'.format(
+                        self.path
+                    )
+                )
+        else:
+            raise FileDontExists(
+                'File {} does not exists'.format(self.path)
+            )
 
 
 class StylesheetManager(object):
@@ -65,9 +90,9 @@ class StylesheetManager(object):
     """
     implements(INotifier)
 
-    _stylesheets = dict()
-
     def __init__(self):
+        self._stylesheets = {}
+
         # Create and setup Linux iNotify mechanism
         self.notifier = inotify.INotify()
         self.notifier.startReading()
@@ -96,9 +121,11 @@ class StylesheetManager(object):
         try:
             files = filepath.listdir(self._styles_store)
             pattern = re.compile('[^_?]\%s$' % '.css|.less', re.IGNORECASE)
-            for file in filter(pattern.search, files):
-                if self.is_valid_file(file):
-                    self.load(file)
+            for stylefile in filter(pattern.search, files):
+                stylefile = normpath(
+                    '{}/{}'.format(self._styles_store, stylefile)
+                )
+                self.load(stylefile)
         except OSError:
             pass
 
@@ -136,15 +163,12 @@ class StylesheetManager(object):
         """
         return self._stylesheets.get(key, None)
 
-    def is_valid_file(self, file_path):
-        """Check if a file is a valid stylesheet file"""
-
-        file_variables = filevariables.FileVariables(file_path)
-        filetype = file_variables.get_value('mamba-file-type')
-        return (filetype == 'css' or filetype == 'less')
-
     def _notify(self, wd, file_path, mask):
         """Notifies the changes on stylesheets file_path """
+
+        print "event %s on %s" % (
+            ', '.join(inotify.humanReadableMask(mask)), filepath
+        )
 
         if mask is inotify.IN_MODIFY:
             style = filepath.splitext(file_path.basename())[0]
@@ -153,5 +177,4 @@ class StylesheetManager(object):
 
         if mask is inotify.IN_CREATE:
             if file_path.exists():
-                if self.is_valid_file(file_path):
-                    self.load(file_path)
+                self.load(file_path)

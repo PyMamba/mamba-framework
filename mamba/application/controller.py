@@ -12,6 +12,8 @@
 
 """
 
+from os.path import normpath
+
 from twisted.web import http
 from twisted.python import log
 from twisted.web import server
@@ -117,7 +119,7 @@ class Controller(resource.Resource):
 
         try:
             return self.route_dispatch(request)
-        except Exception, error:
+        except Exception as error:
             self.prepare_headers(request, http.INTERNAL_SERVER_ERROR, {})
             return str(error)
 
@@ -141,11 +143,10 @@ class Controller(resource.Resource):
             else:
                 request.write(result.subject)
                 request.finish()
-        except Exception, e:
-            print e
-            log.err(e)
+        except Exception as error:
+            log.err(error)
             request.setResponseCode(http.INTERNAL_SERVER_ERROR)
-            request.write(e)
+            request.write(error)
             request.finish()
 
         return
@@ -228,4 +229,7 @@ class ControllerManager(module.ModuleManager):
         :type file_path: str
         """
 
-        return self._valid_file(file_path, 'mamba-controller')
+        return self._valid_file(
+            normpath('{}/{}'.format(self._module_store, file_path)),
+            'mamba-controller'
+        )

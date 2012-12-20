@@ -11,7 +11,9 @@
 
 """
 
+import cPickle
 import functools
+from collections import OrderedDict
 
 
 def cache(size=16):
@@ -24,22 +26,23 @@ def cache(size=16):
     the provided one.
 
     If the size is 0 then an unlimited cache is provided
+
+    NOTE: The memory size of the int_cache is just an approximation
     """
-    cache = list()
+    int_cache = OrderedDict()
 
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            for result in cache:
-                if args == result[0]:
-                    return result[1]
+            if args in int_cache:
+                return int_cache.get(args)
 
             result = func(*args, **kwargs)
-            cache.append((args, result))
+            int_cache.update({args: result})
 
             if size != 0:
-                while cache.__sizeof__() >= size * 1024 * 1024:
-                    cache.pop(0)
+                while len(cPickle.dumps(int_cache)) >= size * 1024 * 1024:
+                    int_cache.popitem(False)
 
             return result
 

@@ -11,7 +11,6 @@
 """
 
 import re
-import sys
 import json
 import inspect
 import logging
@@ -196,17 +195,17 @@ class Router(object):
                     msg,
                     {'content-type': 'text/plain'}
                 ))
-        except TypeError, e:
-            log.msg(e, logLevel=logging.WARN)
+        except TypeError as error:
+            log.msg(error, logLevel=logging.WARN)
             result = defer.succeed(response.BadRequest(
-                str(e),
+                str(error),
                 {'content-type': 'text/plain'}
             ))
-        except:
-            log.err(sys.exc_info())
+        except Exception as error:
+            log.err(error)
             result = response.InternalServerError(
                 'ERROR 500: Internal server error: {}\n\t{}'.format(
-                    sys.exc_type, sys.exc_value
+                    type(error), error
                 )
             )
 
@@ -285,7 +284,7 @@ class Router(object):
         def decorator(func):
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
-                return func, args
+                return func
 
             setattr(wrapper, 'route', Route(method, url, func))
 
@@ -303,8 +302,8 @@ class Router(object):
 
         try:
             return self._prepare_response(result, request)
-        except Exception, e:
-            return self._process_error(result, request, e)
+        except Exception as error:
+            return self._process_error(result, request, error)
 
     def _process_error(self, result, request, error=''):
         """
@@ -371,8 +370,13 @@ class RouteDispatcher(object):
                     return route
 
         for url in self.router.routes.values():
-            if url == self.url:
-                return 'NotImplemented'
+            controllers = url.values()
+            if len(controllers):
+                for i in xrange(len(controllers)):
+                    if self.controller in controllers[i]:
+                        r = controllers[i].get(self.controller).validate(self)
+                        if r:
+                            return 'NotImplemented'
 
         return None
 
@@ -385,7 +389,12 @@ class RouteDispatcher(object):
         data_json = {}
 
         if self.request.method in ['POST', 'PUT']:
-            data_json = json.loads(data) if data else {}
+            ct = self.request.requestHeaders.getRawHeaders('content-type')
+            if 'application/json' in ct:
+                try:
+                    data_json = json.loads(data)
+                except ValueError:
+                    data_json = {}
 
         request_args = self.request.args
         request_headers = self.request.requestHeaders.getRawHeaders(
@@ -393,17 +402,17 @@ class RouteDispatcher(object):
         )
 
         if self.request.method == 'PUT':
-            if request_headers == 'application/x-www-form-urlencoded':
+            if 'application/x-www-form-urlencoded' in request_headers:
                 request_args = parse_qs(data, 1)
 
-            if len(request_args) > 0:
-                for key, value in request_args.iteritems():
-                    if key not in route.callback_args:
-                        route.callback_args.update({key: value[0]})
-            elif data_json:
-                for key, value in data_json.iteritems():
-                    if key not in route.callback_args:
-                        route.callback_args.update({key: value})
+        if len(request_args) > 0:
+            for key, value in request_args.iteritems():
+                if key not in route.callback_args:
+                    route.callback_args.update({key: value[0]})
+        elif data_json:
+            for key, value in data_json.iteritems():
+                if key not in route.callback_args:
+                    route.callback_args.update({key: value})
 
     def __repr__(self):
         return 'RouteDispatcher({})'.format(', '.join(

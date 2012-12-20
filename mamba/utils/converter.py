@@ -60,7 +60,7 @@ class Converter(object):
                         values.append(Converter.serialize(value))
 
                     return values
-        except AttributeError, e:
-            log.msg(e, logLevel=logging.WARN)
+        except AttributeError as error:
+            log.msg(error, logLevel=logging.WARN)
 
         return obj

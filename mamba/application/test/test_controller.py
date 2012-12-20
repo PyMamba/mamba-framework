@@ -100,7 +100,7 @@ class ControllerTest(unittest.TestCase):
         r = yield self._render(c, request)
 
         assert_that(router.dispatch, called().times(1))
-        self.assertEqual(r.written[0], 'ERROR 404: /test not found')
+        self.assertEqual(r.written[0], 'ERROR 404: /dummy/test not found')
 
     def test_prepare_headers_works(self):
 
@@ -147,8 +147,11 @@ class ControllerManagerTest(unittest.TestCase):
         self.assertNot(self.mgr.get_controllers())
 
     def test_is_valid_file_works_on_valid(self):
-        self.assertTrue(self.mgr.is_valid_file(
-            '../mamba/test/application/controller/dummy.py'))
+        import os
+        currdir = os.getcwd()
+        os.chdir('../mamba/test/')
+        self.assertTrue(self.mgr.is_valid_file('dummy.py'))
+        os.chdir(currdir)
 
     def test_is_valid_file_works_on_invalid(self):
         self.assertFalse(self.mgr.is_valid_file('./test.log'))

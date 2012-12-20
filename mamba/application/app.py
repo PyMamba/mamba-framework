@@ -2,12 +2,8 @@
 # Copyright (c) 2012 - Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 
-import fnmatch
-import sys
 import os
 
-from twisted.web import server
-from twisted.internet import reactor
 from twisted.python import versions, log, filepath
 from twisted.python.dist import twisted_subprojects
 
@@ -15,7 +11,6 @@ from mamba import _version as _mamba_version
 from mamba.application import controller, appstyles
 from mamba.utils import borg
 
-__all__ = ['Application', 'ApplicationError']
 
 _app_ver = versions.Version('Application', 0, 1, 0)
 _app_project_ver = versions.Version('Project', 0, 1, 0)
@@ -62,7 +57,7 @@ class Application(borg.Borg):
         self.js_dir = 'js'
         self.language = os.environ['LANG'].split('_')[0]
         self.lessjs = False
-        self._managers = {
+        self.managers = {
             'controller': controller.ControllerManager(),
             'styles': appstyles.AppStyles()
         }
@@ -125,17 +120,5 @@ class Application(borg.Borg):
     def ver(self, value):
         raise ApplicationError("'ver' is readonly")
 
-    def run(self, port=8080):
-        """
-        Method to run the application within Twisted reactor
 
-        This method exists for testing purposes only and fast
-        controller test-development-test workflow. In production you
-        should use twistd
-
-        :param port: the port to listen
-        :type port: number
-        """
-        factory = server.Site(self)
-        reactor.listenTCP(port, factory)
-        reactor.run()
+__all__ = ['Application', 'ApplicationError']

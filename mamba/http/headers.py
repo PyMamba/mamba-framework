@@ -69,6 +69,7 @@ class Headers(object):
 
         @return: A valid DOCTYPE Header string
         """
+
         dtype = doctype.split('-')[0]
         dtd = doctype.split('-')[1]
         if dtype in self._doc_types:

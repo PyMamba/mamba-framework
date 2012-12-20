@@ -10,22 +10,23 @@
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 """
 
-from twisted.web import resource, static
+from twisted.python import log
+from twisted.internet import reactor
+from twisted.web import resource, static, server
 
 from mamba.http import headers
-
-__all__ = ['Page']
 
 
 class Page(resource.Resource):
     """
-    The Mamba Page object.
+    This is the mamba root resource for Applications.
 
-    @param options: The Mamba options for the Page content.
+    :param options: The Mamba options for the Page content
+    :type options: dict
     """
 
     _options = {
-        'doctype': 'html5',     # HTML5 by default
+        'doctype': 'html-html5',     # HTML5 by default
         'meta': []
     }
 
@@ -46,11 +47,16 @@ class Page(resource.Resource):
 
         # Set page language
         self._header.language = app.language
+
         # Set page description
         self._header.description = app.description
+
         # Set managers
-        self._resources_manager = app.managers.get('resources')
-        self._controllers_manager = app.managers.get('controllers')
+        self._styles_manager = app.managers.get('style')
+        self._controllers_manager = app.managers.get('controller')
+
+        # register controllers
+        self.register_controllers()
 
     def getChild(self, path, request):
         """L{twisted.web.resource.Resource.getChild} overwrite"""
@@ -67,34 +73,34 @@ class Page(resource.Resource):
         a = _page.append
 
         # Create the page headers
-        a('{0}\n'.format(self._header.get_doc_type(self._options['doctype'])))
-        a('{0}\n'.format(self._header.get_html_element()))
+        a('{}\n'.format(self._header.get_doc_type(self._options['doctype'])))
+        a('{}\n'.format(self._header.html_element))
         a('    <head>\n')
-        a('        {0}\n'.format(self._header.get_content_type()))
-        a('        {0}\n'.format(self._header.get_generator_content()))
-        a('        {0}\n'.format(self._header.get_description_content()))
-        a('        {0}\n'.format(self._header.get_language_content()))
-        a('        {0}\n'.format(self._header.get_mamba_content()))
+        a('        {}\n'.format(self._header.content_type))
+        a('        {}\n'.format(self._header.get_generator_content()))
+        a('        {}\n'.format(self._header.get_description_content()))
+        a('        {}\n'.format(self._header.get_language_content()))
+        a('        {}\n'.format(self._header.get_mamba_content()))
 
         if 'resPath' in self._options and 'media' in self._options['resPath']:
             media = self._options['resPath']['media']
         else:
             media = 'media'
-        a('        {0}\n'.format(self._header.get_favicon_content(media)))
+        a('        {}\n'.format(self._header.get_favicon_content(media)))
 
         # Iterate over the defined meta keys and add it to the header's page
         for meta in self._options['meta']:
-            a('        {0}\n'.format(meta))
+            a('        {}\n'.format(meta))
 
         # Iterate over the defined styles and add it to the header's page
         for style in self._stylesheets:
-            a('        {0}\n'.format(style.data))
+            a('        {}\n'.format(style.data))
 
         # Iterate over the defined scripts and add it to the header's page
         for script in self._scripts:
-            a('        {0}\n'.format(script.data))
+            a('        {}\n'.format(script.data))
 
-        a('        <title>{0}</title>\n'.format(self._options['title']))
+        a('        <title>{}</title>\n'.format(self._options['title']))
         a('    </head>\n')
         a('</html>')
 
@@ -106,15 +112,44 @@ class Page(resource.Resource):
 
         self._options['meta'].append(meta)
 
-    def add_stylesheet(self, stylesheet):
-        """Adds a stylesheet to the page"""
-
-        self._stylesheets.append(stylesheet)
-        self.putChild(stylesheet.prefix(),
-                      static.File(stylesheet.get_path()))
-
     def add_script(self, script):
         """Adds a script to the page"""
 
         self._scripts.append(script)
         self.putChild(script.get_prefix(), static.File(script.get_path()))
+
+    def register_controllers(self):
+        """Add a child for each controller in the ControllerManager"""
+
+        for controller in self._controllers_manager.get_controllers().values():
+            log.msg(
+                'Registering controller {} with route {} {}({})'.format(
+                    controller.get('object').name,
+                    controller.get('object').__route__,
+                    controller.get('object').name,
+                    controller.get('module')
+                )
+            )
+
+            self.putChild(
+                controller.get('object').__route__,
+                controller.get('object')
+            )
+
+    def run(self, port=8080):
+        """
+        Method to run the application within Twisted reactor
+
+        This method exists for testing purposes only and fast
+        controller test-development-test workflow. In production you
+        should use twistd
+
+        :param port: the port to listen
+        :type port: number
+        """
+        factory = server.Site(self)
+        reactor.listenTCP(port, factory)
+        reactor.run()
+
+
+__all__ = ['Page']

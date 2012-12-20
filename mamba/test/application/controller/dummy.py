@@ -25,6 +25,7 @@ class DummyController(controller.Controller, controller.ControllerProvider):
     name = 'Dummy'
     desc = 'I am a dummy controller created for tests purposes'
     loaded = False
+    __route__ = 'dummy'
 
     def __init__(self):
         """
@@ -44,4 +45,16 @@ class DummyController(controller.Controller, controller.ControllerProvider):
 
     @route('/dummy_test')
     def dumm_test(self, request):
-        return Ok('Dummy Test', {'content-type': 'plain/text'})
+        return Ok('<h1>Dummy Test</h1>', {'content-type': 'text/html'})
+
+    @route('/')
+    def root(self, request):
+        return Ok(
+            '<!DOCTYPE html>'
+            '   <html>'
+            '       <head><title>Dummy Root</title></head>'
+            '       <body>'
+            '           <h1>This is the Dummy Root. Fuck yeah!</h1>'
+            '       </body>'
+            '   </html>'
+        )

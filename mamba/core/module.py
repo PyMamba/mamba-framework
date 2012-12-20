@@ -24,9 +24,6 @@ from mamba.plugin import ExtensionPoint
 from mamba.utils import filevariables
 
 
-__all__ = ['ModuleError', 'ModuleManager']
-
-
 class ModuleError(Exception):
     """ModuleError Exception"""
     pass
@@ -178,3 +175,6 @@ class ModuleManager(object):
                 return True
 
         return False
+
+
+__all__ = ['ModuleError', 'ModuleManager']

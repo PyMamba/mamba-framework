@@ -1,4 +1,4 @@
-# -*- test-case-name: mamba.test.test_appstyles -*-
+# -*- test-case-name: mamba.test.test_web -*-
 # Copyright (c) 2012 - Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 
@@ -20,8 +20,10 @@ class AppStyles(stylesheet.StylesheetManager):
         Initialize
         """
 
-        self._styles_store = 'application/view/stylesheet'
+        self._styles_store = 'application/view/stylesheets'
         super(AppStyles, self).__init__()
+
+        self.setup()
 
     def get_styles(self):
         """

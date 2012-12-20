@@ -8,12 +8,9 @@ Mamba less compiler
 
 import os
 
-from twisted.internet import utils
 from twisted.python import filepath
 from twisted.web import resource, server
-
-
-__all__ = ["LessResource", "LessCompiler"]
+from twisted.internet import utils, defer
 
 
 class LessResource(resource.Resource):
@@ -22,13 +19,15 @@ class LessResource(resource.Resource):
     """
 
     isLeaf = True
+    less_exec = 'lessc'
 
     def render_GET(self, request):
         """
         Try to compile a LESS file and then serve it as CSS
         """
 
-        self.less_compiler = LessCompiler(request.postpath[0])
+        self.less_compiler = LessCompiler(request.postpath[0], self.less_exec)
+
         d = self.less_compiler.compile()
 
         def cb_sendback(resp):
@@ -49,16 +48,17 @@ class LessCompiler(object):
     adds the less.js JavaScript compiler to the page.
     """
 
-    def __init__(self, style):
+    def __init__(self, style, exe='lessc'):
         super(LessCompiler, self).__init__()
         self.stylesheet = style
+        self.exe = exe
 
     def compile(self):
         """
         Compile a LESS script
         """
 
-        d = utils.getProcessOutput('lessc', [self.stylesheet], os.environ)
+        d = utils.getProcessOutput(self.exe, [self.stylesheet], os.environ)
         d.addCallbacks(self._get_compiled, self._get_script)
 
         return d
@@ -79,6 +79,8 @@ class LessCompiler(object):
         from mamba.application import app
         mamba_app = app.Application()
         mamba_app.lessjs = True
-        #mgr = self.stylesheet.StylesheetManager()
 
         return filepath.FilePath(self.stylesheet).getContent().decode('utf-8')
+
+
+__all__ = ["LessResource", "LessCompiler"]
