@@ -15,7 +15,7 @@ class ApplicationTests(unittest.TestCase):
     """Tests for L{mamba.application.app}"""
 
     def setUp(self):
-        self.app = app.Application()
+        self.app = app.Mamba()
         self.addCleanup(
             self.app.managers.get('controller').notifier.loseConnection)
         self.addCleanup(
@@ -23,7 +23,7 @@ class ApplicationTests(unittest.TestCase):
 
     def test_constructor_overwrite_options(self):
         name1 = self.app.name
-        app_tmp = app.Application({'name': 'Test'})
+        app_tmp = app.Mamba({'name': 'Test'})
         self.addCleanup(
             app_tmp.managers.get('controller').notifier.loseConnection)
         self.addCleanup(

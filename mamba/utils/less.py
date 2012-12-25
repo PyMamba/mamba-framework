@@ -1,4 +1,4 @@
-# -*- test-case-name: mamba.utils.test_less -*-
+# -*- test-case-name: mamba.test.test_less -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 
@@ -77,7 +77,7 @@ class LessCompiler(object):
         """
 
         from mamba.application import app
-        mamba_app = app.Application()
+        mamba_app = app.Mamba()
         mamba_app.lessjs = True
 
         return filepath.FilePath(self.stylesheet).getContent().decode('utf-8')

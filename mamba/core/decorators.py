@@ -1,4 +1,4 @@
-# -*- test-case-name: mamba.core.test.test_decorators -*-
+# -*- test-case-name: mamba.test.test_decorators -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 
@@ -27,7 +27,9 @@ def cache(size=16):
 
     If the size is 0 then an unlimited cache is provided
 
-    NOTE: The memory size of the int_cache is just an approximation
+    .. admonition:: Notice
+
+        The memory size of the int_cache is just an approximation
     """
     int_cache = OrderedDict()
 
@@ -53,7 +55,7 @@ def cache(size=16):
 
 def unlimited_cache(func):
     """
-    Just a wrapper over cache decorator to alias @cache(size=0)
+    Just a wrapper over cache decorator to alias :meth:`@cache(size=0)`
     """
     @functools.wraps(func)
     @cache(size=0)

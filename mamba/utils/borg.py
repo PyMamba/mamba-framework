@@ -1,4 +1,4 @@
-# -*- test-case-name: mamba.utils.test.test_borg -*-
+# -*- test-case-name: mamba.test.test_borg -*-
 # Copyright (c) 2012 - Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 
@@ -24,12 +24,14 @@ class Borg(object):
     inherits from Borg and a class B inherits from A then A and B doesn't share
     the same namespace
 
-    Example:
+    Example::
 
         class LockerManager(borg.Borg):
 
             def __init__(self):
                 super(LockerManager, self).__init__()
+
+    Used as::
 
         >>> manager1 = LockerManager()
         >>> manager1.name = 'Locker One'
@@ -37,8 +39,6 @@ class Borg(object):
         >>> print(manager2.name)
         Locker One
         >>>
-
-    .. versionadded:: 0.1
     """
     _shared_state = {}
 

@@ -12,7 +12,7 @@ class AppStyles(stylesheet.StylesheetManager):
     """
     Manager for Application Stylesheets
 
-    .. versionadded:: 0.1
+    seealso: :class:`~mamba.web.Stylesheet`
     """
 
     def __init__(self):
@@ -27,7 +27,7 @@ class AppStyles(stylesheet.StylesheetManager):
 
     def get_styles(self):
         """
-        Return the pool
+        Return the :class:`mamba.Stylesheet` pool
         """
 
         return self.stylesheets

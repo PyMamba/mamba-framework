@@ -9,7 +9,6 @@ Test Dummy Controller
 import json
 
 from zope.interface import implements
-from twisted.internet import defer
 
 from mamba.web.response import Ok
 from mamba.core import interfaces

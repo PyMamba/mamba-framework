@@ -2,6 +2,14 @@
 # Copyright (c) 2012 - Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 
+"""
+.. module: app
+    :platform: Linux
+    :synopsis: Mamba Application Manager
+
+.. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
+"""
+
 import os
 
 from twisted.python import versions, log, filepath
@@ -21,24 +29,33 @@ class ApplicationError(Exception):
     pass
 
 
-class Application(borg.Borg):
+class Mamba(borg.Borg):
     """
-    Mamba Application Manager.
+    This object is just a global configuration for mamba applications that
+    act as the central object on them and is able to act as a central registry.
+    It inherits from the :class: `~mamba.utils.borg.Borg` so you can just
+    instantiate a new object of this class and it will share all the
+    information between instances.
 
-    Mamba only works on GNU/Linux operating system (for now).
+    You create an instance of the :class:`~Mamba` class in your main module
+    or in your `Twisted` `tac` file:
 
-    .. versionadded:: 0.1
+    .. sourcecode:: python
+
+        from mamba import Mamba
+        app = Mamba({'name': 'MyApp', 'description': 'My App', ...})
+
+    Mamba only works in the GNU/Linux operating system (for now).
+
+    :param options: options to initialize the application with
+    :type options: dict
+
     """
 
     def __init__(self, options=None):
-        """
-        Application constructor
+        """Mamba constructor"""
 
-        :param options: options to initialize the application with
-        :type options: dict
-        """
-
-        super(Application, self).__init__()
+        super(Mamba, self).__init__()
         self._install_paths = dict()
         self._mamba_ver = _mamba_version.version.short()
         self._ver = _app_ver.short()

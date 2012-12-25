@@ -15,6 +15,7 @@ import re
 from collections import OrderedDict
 
 from zope.interface import implements
+from twisted.python import rebuild
 from twisted.python import filepath
 from twisted.internet import inotify
 from twisted.python._inotify import INotifyError
@@ -31,7 +32,9 @@ class ModuleError(Exception):
 
 class ModuleManager(object):
     """
-    Every module manager class inherits from me
+    Every module manager class inherits from me. I setup a
+    :class:`twisted.internet.inotify.INotify` object in my
+    :attr:`self._module_store` in order to perform auto reloads
 
     .. versionadded:: 0.1
     """
@@ -76,6 +79,9 @@ class ModuleManager(object):
     def load(self, filename):
         """
         Loads a Mamba module
+
+        :param filename: the module filname
+        :type filename: str
         """
 
         module_name = filepath.splitext(filepath.basename(filename))[0]
@@ -112,6 +118,9 @@ class ModuleManager(object):
     def reload(self, module):
         """
         Reload a controller module
+
+        :param module: the module to reload
+        :type module: str
         """
 
         temp_object = self.lookup(module)
@@ -128,6 +137,9 @@ class ModuleManager(object):
     def lookup(self, module):
         """
         Find and return a controller from the pool
+
+        :param module: the module to lookup
+        :type module: str
         """
 
         return self._modules.get(module, dict())
@@ -142,6 +154,9 @@ class ModuleManager(object):
     def is_valid_file(self, file_path):
         """
         Must be implemented by subclasses
+
+        :param file_path: the filepath to check
+        :type file_path: :class: `twisted.python.filepath.FilePath`
         """
         raise NotImplementedError("Not implemented yet!")
 

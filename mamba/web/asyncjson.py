@@ -1,4 +1,4 @@
-# -*- test-case-name: mamba.web.test.test_web -*-
+# -*- test-case-name: mamba.test.test_web -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 

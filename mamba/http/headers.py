@@ -14,7 +14,7 @@ from mamba._version import version
 class Headers(object):
     """
     An object that build the Application page header and returns it
-    as a well formated XHTML/HTML string.
+    as a well formated *XHTML/HTML* string.
     """
 
     _doc_types = {
@@ -64,10 +64,13 @@ class Headers(object):
 
     def get_doc_type(self, doctype):
         """
-        Translate a L{mamba.web.Page} docType options to a valid
-        DOCTYPE Header string.
+        Translate a :class:`mamba.web.Page` docType options to a valid
+        **DOCTYPE** Header string.
 
-        @return: A valid DOCTYPE Header string
+        :param doctype: the doctype key to get
+        :type doctype: str
+        :returns: A valid **DOCTYPE** Header string
+        :return type: str
         """
 
         dtype = doctype.split('-')[0]
@@ -79,7 +82,13 @@ class Headers(object):
         return ''
 
     def set_doc_type(self, doctype, val):
-        """Sets the doctype"""
+        """Sets the doctype
+
+        :param doctype: the doctype key to set
+        :type doctype: str
+        :param val: the value to set
+        :type val: str
+        """
 
         dtype = doctype.split('-')[0]
         dtd = doctype.split('-')[1]
@@ -113,7 +122,11 @@ class Headers(object):
             return '<meta name="mamba-content" content="Platform: Web" />'
 
     def get_favicon_content(self, media='/media'):
-        """Returns the favicon"""
+        """Returns the favicon
+
+        :param media: a media directory to add, defaults to `/media`
+        :type media: str
+        """
 
         return '<link rel="shortcut icon" href="{0}/{1}" />'.format(
             media, self.favicon)

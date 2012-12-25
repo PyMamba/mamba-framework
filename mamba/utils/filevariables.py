@@ -1,4 +1,4 @@
-# -*- test-case-name: mamba.utils.test.test_filevariables -*-
+# -*- test-case-name: mamba.test.test_filevariables -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 

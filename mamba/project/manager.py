@@ -1,4 +1,4 @@
-# -*- test-case-name: mamba.project.test.test_manager -*-
+# -*- test-case-name: mamba.test.test_project_manager -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 

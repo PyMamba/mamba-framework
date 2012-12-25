@@ -1,4 +1,4 @@
-# -*- test-case-name: mamba.test.test_mamba -*-
+# -*- test-case-name: mamba.test.test_controller -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
 # See LICENSE for more details
 
@@ -6,7 +6,7 @@
 .. module:: controller
     :platform: Linux
     :synopsis: Controllers for web projects that encapsulates twisted
-               low-level resources using werkzeug routing system.
+               low-level resources using custom routing system.
 
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 
@@ -51,7 +51,21 @@ class Controller(resource.Resource):
     """
     Mamba Controller Class define a web accesible resource and its actions.
 
-    .. versionadded:: 0.1
+    A controller can (and should) be attached to a
+    :class:`twisted.web.resource.Resource` as a child or to others
+    :class:`~mamba.Controller`.
+
+    Unlike :class:`twisted.web.resource.Resource`, :class:`~mamba.Controller`
+    don't use the Twisted URL dispatching mechanism. The
+    :class:`~mamba.Controller` uses :class:`~mamba.web.Router` for URL
+    dispatching through the :py:func:`~mamba.application.route` decorator::
+
+        @route('/hello_world', method='GET')
+        def helloworld(self, request, **kwargs):
+            return 'Hello World'
+
+    seealso: :class:`~mamba.web.Router`, :class:`~mamba.web.Route`
+
     """
 
     isLeaf = True
@@ -68,9 +82,10 @@ class Controller(resource.Resource):
         This method is not supposed to be called because we are overriden
         the full route dispatching mechanism already built in Twisted.
 
-        Class variable level isLeaf is supposed to be always True but some
-        user can override it in his Controller implementation so we make
-        sure that the native twisted behavior is never executed.
+        Class variable level :attr:`isLeaf` is supposed to be always
+        :keyword:`True` but any users can override it in their
+        :class:`~mamba.Controller` implementation so we make sure that the
+        native twisted behavior is never executed.
 
         If you need Twisted native url dispatching in your site you should
         use :class:`~twisted.web.resource.Resource` class directly in your
@@ -78,10 +93,11 @@ class Controller(resource.Resource):
 
         :param name: ignored
         :type name: string
-        :param request: a :class:`~twisted.web.server.request` specifying
+        :param request: a :class:`twisted.web.server.Request` specifying
                         meta-information about the request that is being made
                         for this child that is ignored at all.
-        :type request: :class:`~twisted.web.server.request`
+        :type request: :class:`~twisted.web.server.Request`
+        :rtype: :class:`~mamba.Controller`
         """
 
         # someone is using Controller wrong
@@ -109,12 +125,12 @@ class Controller(resource.Resource):
     def render(self, request):
         """
         Render a given resource.
-        See :class:`~twisted.web.resource.IResource`'s render method.
+        see: :class:`twisted.web.resource.IResource`'s render method.
 
         I try to render a router response from the routing mechanism.
 
         :param request: the HTTP request
-        :type request: :class:`~twisted.web.server.Request`
+        :type request: :class:`twisted.web.server.Request`
         """
 
         try:
@@ -158,7 +174,7 @@ class Controller(resource.Resource):
         :param request: the HTTP request
         :type request: :class:`~twisted.web.server.Request`
         :param code: the HTTP response code
-        :type code: number
+        :type code: int
         :param headers: the HTTP headers
         :type headers: dict
         """
@@ -205,9 +221,10 @@ class Controller(resource.Resource):
 
 class ControllerManager(module.ModuleManager):
     """
-    Uses a ControllerProvider to load, store and reload Mamba Controllers
+    Uses a ControllerProvider to load, store and reload Mamba Controllers.
 
-    .. versionadded:: 0.1
+    :attr:`_model_store` A private attribute that sets the prefix
+    path for the controllers store
     """
 
     def __init__(self):
@@ -217,7 +234,7 @@ class ControllerManager(module.ModuleManager):
         super(ControllerManager, self).__init__()
 
     def get_controllers(self):
-        """Return the pool"""
+        """Return the controllers pool"""
 
         return self._modules
 

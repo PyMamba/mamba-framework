@@ -6,6 +6,7 @@
 Tests for mamba.web
 """
 
+import sys
 import tempfile
 from cStringIO import StringIO
 
@@ -17,12 +18,13 @@ from twisted.web.http_headers import Headers
 from twisted.web.test.test_web import DummyRequest
 from doublex import Stub, ProxySpy, Spy, called, assert_that
 
-from mamba.application import appstyles
+from mamba.application import appstyles, controller
 from mamba.application import route as decoroute
 from mamba.web import stylesheet, page, asyncjson, response
 from mamba.web.routing import Route, Router, RouteDispatcher
 
-from mamba.utils.test.test_less import less_file
+from mamba.test.test_less import less_file
+from mamba.test.application.controller.dummy import DummyController
 
 
 class StylesheetTest(unittest.SynchronousTestCase):
@@ -136,6 +138,7 @@ class AsyncJSONTest(unittest.TestCase):
         assert_that(consumer.write, called())
         assert_that(consumer.unregisterProducer, called().times(1))
         assert_that(ajson.begin, called())
+        self.flushLoggedErrors()
 
 
 class PageTest(unittest.TestCase):
@@ -148,6 +151,7 @@ class PageTest(unittest.TestCase):
         with Stub() as app:
             app.name = 'Testing App'
             app.language = 'en_EN'
+            app.description = 'Test Description'
 
             with Stub() as controllers:
                 controllers.get_controllers().returns({})
@@ -183,7 +187,18 @@ class PageTest(unittest.TestCase):
             root.getChild('', DummyRequest(['']))
         )
 
-    def test_add_meta(self):
+    def test_page_get_child_returns_registered_childs(self):
+
+        root = page.Page(self.get_commons())
+        child = DummyController()
+        root.putChild('dummy', child)
+
+        self.assertIdentical(
+            child,
+            root.getChildWithDefault('dummy', DummyRequest(['']))
+        )
+
+    def test_page_add_meta(self):
 
         root = page.Page(self.get_commons())
         root.add_meta('Content-type: "plain/html"')
@@ -191,6 +206,37 @@ class PageTest(unittest.TestCase):
         self.assertEquals(
             root._options['meta'],
             ['Content-type: "plain/html"']
+        )
+
+    def test_page_add_script(self):
+
+        root = page.Page(self.get_commons())
+        style = stylesheet.Stylesheet(
+            '../mamba/test/application/view/stylesheets/dummy.less'
+        )
+        root.add_script(style)
+
+        self.assertEquals(root._scripts[0], style)
+        self.assertEquals(
+            root.getChildWithDefault(
+                style.prefix, DummyRequest([''])).basename(),
+            style.name
+        )
+
+    def test_page_register_controllers(self):
+
+        root = page.Page(self.get_commons())
+        mgr = controller.ControllerManager()
+        self.addCleanup(mgr.notifier.loseConnection)
+        sys.path.append('../mamba/test')
+        mgr.load('../mamba/test/application/controller/dummy.py')
+
+        root._controllers_manager = mgr
+        root.register_controllers()
+
+        self.assertIdentical(
+            root.getChildWithDefault('dummy', DummyRequest([''])),
+            mgr.lookup('dummy')['object']
         )
 
 

@@ -1,4 +1,4 @@
-# -*- test-case-name: mamba.utils.test.test_converter -*-
+# -*- test-case-name: mamba.test.test_converter -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 

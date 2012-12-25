@@ -1,4 +1,4 @@
-# -*- test-case-name: mamba.utils.test.test_camelcase -*-
+# -*- test-case-name: mamba.test.test_camelcase -*-
 # Copyright (c) 2012 - Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 
@@ -18,7 +18,6 @@ class CamelCase(object):
 
     :param camelize: the string to camelize
     :type camelize: str
-    .. versionadded:: 0.1
     """
 
     def __init__(self, camelize):
@@ -32,7 +31,6 @@ class CamelCase(object):
 
         :param union: if true is will use a space between words
         :type union: bool
-        .. versionadded:: 0.1
         """
 
         if not union:

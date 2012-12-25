@@ -102,7 +102,7 @@ class Route(object):
 
         :param dispatcher: the dispatcher object that containing the
                            information to validate
-        :type dispatcher: :class:`~mamba.web.routing.RouteDispatcher`
+        :type dispatcher: :class:`~mamba.web.RouteDispatcher`
         """
 
         group = self.match.search(dispatcher.url)
@@ -165,7 +165,7 @@ class Router(object):
         Dispatch a route and return back the appropiate response.
 
         :param controller: the mamba controller
-        :type controller: :class:`~mamba.application.controller.Controller`
+        :type controller: :class:`~mamba.Controller`
         :param request: the HTTP request
         :type request: :class:`twisted.web.server.Request`
         """
@@ -216,7 +216,7 @@ class Router(object):
         Install all the routes in a controller.
 
         :param controller: the controller where to fid routes
-        :type controller: :class:`~mamba.application.controller.Controller`
+        :type controller: :class:`~mamba.Controller`
         """
 
         for func in inspect.getmembers(controller, predicate=inspect.ismethod):
@@ -261,12 +261,12 @@ class Router(object):
 
     def register_route(self, controller, route):
         """
-        Register a route for the given controller
+        Decorator that register a route for the given controller
 
         :param controller: the controller where to register the route
-        :type controller: :class:`~mamba.application.controller.Controller`
-        :param : the Route to register
-        :type route: :class:`~mamba.web.routing.Route`
+        :type controller: :class:`~mamba.Controller`
+        :param route: the :class:`~mamba.Route` to register
+        :type route: :class:`~mamba.web.Route`
         """
 
         controller_name = controller.__class__.__name__

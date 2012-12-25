@@ -43,3 +43,4 @@ nosetests.xml
 _trial_temp/
 sql/
 release/
+docs/_build/

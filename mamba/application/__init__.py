@@ -10,18 +10,20 @@
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 """
 
-from mamba.application.app import Application, _app_ver
-from mamba.application.controller import (
+from .app import Mamba, ApplicationError, _app_ver
+from .controller import (
     Controller, ControllerManager, ControllerProvider, ControllerError
 )
-from mamba.application.appstyles import AppStyles
+from .appstyles import AppStyles
+from .model import Model
 from mamba.web.routing import Router
 
 route = Router().route
 
 __all__ = [
-    'Application', '_app_ver',
+    'Mamba', 'ApplicationError', '_app_ver',
     'Controller', 'ControllerManager', 'ControllerProvider', 'ControllerError',
     'AppStyles',
+    'Model',
     'route'
 ]

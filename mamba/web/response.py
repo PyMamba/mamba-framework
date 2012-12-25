@@ -1,4 +1,4 @@
-# -*- test-case-name: mamba.web.test.test_response -*-
+# -*- test-case-name: mamba.test.test_response -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 
@@ -24,6 +24,14 @@ from mamba.core.interfaces import IResponse
 class Response(object):
     """
     Mamba web request response base dummy object
+
+    :param code: the HTML code for the response
+    :type code: int
+    :param subject: the subject body of he response
+    :type subject: :class:`~mamba.web.Response` or dict or str
+    :param headers: the HTTP headers to return back in the response to the
+                    browser
+    :type headers: dict or a list of dicts
     """
 
     def __init__(self, code, subject, headers):
@@ -47,6 +55,12 @@ class Response(object):
 class Ok(Response):
     """
     Ok 200 HTTP Response
+
+    :param subject: the subject body of he response
+    :type subject: :class:`~mamba.web.Response` or dict or str
+    :param headers: the HTTP headers to return back in the response to the
+                    browser
+    :type headers: dict or a list of dicts
     """
 
     implements(IResponse)
@@ -58,6 +72,12 @@ class Ok(Response):
 class BadRequest(Response):
     """
     BadRequest 400 HTTP Response
+
+    :param subject: the subject body of he response
+    :type subject: :class:`~mamba.web.Response` or dict or str
+    :param headers: the HTTP headers to return back in the response to the
+                    browser
+    :type headers: dict or a list of dicts
     """
 
     implements(IResponse)
@@ -69,6 +89,12 @@ class BadRequest(Response):
 class NotFound(Response):
     """
     Error 404 Not Found HTTP Response
+
+    :param subject: the subject body of he response
+    :type subject: :class:`~mamba.web.Response` or dict or str
+    :param headers: the HTTP headers to return back in the response to the
+                    browser
+    :type headers: dict or a list of dicts
     """
 
     implements(IResponse)
@@ -83,6 +109,12 @@ class NotFound(Response):
 class Conflict(Response):
     """
     Error 409 Conflict found
+
+    :param subject: the subject body of he response
+    :type subject: :class:`~mamba.web.Response` or dict or str
+    :param value: the value of the conflicted operatio
+    :param message: a customer user messahe for the response
+    :type message: str
     """
 
     implements(IResponse)
@@ -104,6 +136,12 @@ class Conflict(Response):
 class AlreadyExists(Conflict):
     """
     Error 409 Conflict found in POST
+
+    :param subject: the subject body of he response
+    :type subject: :class:`~mamba.web.Response` or dict or str
+    :param value: the value of the conflicted operatio
+    :param message: a customer user messahe for the response
+    :type message: str
     """
 
     implements(IResponse)
@@ -122,6 +160,10 @@ class AlreadyExists(Conflict):
 class InternalServerError(Response):
     """
     Error 500 Internal Server Error
+
+    :param message: a user custom message with a description of the nature
+                    of the error
+    :type message: str
     """
 
     implements(IResponse)
@@ -137,6 +179,11 @@ class InternalServerError(Response):
 class NotImplemented(Response):
     """
     Error 501 Not Implemented
+
+    :param url: the URL that is not implemented
+    :type url: str
+    :param message: a user custom message describing the problem
+    :type message: str
     """
 
     def __init__(self, url, message=''):

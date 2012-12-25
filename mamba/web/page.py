@@ -3,7 +3,7 @@
 # Ses LICENSE for more details
 
 """
-.. module: stylesheet
+.. module: page
     :platform: Unix, Windows
     :synopsis: The Page object is the main web application entry point
 
@@ -19,25 +19,29 @@ from mamba.http import headers
 
 class Page(resource.Resource):
     """
-    This is the mamba root resource for Applications.
+    This represents a full web page in mamba applications. It's usually
+    the root page of your web site/application.
 
-    :param options: The Mamba options for the Page content
-    :type options: dict
+    TODO: Reimplement this class to use Jinja2 templating system and a
+    better and more flexible way of add/render scripts, styles and content.
+
+    :param app: The Mamba Application that implements this page
+    :type app: :class:`~mamba.application.app.Application`
     """
-
-    _options = {
-        'doctype': 'html-html5',     # HTML5 by default
-        'meta': []
-    }
-
-    _header = headers.Headers()
-    _resources_manager = None
-    _controllers_manager = None
-    _stylesheets = []
-    _scripts = []
 
     def __init__(self, app):
         resource.Resource.__init__(self)
+
+        self._options = {
+            'doctype': 'html-html5',     # HTML5 by default
+            'meta': []
+        }
+
+        self._header = headers.Headers()
+        self._resources_manager = None
+        self._controllers_manager = None
+        self._stylesheets = []
+        self._scripts = []
 
         self._options.update({
             'title': app.name,
@@ -59,7 +63,7 @@ class Page(resource.Resource):
         self.register_controllers()
 
     def getChild(self, path, request):
-        """L{twisted.web.resource.Resource.getChild} overwrite"""
+        """twisted.web.resource.Resource.getChild overwrite"""
 
         if path == '' or path is None or path == 'index' or path == 'app':
             return self
@@ -116,7 +120,7 @@ class Page(resource.Resource):
         """Adds a script to the page"""
 
         self._scripts.append(script)
-        self.putChild(script.get_prefix(), static.File(script.get_path()))
+        self.putChild(script.prefix, static.File(script.path))
 
     def register_controllers(self):
         """Add a child for each controller in the ControllerManager"""

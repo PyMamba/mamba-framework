@@ -46,8 +46,6 @@ class IController(Interface):
     Manba Controllers interface.
 
     Every controller will implement this interface
-
-    .. versionadded:: 0.1
     """
 
     name = Attribute(

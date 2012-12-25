@@ -11,60 +11,54 @@
 
 """
 
-__all__ = ['ExtensionPoint']
-
 
 class ExtensionPoint(type):
     """
     Extensions mount point
 
     This class serves 3 purposes:
-        1) A way to declare a mount point for plugins or extensions point.
-        2) A way to register a plugin in a particular mount point.
-        3) A way to retrieve the plugins that have been registered.
 
-        The system works by declaring classes that server as mount points.
-        Since I subclass 'type' I can be used as a metaclass, for example:
+        1. A way to declare a mount point for plugins or extensions point.
+        2. A way to register a plugin in a particular mount point.
+        3. A way to retrieve the plugins that have been registered.
 
-        Example::
-            class ShareProvider:
-                '''
-                Mount point for plugins which refer to share services that can
-                be used.
+    The system works by declaring classes that serves as mount points.
+    Since I subclass ``type`` I can be used as a metaclass, for example::
 
-                Plugins implementing this reference should provide the
-                following attributes:
+        class ShareProvider:
+            '''
+            Mount point for plugins which refer to share services that can
+            be used.
 
-                =========== ===================================================
-                name        Share service name
-                url         The URL to connect with the service
-                username    The username which connect to the service
-                password    The user password
-                API_key     The API Key to use with the service
-                =========== ===================================================
+            Plugins implementing this reference should provide the
+            following attributes:
 
-                '''
-                __metaclass__ = ExtensionPoint
+            =========== ===================================================
+            name        Share service name
+            url         The URL to connect with the service
+            username    The username which connect to the service
+            password    The user password
+            API_key     The API Key to use with the service
+            =========== ===================================================
+
+            '''
+            __metaclass__ = ExtensionPoint
 
 
-        Then we can subclass those mount points in order to define plugins.
-        As the plugin will also inherits from the metaclass, they will be
-        auto registered just for subclassing the provider. Example:
+    Then we can subclass those mount points in order to define plugins.
+    As the plugin will also inherits from the metaclass, they will be
+    auto registered just for subclassing the provider::
 
-        Example::
-            class Twitter(ShareProvider):
-                name = 'Twitter'
-                url = 'http://api.twitter.com/'
-                ...
+        class Twitter(ShareProvider):
+            name = 'Twitter'
+            url = 'http://api.twitter.com/'
+            ...
 
-        We can register any Share provider plugin just subclassing from the
-        ShareProvider class and then use it to share our contents:
+    We can register any Share provider plugin just subclassing from the
+    ShareProvider class and then use it to share our contents::
 
-        Example::
-            for share_service in ShareProvider.plugins:
-                share_service().share(SharedObject)
-
-        .. versionadded:: 0.1.0
+        for share_service in ShareProvider.plugins:
+            share_service().share(SharedObject)
     """
 
     def __init__(mcs, name, bases, attrs):
@@ -83,3 +77,6 @@ class ExtensionPoint(type):
             mcs.plugins = []
         else:
             mcs.plugins.append(mcs)
+
+
+__all__ = ['ExtensionPoint']

@@ -22,9 +22,6 @@ from mamba.core.interfaces import INotifier
 from mamba.utils import filevariables
 
 
-__all__ = ['StylesheetError', 'Stylesheet', 'StylesheetManager']
-
-
 class StylesheetError(Exception):
     """Generic class for Stylesheet exceptions"""
 
@@ -44,6 +41,11 @@ class FileDontExists(StylesheetError):
 class Stylesheet(object):
     """
     Object that represents an stylesheet or a less script
+
+    :param path: the path of the stylesheet
+    :type path: str
+    :param prefix: the prefix where the stylesheets reside
+    :type prefix: str
     """
 
     def __init__(self, path='', prefix='styles'):
@@ -138,16 +140,20 @@ class StylesheetManager(object):
         self._stylesheets.update({style.name: style})
 
     def reload(self, style):
-        """
-        Reload a given script.
+        """Send a COMET / WebSocket petition to reload a specific CSS file.
 
-        This method just send a COMET / WebSocket petition to reload a
-        specific CSS file.
+        :param style: the CSS file to reload
+        :type style: :class:`~mamba.application.appstyle.AppStyle`
 
         JavaScript to use:
+
+        .. sourcecode:: javascript
+
             var queryString = '?reload=' + new Date().getTime();
             // ExtJS - Sencha
             var el = Ext.get(styleName);
+            // jQuery
+            var el = $(styleName);
             // LungoJS
             var el = $$(styleName);
 
@@ -178,3 +184,6 @@ class StylesheetManager(object):
         if mask is inotify.IN_CREATE:
             if file_path.exists():
                 self.load(file_path)
+
+
+__all__ = ['StylesheetError', 'Stylesheet', 'StylesheetManager']
