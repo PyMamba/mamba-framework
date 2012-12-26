@@ -10,13 +10,22 @@ from twisted.trial import unittest
 from twisted.python.threadpool import ThreadPool
 from doublex import Spy, assert_that, called, ANY_ARG
 
-from mamba.enterprise import DatabaseManager
+from storm.locals import Store
+
+from mamba.utils import config
+from mamba.enterprise import Database
 
 
-class DatabaseManagerTest(unittest.TestCase):
+class DatabaseTest(unittest.TestCase):
 
     def setUp(self):
-        self.database = DatabaseManager(self.get_pool())
+        config.Database().load(
+            '../mamba/test/application/config/database.json'
+        )
+        self.database = Database(self.get_pool())
+
+    def tearDown(self):
+        self.database.pool.stop()
 
     def get_pool(self):
 
@@ -28,12 +37,12 @@ class DatabaseManagerTest(unittest.TestCase):
 
     def test_database_initial_name_is_database_pool(self):
 
-        database = DatabaseManager()
-        self.assertEqual(database.pool.name, 'DatabaseManagerPool')
+        database = Database()
+        self.assertEqual(database.pool.name, 'DatabasePool')
 
     def test_databse_initial_pool_size_is_five_and_twenty_five(self):
 
-        database = DatabaseManager()
+        database = Database()
         self.assertEqual(database.pool.min, 5)
         self.assertEqual(database.pool.max, 20)
 
@@ -103,3 +112,7 @@ class DatabaseManagerTest(unittest.TestCase):
 
         self.database.pool = ThreadPool(0, 10)
         self.assertRaises(AssertionError, self.database.adjust_poolsize, 20)
+
+    def test_database_store(self):
+        store = self.database.store()
+        self.assertIsInstance(store, Store)

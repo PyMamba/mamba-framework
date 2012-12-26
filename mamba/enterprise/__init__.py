@@ -6,6 +6,6 @@ __doc__ = '''
 Subpackage containing the modules that implement database abstraction layer
 '''
 
-from .database import DatabaseManager
+from .database import Database
 
 __all__ = ['DatabaseManager']

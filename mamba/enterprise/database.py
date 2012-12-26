@@ -4,22 +4,25 @@
 
 """
 .. module:: database
-    :platform: Linux
-    :synopsis: Database abstraction.
+    :platform: Unix, Windows
+    :synopsis: Storm ORM Database implementation for Mamba
 
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 
 """
 
+from twisted.python import log
+from storm.zope.interfaces import IZStorm
+from storm.zope.zstorm import global_zstorm
 from twisted.python.threadpool import ThreadPool
+from zope.component import provideUtility, getUtility
 
-from mamba import plugin
-from mamba.utils import borg
+from mamba.utils import config
 
 
-class DatabaseManager(borg.Borg):
+class Database(object):
     """
-    Database abstraction.
+    Storm ORM database provider for Mamba.
 
     :param pool: the thrad pool for this database
     :type pool: :class:`twisted.python.threadpool.ThreadPool`
@@ -27,10 +30,14 @@ class DatabaseManager(borg.Borg):
 
     def __init__(self, pool=None):
         if pool is None:
-            pool = ThreadPool(name='DatabaseManagerPool')
+            pool = ThreadPool(name='DatabasePool')
 
         self.pool = pool
         self.started = False
+
+        provideUtility(global_zstorm, IZStorm)
+        self.zstorm = getUtility(IZStorm)
+        self.zstorm.set_default_uri('main', config.Database().uri)
 
     def start(self):
         """Starts the Database (and the threadpool)"""
@@ -62,13 +69,16 @@ class DatabaseManager(borg.Borg):
 
         self.pool.adjustPoolsize(min_threads, max_threads)
 
+    def store(self, model=None):
+        """
+        Returns a Store per-thread through :class:`storm.zope.zstorm.ZStorm`
 
-class DatabaseProvider:
-    """
-    Mount point for database plugins.
+        :param model: the registered per-model store, if None main store is
+                      returned
+        :type model: :class:`~mamba.application.model.Model`
+        """
 
-    Database Plugins implementing this reference should implements the
-    IDatabaseProvider interface
-    """
+        if model is None:
+            return self.zstorm.get('main')
 
-    __metaclass__ = plugin.ExtensionPoint
+        return self.zstorm.get(model.__class__.__name__, model.uri)
