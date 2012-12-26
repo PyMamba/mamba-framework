@@ -11,11 +11,9 @@
 
 """
 
-from zope.component import provideUtility, getUtility
-import transaction
-from storm.zope.interfaces import IZStorm
-from storm.zope.zstorm import global_zstorm
 from storm.twisted.transact import Transactor, transact
+
+from mamba.enterprise import Database
 
 
 class Model(object):
@@ -38,4 +36,62 @@ class Model(object):
     different instances of :class:`~storm.locals.Store` per thread for us.
     """
 
-    pass
+    database = Database()
+
+    def __init__(self):
+        super(Model, self).__init__()
+
+        if not self.database.started:
+            self.database.start()
+
+        self.transactor = Transactor(self.database.pool)
+
+    @transact
+    def create(self):
+        """
+        Create a new register in the database
+        """
+
+        store = self.database.store(self)
+        store.add(self)
+
+    @transact
+    def read(self, id):
+        """
+        Read a register from the database. The give key (usually ID) should
+        be a primery key.
+
+        :param id: the ID to get from the database
+        :type id: int
+        """
+
+        store = self.database.store(self)
+        data = store.get(self, id)
+
+        return data
+
+    @transact
+    def update(self):
+        """
+        Update a register in the database
+        """
+
+        store = self.database.store(self)
+        store.commit()
+
+    @transact
+    def delete(self):
+        """
+        Delete a register from the database
+        """
+
+        store = self.database.store(self)
+        store.remove(self)
+
+    @property
+    def uri(self):
+        """
+        Returns the database URI for this model
+        """
+
+        return self.__uri__
