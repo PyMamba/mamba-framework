@@ -33,7 +33,7 @@ class UrlRegex(object):
     Common static URL regex
     """
 
-    url_matcher = re.compile(r'<(int|float|bool|):?([^/]+)>')
+    url_matcher = re.compile(r'<(int|float|):?([^/]+)>')
     type_regex = {
         'int': r'(?P<type>\d+)',
         'float': r'(?P<type>\d+.?\d*)',
