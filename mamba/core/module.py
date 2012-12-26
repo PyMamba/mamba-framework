@@ -15,7 +15,6 @@ import re
 from collections import OrderedDict
 
 from zope.interface import implements
-from twisted.python import rebuild
 from twisted.python import filepath
 from twisted.internet import inotify
 from twisted.python._inotify import INotifyError
