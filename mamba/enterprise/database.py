@@ -11,7 +11,6 @@
 
 """
 
-from twisted.python import log
 from storm.zope.interfaces import IZStorm
 from storm.zope.zstorm import global_zstorm
 from twisted.python.threadpool import ThreadPool
@@ -78,7 +77,7 @@ class Database(object):
         :type model: :class:`~mamba.application.model.Model`
         """
 
-        if model is None:
+        if model is None or model.uri is None:
             return self.zstorm.get('main')
 
         return self.zstorm.get(model.__class__.__name__, model.uri)

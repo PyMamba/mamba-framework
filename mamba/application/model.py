@@ -1,4 +1,4 @@
-# -*- test-case-name: mamba.test.test_mamba -*-
+# -*- test-case-name: mamba.test.test_model -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
 # See LICENSE for more details
 
@@ -66,7 +66,8 @@ class Model(object):
         """
 
         store = self.database.store(self)
-        data = store.get(self, id)
+        data = store.get(self.__class__, id)
+        data.transactor = self.transactor
 
         return data
 
@@ -94,4 +95,7 @@ class Model(object):
         Returns the database URI for this model
         """
 
-        return self.__uri__
+        if hasattr(self, '__uri__'):
+            return self.__uri__
+
+        return None
