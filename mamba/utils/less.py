@@ -10,7 +10,7 @@ import os
 
 from twisted.python import filepath
 from twisted.web import resource, server
-from twisted.internet import utils, defer
+from twisted.internet import utils
 
 
 class LessResource(resource.Resource):
