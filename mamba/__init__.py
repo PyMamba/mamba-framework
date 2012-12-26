@@ -16,6 +16,14 @@ import sys
 
 if not hasattr(sys, "version_info") or sys.version_info < (2, 7):
     raise RuntimeError("Mamba requires Python 2.7 or later.")
+
+# Fast Fix for PyPy incompatibilities with Storm cextesions
+if '__pypy__' in sys.modules:
+    # we are running on PyPy interpreter make sure we don't use the
+    # Storm C extensions that make PyPy cpyext crash
+    import os
+    os.environ.update({'STORM_CEXTENSIONS': '0'})
+
 del sys
 
 # setup version
@@ -26,6 +34,7 @@ from .application import Mamba, ApplicationError
 from .application import AppStyles
 from .application import Controller, ControllerManager
 from .application import Model
+from .enterprise import Database
 from plugin import ExtensionPoint
 
 
@@ -33,5 +42,6 @@ __all__ = [
     'Mamba', 'ApplicationError', 'AppStyles',
     'Controller', 'ControllerManager',
     'ExtensionPoint',
-    'Model'
+    'Model',
+    'Database'
 ]
