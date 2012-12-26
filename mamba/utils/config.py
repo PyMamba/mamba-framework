@@ -1,0 +1,136 @@
+# -*- test-case-name: mamba.test.test_config -*-
+# Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
+# See LICENSE for more details
+
+"""
+.. module:: configuration
+    :platform: Unix, Windows
+    :synopsis: JSON Configuration parser
+
+.. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
+
+"""
+
+import json
+
+from twisted.python import filepath, log
+
+from mamba.utils import borg, output
+
+
+class BaseConfig(borg.Borg):
+    """
+    Base Configuration object
+    """
+
+    def __init__(self):
+        super(BaseConfig, self).__init__()
+        if not hasattr(self, 'loaded'):
+            self.loaded = False
+
+    def load(self, config_file=''):
+        file_desc = filepath.FilePath(config_file)
+        try:
+            with file_desc.open('r') as fd:
+                try:
+                    for key, value in json.loads(fd.read()).iteritems():
+                        setattr(self, key.lower(), value)
+                    self.loaded = True
+                except ValueError:
+                    self._defaults()
+                    if self.loaded:
+                        self.loaded = False
+
+                    log.err(
+                        output.red(
+                            '{}: Invalid config file {}, falling back to '
+                            'default settings {}'.format(
+                                self.__class__.__name__, config_file, self
+                            )
+                        )
+                    )
+        except IOError:
+            if not self.loaded or config_file in ['clean', 'default']:
+                self._defaults()
+                if self.loaded:
+                    self.loaded = False
+
+
+class Database(BaseConfig):
+    """
+    Database configuration object
+
+    This object load and parses the configuration details for the database
+    access using a JSON configuration file with this format:
+
+     .. sourcecode:: json
+
+        {
+            'uri': 'sqlite:',
+            'min_threads': 5,
+            'max_threads': 20,
+            'auto_adjust_pool_size': false
+        }
+
+    Where uri is the Storm URI format for create ZStores and min, max threads
+    are the minimum and maximum threads in the thread pool for operate with
+    the database. If auto_adjust_pool_size is True, the size of the thread
+    pool should be adjust dynamically.
+
+    If no config_file or invalid config_file is given at first load attempt,
+    then a fallback default settings with a SQLite in memory table are
+    returned back.
+
+    If you loaded a valid config file and you instance the database config
+    again with an invalid JSON format file, then a fallback default settings
+    with SQLite in memory URI is returned back in order to preserve your
+    data (if we don't fallback to a default configuration you can overwrite
+    important data in your previous well configured environment).
+
+    If you loaded a valid config file and pass a non existent or a void
+    file in the constructor you get back your previous config so you can
+    use it like a singleton instance::
+
+        config.Database('path/to/my_valid/config.json')
+        ...
+        cfg = config.Database()
+
+
+    If you want to clear your config and return it back to a default
+    state you should pass 'clean' or 'default' as parameter::
+
+        config.Database('default')
+
+    :param config_file: the file to load the configuration from, it can (and
+                        should) be empty to get back the previous configured
+                        data
+    :type config_file: str
+    """
+
+    def __init__(self, config_file=''):
+        super(Database, self).__init__()
+        self.load(config_file)
+
+    def _defaults(self):
+        """Set default data to config"""
+        self.uri = 'sqlite:'
+        self.min_threads = 0
+        self.max_threads = 10
+        self.auto_adjust_pool_size = False
+
+    def __repr__(self):
+        return 'config.Database(%s)' % (
+            ', '.join(map(repr, [self.uri, self.min_threads, self.max_threads,
+            self.auto_adjust_pool_size]))
+        )
+
+
+class NoSQL(BaseConfig):
+    """
+    """
+
+    def __init__(self):
+        super(NoSQL, self).__init__()
+
+    def _defaults(self):
+        self.uri = 'pollas'
