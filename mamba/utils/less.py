@@ -34,7 +34,7 @@ class LessResource(resource.Resource):
             """
             Write result from callback
             """
-            request.write(resp)
+            request.write(bytes(resp))
             request.finish()
 
         d.addCallback(cb_sendback)
