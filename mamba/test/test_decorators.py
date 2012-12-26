@@ -28,12 +28,12 @@ class TestDecorators(unittest.TestCase):
 
             return a * b
 
-        self.assertEquals(multiplication(2, 2), 4)
-        self.assertEquals(hit_count, 1)
-        self.assertEquals(multiplication(2, 2), 4)
-        self.assertEquals(hit_count, 1)
-        self.assertEquals(multiplication(4, 4), 16)
-        self.assertEquals(hit_count, 2)
+        self.assertEqual(multiplication(2, 2), 4)
+        self.assertEqual(hit_count, 1)
+        self.assertEqual(multiplication(2, 2), 4)
+        self.assertEqual(hit_count, 1)
+        self.assertEqual(multiplication(4, 4), 16)
+        self.assertEqual(hit_count, 2)
 
     def test_cache_limit_works(self):
         global hit_count
@@ -46,14 +46,14 @@ class TestDecorators(unittest.TestCase):
             return bytearray(1024 * 1024)
 
         eat_memory(1)
-        self.assertEquals(hit_count, 1)
+        self.assertEqual(hit_count, 1)
         eat_memory(1)
-        self.assertEquals(hit_count, 1)
+        self.assertEqual(hit_count, 1)
         eat_memory(2)
-        self.assertEquals(hit_count, 2)
+        self.assertEqual(hit_count, 2)
         eat_memory(3)
-        self.assertEquals(hit_count, 3)
+        self.assertEqual(hit_count, 3)
         eat_memory(4)
-        self.assertEquals(hit_count, 4)
+        self.assertEqual(hit_count, 4)
         eat_memory(1)
-        self.assertEquals(hit_count, 5)
+        self.assertEqual(hit_count, 5)

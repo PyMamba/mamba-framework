@@ -113,7 +113,7 @@ class StylesheetManagerTest(unittest.TestCase):
         self.mgr.reload('dummy.less')
 
     def test_lookup_returns_none_on_unknown_syles(self):
-        self.assertEquals(self.mgr.lookup('unknown'), None)
+        self.assertEqual(self.mgr.lookup('unknown'), None)
 
     def test_lookup_returns_an_style_object(self):
         self.load_style()
@@ -203,7 +203,7 @@ class PageTest(unittest.TestCase):
         root = page.Page(self.get_commons())
         root.add_meta('Content-type: "plain/html"')
 
-        self.assertEquals(
+        self.assertEqual(
             root._options['meta'],
             ['Content-type: "plain/html"']
         )
@@ -216,8 +216,8 @@ class PageTest(unittest.TestCase):
         )
         root.add_script(style)
 
-        self.assertEquals(root._scripts[0], style)
-        self.assertEquals(
+        self.assertEqual(root._scripts[0], style)
+        self.assertEqual(
             root.getChildWithDefault(
                 style.prefix, DummyRequest([''])).basename(),
             style.name
@@ -245,18 +245,18 @@ class RouteTest(unittest.TestCase):
     def test_compile(self):
         route = Route('GET', '/test', lambda ignore: 'Test Done')
         route.compile()
-        self.assertEquals(route.match.pattern, '^/test$')
+        self.assertEqual(route.match.pattern, '^/test$')
         route.url = '/test/<int:userId>'
         route.compile()
-        self.assertEquals(route.match.pattern, '^/test/(?P<userId>\\d+)$')
+        self.assertEqual(route.match.pattern, '^/test/(?P<userId>\\d+)$')
         route.url = '/test/<float:userId>'
         route.compile()
-        self.assertEquals(
+        self.assertEqual(
             route.match.pattern, '^/test/(?P<userId>\\d+.?\\d*)$'
         )
         route.url = '/test/<userName>'
         route.compile()
-        self.assertEquals(route.match.pattern, '^/test/(?P<userName>([^/]+))$')
+        self.assertEqual(route.match.pattern, '^/test/(?P<userName>([^/]+))$')
 
     def test_validate(self):
         route = Route('GET', '/test/<int:uderId>', lambda ignore: 'Test Done')
@@ -265,12 +265,12 @@ class RouteTest(unittest.TestCase):
         with Stub() as dispatcher:
             dispatcher.url = '/test/102'
 
-        self.assertEquals(route.validate(dispatcher), route)
+        self.assertEqual(route.validate(dispatcher), route)
 
         with Stub() as dispatcher:
             dispatcher.url = '/test'
 
-        self.assertEquals(route.validate(dispatcher), None)
+        self.assertEqual(route.validate(dispatcher), None)
 
     def test__call__(self):
 
@@ -282,7 +282,7 @@ class RouteTest(unittest.TestCase):
             dispatcher.url = '/test/102/10.1/test'
 
         r = route.validate(dispatcher)
-        self.assertEquals(r(controller, None), 'User 102 10.1 test')
+        self.assertEqual(r(controller, None), 'User 102 10.1 test')
 
 
 class RouterTest(unittest.TestCase):
@@ -343,8 +343,8 @@ class RouterTest(unittest.TestCase):
 
         result = yield StubController().render(request)
         self.assertIsInstance(result, response.Ok)
-        self.assertEquals(result.subject, 'Plain Text')
-        self.assertEquals(result.headers, {'content-type': 'text/plain'})
+        self.assertEqual(result.subject, 'Plain Text')
+        self.assertEqual(result.headers, {'content-type': 'text/plain'})
 
     @defer.inlineCallbacks
     def test_dispatch_route_returns_text_html_on_html_resturning_route(self):
@@ -354,8 +354,8 @@ class RouterTest(unittest.TestCase):
 
         result = yield StubController().render(request)
         self.assertIsInstance(result, response.Ok)
-        self.assertEquals(result.subject, '<h1>HTML Text</h1>')
-        self.assertEquals(result.headers, {'content-type': 'text/html'})
+        self.assertEqual(result.subject, '<h1>HTML Text</h1>')
+        self.assertEqual(result.headers, {'content-type': 'text/html'})
 
     @defer.inlineCallbacks
     def test_dispatch_route_returns_json_on_response_object(self):
@@ -370,8 +370,8 @@ class RouterTest(unittest.TestCase):
 
         result = yield StubController().render(request)
         self.assertIsInstance(result, response.Ok)
-        self.assertEquals(result.headers, {'content-type': 'application/json'})
-        self.assertEquals(result.subject, {
+        self.assertEqual(result.headers, {'content-type': 'application/json'})
+        self.assertEqual(result.subject, {
             'name': 'Person', 'interests': 'Testing', 'age': 30
         })
 
@@ -384,8 +384,8 @@ class RouterTest(unittest.TestCase):
 
         result = yield StubController().render(request)
         self.assertIsInstance(result, response.Ok)
-        self.assertEquals(result.headers, {'content-type': 'application/json'})
-        self.assertEquals(result.subject, {
+        self.assertEqual(result.headers, {'content-type': 'application/json'})
+        self.assertEqual(result.subject, {
             'name': 'Person', 'interests': 'Testing', 'age': 30
         })
 
@@ -463,7 +463,7 @@ class TestRouteDispatcher(unittest.TestCase):
         route_dispatcher = RouteDispatcher(
             Router(), StubController(), DummyRequest(['////test///one///'])
         )
-        self.assertEquals(route_dispatcher.url, '/test/one')
+        self.assertEqual(route_dispatcher.url, '/test/one')
 
     def test_lookup_returns_route(self):
 
@@ -481,7 +481,7 @@ class TestRouteDispatcher(unittest.TestCase):
             Router(), StubController(), DummyRequest(['/test'])
         )
 
-        self.assertEquals(route_dispatcher.lookup(), None)
+        self.assertEqual(route_dispatcher.lookup(), None)
 
     def test_lookup_returns_not_implemented_on_valid_url_invalid_method(self):
 
@@ -491,7 +491,7 @@ class TestRouteDispatcher(unittest.TestCase):
         router.install_routes(controller)
         route_dispatcher = RouteDispatcher(router, controller, request)
 
-        self.assertEquals(route_dispatcher.lookup(), 'NotImplemented')
+        self.assertEqual(route_dispatcher.lookup(), 'NotImplemented')
 
 
 class Collaborator(object):

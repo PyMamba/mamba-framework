@@ -21,25 +21,25 @@ class TestCamelCase(unittest.TestCase):
         self.camel_unicode = camelcase.CamelCase(u'test case')
 
     def test_camelcase(self):
-        self.assertEquals(self.camel.camelize(), 'Test Case')
+        self.assertEqual(self.camel.camelize(), 'Test Case')
 
     def test_camelcase_union(self):
-        self.assertEquals(self.camel.camelize(True), 'TestCase')
+        self.assertEqual(self.camel.camelize(True), 'TestCase')
 
     def test_camelcase_tuple(self):
-        self.assertEquals(self.camel_tuple.camelize(), 'Test Case')
+        self.assertEqual(self.camel_tuple.camelize(), 'Test Case')
 
     def test_camelcase_tuple_union(self):
-        self.assertEquals(self.camel_tuple.camelize(True), 'TestCase')
+        self.assertEqual(self.camel_tuple.camelize(True), 'TestCase')
 
     def test_camelcase_list(self):
-        self.assertEquals(self.camel_list.camelize(), 'Test Case')
+        self.assertEqual(self.camel_list.camelize(), 'Test Case')
 
     def test_camelcase_list_union(self):
-        self.assertEquals(self.camel_list.camelize(True), 'TestCase')
+        self.assertEqual(self.camel_list.camelize(True), 'TestCase')
 
     def test_camelcase_unicode(self):
-        self.assertEquals(self.camel_unicode.camelize(), u'Test Case')
+        self.assertEqual(self.camel_unicode.camelize(), u'Test Case')
 
     def test_camelcase_unknown_type_raises(self):
         camel = camelcase.CamelCase({'test': 'case'})

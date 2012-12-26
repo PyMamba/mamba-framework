@@ -34,4 +34,4 @@ class PluginTest(unittest.TestCase):
 
     def test_extension_points(self):
         for dummy in DummyProviderTest.plugins:
-            self.assertEquals(dummy().get_name(), 'Dumb')
+            self.assertEqual(dummy().get_name(), 'Dumb')

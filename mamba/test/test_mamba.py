@@ -9,11 +9,11 @@ Tests for L{mamba.application.app} and L{mamba.scripts.mamba}
 from twisted.trial import unittest
 from twisted.web import resource
 
-from mamba.test.application.controller import dummy
-from mamba.application import controller
-from mamba.plugin import ExtensionPoint
-from mamba.core import interfaces
 from mamba import __version__
+from mamba.core import interfaces
+from mamba.plugin import ExtensionPoint
+from mamba.application import controller
+from mamba.test.application.controller import dummy
 
 
 class MambaTest(unittest.TestCase):
@@ -31,7 +31,10 @@ class MambaTest(unittest.TestCase):
         self.assertEqual(__version__, '0.1.0')
 
     def test_controller_provider(self):
-        self.assertTrue(controller.ControllerProvider, ExtensionPoint)
+        self.assertEqual(
+            controller.ControllerProvider.__metaclass__.__name__,
+            ExtensionPoint.__name__
+        )
 
     def test_dummy_controller_inherits_resource(self):
         self.assertTrue(issubclass(dummy.DummyController, resource.Resource))

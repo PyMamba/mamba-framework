@@ -31,22 +31,22 @@ class ConverterTest(unittest.TestCase):
     def test_converts_primitives_to_json(self):
         for t in set(Converter.primitives + Converter.containers):
             if t is str or t is unicode:
-                self.assertEquals(
+                self.assertEqual(
                     json.dumps(self.test_data[t]),
                     '"{}"'.format(self.test_data[t])
                 )
             elif t is bool:
-                self.assertEquals(
+                self.assertEqual(
                     json.dumps(self.test_data[t]),
                     str(self.test_data[t]).lower()
                 )
             elif t is tuple:
-                self.assertEquals(
+                self.assertEqual(
                     json.dumps(self.test_data[t]),
                     str(list(self.test_data[t]))
                 )
             else:
-                self.assertEquals(
+                self.assertEqual(
                     json.dumps(self.test_data[t]), str(self.test_data[t]))
 
     def test_convert_object_to_json(self):
@@ -65,7 +65,7 @@ class ConverterTest(unittest.TestCase):
         }
         c2 = Collaborator()
 
-        self.assertEquals(Converter.serialize(c1), Converter.serialize(c2))
+        self.assertEqual(Converter.serialize(c1), Converter.serialize(c2))
 
         class Collaborator2(object):
             name = 'Collaborator'
@@ -75,4 +75,4 @@ class ConverterTest(unittest.TestCase):
 
         c3 = Collaborator2()
 
-        self.assertEquals(Converter.serialize(c1), Converter.serialize(c3))
+        self.assertEqual(Converter.serialize(c1), Converter.serialize(c3))

@@ -118,7 +118,7 @@ class LessCompilerTests(unittest.TestCase):
 
         retval = yield lc.compile()
 
-        self.assertEquals(
+        self.assertEqual(
             filepath.FilePath(self.file.name).getContent().decode('utf-8'),
             retval
         )
@@ -153,7 +153,7 @@ class LessResourceTest(unittest.TestCase):
         lc = less.LessCompiler(self.fd.name)
         retval = yield lc.compile()
 
-        self.assertEquals(retval, result)
+        self.assertEqual(retval, result)
 
     def _render(self, resource, request):
         result = resource.render(request)

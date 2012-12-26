@@ -14,13 +14,13 @@ from mamba.web.url_sanitizer import UrlSanitizer
 class UrlSanitizerTest(unittest.TestCase):
 
     def test_sanitize_string(self):
-        self.assertEquals(
+        self.assertEqual(
             UrlSanitizer().sanitize_string('//test////url///'),
             '/test/url'
         )
 
     def test_sanitize_container(self):
-        self.assertEquals(
+        self.assertEqual(
             UrlSanitizer().sanitize_container(['//test', '//url///']),
             '/test/url'
         )

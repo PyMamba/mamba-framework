@@ -31,4 +31,6 @@ class TestOutput(unittest.TestCase):
                 else:
                     the_color = 'Test'
 
-                self.assertEquals(test_color('Test'), the_color)
+                self.assertEqual(test_color('Test'), the_color)
+
+        self.flushLoggedErrors()

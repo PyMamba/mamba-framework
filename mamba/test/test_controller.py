@@ -87,7 +87,7 @@ class ControllerTest(unittest.TestCase):
         self.assertEqual(request.written[0], 'Testing')
 
     def test_register_path_returns_empty(self):
-        self.assertEquals(self.c.get_register_path(), '')
+        self.assertEqual(self.c.get_register_path(), '')
 
     @defer.inlineCallbacks
     def test_controller_render_delegates_on_routing(self):
@@ -162,7 +162,7 @@ class ControllerManagerTest(unittest.TestCase):
 
     def test_lookup(self):
         unknown = self.mgr.lookup('unkwnown')
-        self.assertEquals(unknown, {})
+        self.assertEqual(unknown, {})
 
         self.load_manager()
         dummy = self.mgr.lookup('dummy').get('object')
