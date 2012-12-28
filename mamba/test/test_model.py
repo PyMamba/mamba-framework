@@ -66,8 +66,8 @@ class DummyModel(Model):
     """Dummy Model for testing purposes"""
 
     __storm_table__ = 'dummy'
-    id = Int(primary=True)
-    name = Unicode()
+    id = Int(primary=True, auto_increment=True, unsigned=True)
+    name = Unicode(size=64, allow_none=False)
 
     def __init__(self, name=None):
         super(DummyModel, self).__init__()

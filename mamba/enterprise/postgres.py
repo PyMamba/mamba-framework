@@ -35,4 +35,8 @@ class PostgreSQL:
     def register():
         """Register this component"""
 
-        components.registerAdapter(MambaSQLAdapter, PostgreSQL, IMambaSQL)
+        try:
+            components.registerAdapter(MambaSQLAdapter, PostgreSQL, IMambaSQL)
+        except ValueError:
+            # component already registered
+            pass

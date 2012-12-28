@@ -267,4 +267,8 @@ class MySQL:
     def register():
         """Register this component"""
 
-        components.registerAdapter(MambaSQLAdapter, MySQL, IMambaSQL)
+        try:
+            components.registerAdapter(MambaSQLAdapter, MySQL, IMambaSQL)
+        except ValueError:
+            # component already registered
+            pass

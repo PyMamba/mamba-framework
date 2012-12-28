@@ -71,4 +71,8 @@ class SQLite:
     def register():
         """Register this component"""
 
-        components.registerAdapter(MambaSQLAdapter, SQLite, IMambaSQL)
+        try:
+            components.registerAdapter(MambaSQLAdapter, SQLite, IMambaSQL)
+        except ValueError:
+            # component already registered
+            pass
