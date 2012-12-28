@@ -17,8 +17,6 @@ from zope.interface import Interface, Attribute
 class INotifier(Interface):
     """
     Every Inotifier class will implement this interface
-
-    .. versionadded:: 0.1
     """
 
     def _notify(ignore, file_path, mask):
@@ -76,8 +74,6 @@ class IDeployer(Interface):
     Mamba Deployers interface.
 
     Every deployer must implement this interface
-
-    .. versionadded:: 0.1
     """
 
 
@@ -86,8 +82,6 @@ class IResponse(Interface):
     Mamba Web Response interface.
 
     Every web response must implement this interface.
-
-    .. versionadded:: 0.1
     """
 
     code = Attribute(
@@ -110,3 +104,36 @@ class IResponse(Interface):
         :type headers: dict
         """
     )
+
+
+class IMambaSQL(Interface):
+    """
+    Mamba SQL interface.
+
+    I'm usefull to create common SQL queries for create or alter tables
+    for all the SQL backends supported by Mamba.
+    """
+
+    original = Attribute(
+        """
+        :param original: the original underlying SQL backend type
+        """
+    )
+
+    def parse_column(self, column):
+        """Parse a Storm column to the correct SQL value"""
+
+    def detect_primary_key(self):
+        """Detect and reeturn the primary key for the table"""
+
+    def create_table(self):
+        """
+        Return the SQL syntax string to create a table to the selected
+        underlying database system
+        """
+
+    def drop_table(self):
+        """
+        Return the SQL syntax string to drop a table from the selected
+        underlying database system
+        """

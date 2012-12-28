@@ -7,5 +7,7 @@ Subpackage containing the modules that implement database abstraction layer
 '''
 
 from .database import Database
+from .mysql import TinyInt, MediumInt
 
-__all__ = ['DatabaseManager']
+
+__all__ = ['Database', 'TinyInt', 'MediumInt']

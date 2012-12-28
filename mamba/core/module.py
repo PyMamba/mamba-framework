@@ -34,8 +34,6 @@ class ModuleManager(object):
     Every module manager class inherits from me. I setup a
     :class:`twisted.internet.inotify.INotify` object in my
     :attr:`self._module_store` in order to perform auto reloads
-
-    .. versionadded:: 0.1
     """
     implements(INotifier)
 
