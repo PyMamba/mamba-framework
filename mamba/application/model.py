@@ -11,9 +11,20 @@
 
 """
 
+from storm.uri import URI
 from storm.twisted.transact import Transactor, transact
 
-from mamba.enterprise import Database
+from mamba.utils import config
+from mamba.core import interfaces
+from mamba.enterprise.database import Database, AdapterFactory
+
+
+class ModelError(Exception):
+    """Base class for Model Exceptions"""
+
+
+class InvalidModelSchema(ModelError):
+    """Fired when an invalid scheme is detected"""
 
 
 class Model(object):
@@ -99,3 +110,64 @@ class Model(object):
             return self.__uri__
 
         return None
+
+    @transact
+    def create_table(self):
+        """
+        Create the table for this model in the underlying database system
+        """
+
+        store = self.database.store(self)
+        store.execute(self.dump_table())
+
+    @transact
+    def drop_table(self):
+        """
+        Delete the table for this model in the underlying database system
+        """
+
+        adapter = self.get_adapter()
+        store = self.database.store(self)
+        store.execute(adapter.drop_table())
+
+    def dump_table(self):
+        """
+        Dumps the SQL command used for create a table with this model
+
+        :param schema: the SQL schema, SQLite by default
+        :type schema: str
+        """
+
+        adapter = self.get_adapter()
+        return adapter.create_table()
+
+    def get_uri(self):
+        """Return an URI instance using the uri config for this model"""
+
+        if self.uri is not None:
+            uri = URI(self.uri)
+        else:
+            uri = URI(config.Database().uri)
+
+        return uri
+
+    def get_adapter(self):
+        """Get a valid adapter for this model"""
+
+        uri = self.get_uri()
+
+        try:
+            adapter = interfaces.IMambaSQL(
+                AdapterFactory(uri.scheme, self).produce()
+            )
+        except TypeError as error:
+            raise InvalidModelSchema(
+                'Invalid Model Schema {}, aborting table dumping for '
+                'model {}. Error:'.format(
+                    uri.scheme,
+                    self.__class__.__name__,
+                    error
+                )
+            )
+
+        return adapter
