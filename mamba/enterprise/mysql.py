@@ -15,9 +15,10 @@ from storm.expr import Undef
 from storm import variables, properties
 from twisted.python import components
 
+from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL
+from mamba.enterprise.common import CommonSQL
 from mamba.core.adapters import MambaSQLAdapter
-from mamba.enterprise.dummy import SmallInt, BigInt
 
 
 class MySQLError(Exception):
@@ -54,7 +55,7 @@ class MediumInt(properties.Int):
     pass
 
 
-class MySQL:
+class MySQL(CommonSQL):
     """
     This class implements the MySQL syntax layer for mamba
 
@@ -68,10 +69,10 @@ class MySQL:
     def parse_column(self, column):
         """
         Parse a Storm column to the correct MySQL value type. For example,
-        if we pass a column of type :class:`storm.variable.IntVariable` with
-        name `amount` we get back:
+        if we pass a column of type :class:`~mamba.variable.SmallIntVariable`
+        with name `amount` we get back:
 
-            amount SMALLINT
+            `amount` smallint
 
         :param column: the Storm properties column to parse
         :type column: :class:`storm.properties`
@@ -150,16 +151,18 @@ class MySQL:
         Return the MySQL syntax for create a table with this model
         """
 
-        query = 'CREATE TABLE `{}` (\n'.format(self.model.__storm_table__)
+        query = 'CREATE TABLE {} (\n'.format((
+            'IF NOT EXISTS `{}`'.format(self.model.__storm_table__) if (
+            config.Database().create_table_bevaviour != 'drop_table')
+            else '`' + self.model.__storm_table__ + '`'
+        ))
         for i in range(len(self.model._storm_columns.keys())):
             column = self.model._storm_columns.keys()[i]
             query += '  {},\n'.format(self.parse_column(column))
 
         query += '  {}\n'.format(self.detect_primary_key())
         # TODO: indexes and keys
-        query += ') {} DEFAULT CHARSET=utf8\n'.format(
-            self.engine
-        )
+        query += ') {} DEFAULT CHARSET=utf8\n'.format(self.engine)
 
         return query
 
@@ -167,7 +170,7 @@ class MySQL:
         """
         Parse an specific integer type for MySQL, for example:
 
-            UNSIGNED SMALLINT
+            smallint UNSIGNED
 
         :param column: the Storm properties column to parse
         :type column: :class:`storm.properties.Int`
@@ -186,40 +189,6 @@ class MySQL:
             ),
             ' UNSIGNED' if unsigned else '',
             ' AUTO_INCREMENT' if auto_increment else ''
-        )
-
-    def _parse_float(self, column):
-        """
-        Parse an specific floating point type for MySQL, for example:
-
-            DOUBLE PRECISSION
-
-        :param column: the Storm properties column to parse
-        :type column: :class:`storm.properties.Float`
-        """
-
-        if column.__class__.__name__ == 'Float':
-            column_type = 'float'
-        else:
-            column_type = 'double precission'
-
-        return column_type
-
-    def _parse_unicode(self, column):
-        """
-        Parse an specific floating point type for MySQL, for example:
-
-            varchar(256)
-
-        :param column: the Storm properties column to parse
-        :type column: :class:`storm.properties.Unicode`
-        """
-
-        size = column._get_column(self.model.__class__).size
-
-        return '{}{}'.format(
-            'text' if size is Undef else 'varchar',
-            '({})'.format(size) if size is not Undef else ''
         )
 
     def _null_allowed(self, column):

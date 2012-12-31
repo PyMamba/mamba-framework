@@ -83,6 +83,9 @@ class StylesheetManagerTest(unittest.TestCase):
         self.mgr = appstyles.AppStyles()
         self.addCleanup(self.mgr.notifier.loseConnection)
 
+    def tearDown(self):
+        self.flushLoggedErrors()
+
     def load_style(self):
         self.mgr.load('../mamba/test/application/view/stylesheets/dummy.less')
 

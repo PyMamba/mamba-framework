@@ -22,7 +22,7 @@ from zope.component import provideUtility, getUtility
 from mamba.utils import config
 from mamba.enterprise.mysql import MySQL
 from mamba.enterprise.sqlite import SQLite
-from mamba.enterprise.dummy import DummySQL
+from mamba.enterprise.common import CommonSQL
 from mamba.enterprise.postgres import PostgreSQL
 
 
@@ -111,21 +111,23 @@ class AdapterFactory(object):
 
     :param scheme: the database scheme (one of PostgreSQL, MySQL, SQLite)
     :type scheme: str
+    :param model: the model to use with this adapter
+    :type model: :class:`~mamba.Model`
     """
 
-    def __init__(self, scheme, module):
+    def __init__(self, scheme, model):
         self.scheme = scheme
-        self.module = module
+        self.model = model
 
     def produce(self):
         if self.scheme == 'sqlite':
-            return SQLite(self.module)
+            return SQLite(self.model)
         elif self.scheme == 'mysql':
-            return MySQL(self.module)
+            return MySQL(self.model)
         elif self.scheme == 'postgres':
-            return PostgreSQL(self.module)
+            return PostgreSQL(self.model)
         else:
-            return DummySQL(self.module)
+            return CommonSQL(self.model)
 
 
 # Monkey Patching Storm (only a bit)
@@ -142,6 +144,7 @@ class PropertyColumnMambaPatch(Column):
         self.size = variable_kwargs.pop('size', Undef)
         self.unsigned = variable_kwargs.pop('unsigned', False)
         self.auto_increment = variable_kwargs.pop('auto_increment', False)
+        self.array = variable_kwargs.pop('array', None)
 
         Column.__init__(self, name, cls, primary,
                         properties.VariableFactory(

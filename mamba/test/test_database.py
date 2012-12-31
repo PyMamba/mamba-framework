@@ -10,10 +10,11 @@ from twisted.trial import unittest
 from twisted.python.threadpool import ThreadPool
 from doublex import Spy, assert_that, called, ANY_ARG
 
-from storm.locals import Store
+from storm.locals import Store, Int, Unicode
 
 from mamba.utils import config
 from mamba.enterprise import Database
+from mamba.enterprise.database import AdapterFactory
 
 
 class DatabaseTest(unittest.TestCase):
@@ -116,3 +117,29 @@ class DatabaseTest(unittest.TestCase):
     def test_database_store(self):
         store = self.database.store()
         self.assertIsInstance(store, Store)
+
+
+class AdapterFactoryTest(unittest.TestCase):
+
+    def get_adapter_for_scheme(self, scheme):
+        if scheme == 'sqlite':
+            from mamba.enterprise.sqlite import SQLite
+            return AdapterFactory('sqlite', None).produce(), SQLite
+        elif scheme == 'mysql':
+            from mamba.enterprise.mysql import MySQL
+            return AdapterFactory('mysql', None).produce(), MySQL
+        else:
+            from mamba.enterprise.postgres import PostgreSQL
+            return AdapterFactory('postgres', None).produce(), PostgreSQL
+
+    def test_sqlite_adapter(self):
+        factory, instance = self.get_adapter_for_scheme('sqlite')
+        self.assertIsInstance(factory, instance)
+
+    def test_mysql_adapter(self):
+        factory, instance = self.get_adapter_for_scheme('mysql')
+        self.assertIsInstance(factory, instance)
+
+    def test_postgres_adapter(self):
+        factory, instance = self.get_adapter_for_scheme('postgres')
+        self.assertIsInstance(factory, instance)

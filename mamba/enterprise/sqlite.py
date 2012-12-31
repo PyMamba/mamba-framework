@@ -14,8 +14,17 @@
 from storm import variables
 from twisted.python import components
 
+from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL
 from mamba.core.adapters import MambaSQLAdapter
+
+
+class SQLiteError(Exception):
+    """Base class for SQLite related errors"""
+
+
+class SQLiteMissingPrimaryKey(SQLiteError):
+    """Fired when the model is missing the primary key"""
 
 
 class SQLite:
@@ -27,7 +36,7 @@ class SQLite:
     """
 
     def __init__(self, model):
-        self.module = model
+        self.model = model
 
     def parse_column(self, column):
         """
@@ -66,6 +75,50 @@ class SQLite:
             column_type
         )
         return column_type
+
+    def detect_primary_key(self):
+        """
+        Detect the primary key for the model and return it back with the
+        correct SQLite syntax
+
+        :returns: a string with the correct SQLite syntax
+        :rtype: str
+        :raises: SQLiteMissingPrimaryKey on missing primary key
+        """
+
+        if not hasattr(self.model, '__storm_primary__'):
+            for column in self.model._storm_columns.values():
+                if column.primary == 1:
+                    return 'PRIMARY KEY({})'.format(column.name)
+
+            raise SQLiteMissingPrimaryKey(
+                'SQLite based model {} is missing a primary key column'.format(
+                    repr(self.model)
+                )
+            )
+
+        return 'PRIMARY KEY {}'.format(
+            str(self.model.__storm_primary__)
+        )
+
+    def create_table(self):
+        """
+        Return the SQLite syntax for create a table with this model
+        """
+
+        query = 'CREATE TABLE {} (\n'.format((
+            'IF NOT EXISTS {}'.format(self.model.__storm_table__) if (
+            config.Database().create_table_bevaviour != 'drop_table')
+            else self.model.__storm_table__
+        ))
+
+        for i in range(len(self.model._storm_columns.keys())):
+            column = self.model._storm_columns.keys()[i]
+            query += '  {},\n'.format(self.parse_column(column))
+
+        query += '  {})\n'.format(self.detect_primary_key())
+
+        return query
 
     @staticmethod
     def register():

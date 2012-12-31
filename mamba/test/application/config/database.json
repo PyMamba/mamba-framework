@@ -2,5 +2,6 @@
     "uri": "sqlite:",
     "min_threads": 5,
     "max_threads": 20,
-    "auto_adjust_pool_size": false
+    "auto_adjust_pool_size": false,
+    "create_table_behaviour": "create_if_not_exists"
 }

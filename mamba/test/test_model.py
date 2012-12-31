@@ -6,13 +6,19 @@
 Tests for mamba.application.model
 """
 
+import tempfile
+
+from storm.uri import URI
 from twisted.trial import unittest
+from twisted.python import filepath
 from storm.locals import Int, Unicode
 from storm.twisted.testing import FakeThreadPool
 from twisted.internet.defer import inlineCallbacks
 
 from mamba import Model
 from mamba import Database
+from mamba.utils import config
+from mamba.core import interfaces
 
 
 class ModelTest(unittest.TestCase):
@@ -60,6 +66,96 @@ class ModelTest(unittest.TestCase):
 
         store = self.database.store()
         self.assertTrue(len(store.find(DummyModel)) == 0)
+
+    def test_model_dump_table(self):
+        dummy = DummyModel()
+        script = dummy.dump_table()
+        self.assertTrue('CREATE TABLE IF NOT EXISTS dummy' in script)
+        self.assertTrue('PRIMARY KEY(id)' in script)
+        self.assertTrue('name VARCHAR' in script)
+        self.assertTrue('id INTEGER' in script)
+
+    def test_model_dump_table_with_mysql(self):
+        mysql_config = tempfile.NamedTemporaryFile(delete=False)
+        mysql_config.write('''
+            {
+                "uri": "mysql:memory",
+                "min_threads": 5,
+                "max_threads": 20,
+                "auto_adjust_pool_size": false,
+                "create_table_behaviour": "create_if_not_exists"
+            }
+        ''')
+        mysql_config.close()
+
+        config.Database(mysql_config.name)
+        self.assertTrue(config.Database().loaded)
+
+        dummy = DummyModel()
+        script = dummy.dump_table()
+
+        self.assertTrue('CREATE TABLE IF NOT EXISTS `dummy`' in script)
+        self.assertTrue('PRIMARY KEY(`id`)' in script)
+        self.assertTrue('`name` varchar(64)' in script)
+        self.assertTrue('`id` int UNSIGNED AUTO_INCREMENT' in script)
+        self.assertTrue('ENGINE=InnoDB' in script)
+        self.assertTrue('DEFAULT CHARSET=utf8' in script)
+
+        config.Database('../mamba/test/application/config/database.json')
+        filepath.FilePath(mysql_config.name).remove()
+
+    def test_model_dump_table_with_postgres(self):
+        postgres_config = tempfile.NamedTemporaryFile(delete=False)
+        postgres_config.write('''
+            {
+                "uri": "postgres:fake",
+                "min_threads": 5,
+                "max_threads": 20,
+                "auto_adjust_pool_size": false,
+                "create_table_behaviour": "create_if_not_exists"
+            }
+        ''')
+        postgres_config.close()
+
+        config.Database(postgres_config.name)
+        self.assertTrue(config.Database().loaded)
+
+        dummy = DummyModel()
+        script = dummy.dump_table()
+
+        self.assertTrue('CREATE TABLE IF NOT EXISTS \'dummy\'' in script)
+        self.assertTrue('PRIMARY KEY(\'id\')' in script)
+        self.assertTrue('\'name\' varchar(64)' in script)
+        self.assertTrue('\'id\' integer' in script)
+
+        config.Database('../mamba/test/application/config/database.json')
+        filepath.FilePath(postgres_config.name).remove()
+
+    @inlineCallbacks
+    def test_model_create_table(self):
+        dummy = DummyModel()
+        yield dummy.create_table()
+
+        store = dummy.database.store(dummy)
+
+        self.assertEqual(
+            store.execute('''
+                SELECT name
+                FROM sqlite_master
+                WHERE type="table"
+                ORDER BY name
+            ''').get_one()[0],
+            u'dummy'
+        )
+
+    def test_get_uri(self):
+        dummy = DummyModel()
+        self.assertEqual(dummy.get_uri().scheme, URI('sqlite:').scheme)
+
+    def test_get_adapter(self):
+        dummy = DummyModel()
+        adapter = dummy.get_adapter()
+        self.assertTrue(interfaces.IMambaSQL.providedBy(adapter))
 
 
 class DummyModel(Model):
