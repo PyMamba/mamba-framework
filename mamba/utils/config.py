@@ -63,19 +63,32 @@ class Database(BaseConfig):
     This object load and parses the configuration details for the database
     access using a JSON configuration file with this format:
 
-     .. sourcecode:: json
+     .. sourcecode:: javascript
 
         {
             'uri': 'sqlite:',
             'min_threads': 5,
             'max_threads': 20,
-            'auto_adjust_pool_size': false
+            'auto_adjust_pool_size': false,
+            'create_table_behaviour': 'create_if_not_exists'
         }
 
     Where uri is the Storm URI format for create ZStores and min, max threads
     are the minimum and maximum threads in the thread pool for operate with
     the database. If auto_adjust_pool_size is True, the size of the thread
     pool should be adjust dynamically.
+
+    For *create_table_bevaviour* possible values are:
+
+        *create_if_not_exists*
+            this is the default behaviour and it should add 'IF DONT EXISTS'
+            to the table creation scripts
+
+        *drop_table*
+            this behaviour will always drop a table before try to create it.
+            Be carefull with this behaviour because you can lose all your
+            data if you dont take care of it
+
 
     If no config_file or invalid config_file is given at first load attempt,
     then a fallback default settings with a SQLite in memory table are
@@ -117,11 +130,12 @@ class Database(BaseConfig):
         self.min_threads = 0
         self.max_threads = 10
         self.auto_adjust_pool_size = False
+        self.create_table_bevaviour = 'create_if_not_exists'
 
     def __repr__(self):
         return 'config.Database(%s)' % (
             ', '.join(map(repr, [self.uri, self.min_threads, self.max_threads,
-            self.auto_adjust_pool_size]))
+            self.auto_adjust_pool_size, self.create_table_bevaviour]))
         )
 
 
