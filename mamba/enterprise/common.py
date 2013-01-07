@@ -57,9 +57,6 @@ class DoublePrecission(properties.Float):
 class CommonSQL:
     """I do nothing, my only purpse is serve as dummy object"""
 
-    def __init__(self, wrapped):
-        self.wrapped = wrapped
-
     def _parse_float(self, column):
         """
         Parse an specific floating point type for MySQL/Postgres, for example:
@@ -93,3 +90,32 @@ class CommonSQL:
             'text' if size is Undef else 'varchar',
             '({})'.format(size) if size is not Undef else ''
         )
+
+    def _null_allowed(self, column):
+        """
+        Parse the column to check if a column allows NULL values
+
+        :param column: the Storm properties column to parse
+        :type column: :class:`storm.properties.Property`
+        """
+
+        property_column = column._get_column(self.model.__class__)
+        null_allowed = property_column.variable_factory()._allow_none
+
+        return ' NOT NULL' if not null_allowed else ''
+
+    def _default(self, column):
+        """
+        Get the default argument for a column (if any)
+
+        :param column: the Storm properties column to parse
+        :type column: :class:`storm.properties.Property`
+        """
+
+        property_column = column._get_column(self.model.__class__)
+        variable = property_column.variable_factory()
+
+        if variable._value is not Undef:
+            return ' {}'.format(variable._value)
+
+        return ''

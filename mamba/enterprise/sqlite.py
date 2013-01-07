@@ -1,4 +1,4 @@
-# -*- test-case-name: mamba.test.test_database -*-
+# -*- test-case-name: mamba.test.test_model -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
 # See LICENSE for more details
 
@@ -16,6 +16,7 @@ from twisted.python import components
 
 from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL
+from mamba.enterprise.common import CommonSQL
 from mamba.core.adapters import MambaSQLAdapter
 
 
@@ -27,7 +28,7 @@ class SQLiteMissingPrimaryKey(SQLiteError):
     """Fired when the model is missing the primary key"""
 
 
-class SQLite:
+class SQLite(CommonSQL):
     """
     This class implements the SQLite syntax layer for mamba
 
@@ -70,9 +71,11 @@ class SQLite:
         else:
             column_type = 'TEXT'  # fallback to TEXT (tears are comming)
 
-        column_type = '{} {}'.format(
+        column_type = '{} {}{}{}'.format(
             column._detect_attr_name(self.model.__class__),
-            column_type
+            column_type,
+            self._null_allowed(column),
+            self._default(column)
         )
         return column_type
 

@@ -11,8 +11,7 @@
 
 """
 
-from storm.expr import Undef
-from storm import variables, properties
+from storm import variables
 from twisted.python import components
 
 from mamba.utils import config
@@ -25,7 +24,7 @@ class PostgreSQLError(Exception):
     """Base class for PostgreSQL errors"""
 
 
-class PostgreSQLMissingPRimaryKey(PostgreSQLError):
+class PostgreSQLMissingPrimaryKey(PostgreSQLError):
     """Fired when the model is missing the primary key"""
 
 
@@ -94,7 +93,7 @@ class PostgreSQL(CommonSQL):
         else:
             column_type = 'text'  # fallback to text (tears are comming)
 
-        column_type = '`{}` {}{}{}'.format(
+        column_type = '\'{}\' {}{}{}'.format(
             column._detect_attr_name(self.model.__class__),
             column_type,
             self._null_allowed(column),
@@ -144,7 +143,7 @@ class PostgreSQL(CommonSQL):
                 if column.primary == 1:
                     return 'PRIMARY KEY(\'{}\')'.format(column.name)
 
-            raise PostgreSQLMissingPRimaryKey(
+            raise PostgreSQLMissingPrimaryKey(
                 'PostgreSQL based model {} is missing a primary '
                 'key column'.format(repr(self.model))
             )
