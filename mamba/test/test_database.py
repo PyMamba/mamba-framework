@@ -6,11 +6,10 @@
 Tests for mamba.enterprise.database
 """
 
+from storm.locals import Store
 from twisted.trial import unittest
 from twisted.python.threadpool import ThreadPool
 from doublex import Spy, assert_that, called, ANY_ARG
-
-from storm.locals import Store, Int, Unicode
 
 from mamba.utils import config
 from mamba.enterprise import Database

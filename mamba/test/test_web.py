@@ -146,8 +146,8 @@ class AsyncJSONTest(unittest.TestCase):
 
 class PageTest(unittest.TestCase):
 
-    def setUp(self):
-        pass
+    def tearDown(self):
+        self.flushLoggedErrors()
 
     def get_commons(self):
 

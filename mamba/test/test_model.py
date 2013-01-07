@@ -19,6 +19,9 @@ from mamba import Model
 from mamba import Database
 from mamba.utils import config
 from mamba.core import interfaces
+from mamba.enterprise.mysql import MySQLMissingPrimaryKey, MySQL
+from mamba.enterprise.sqlite import SQLiteMissingPrimaryKey, SQLite
+from mamba.enterprise.postgres import PostgreSQLMissingPrimaryKey, PostgreSQL
 
 
 class ModelTest(unittest.TestCase):
@@ -36,6 +39,9 @@ class ModelTest(unittest.TestCase):
             ')'
         )
         store.commit()
+
+    def tearDown(self):
+        self.flushLoggedErrors()
 
     def test_model_create(self):
         dummy = DummyModel('Dummy')
@@ -126,7 +132,7 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('CREATE TABLE IF NOT EXISTS \'dummy\'' in script)
         self.assertTrue('PRIMARY KEY(\'id\')' in script)
         self.assertTrue('\'name\' varchar(64)' in script)
-        self.assertTrue('\'id\' integer' in script)
+        self.assertTrue('\'id\' serial' in script)
 
         config.Database('../mamba/test/application/config/database.json')
         filepath.FilePath(postgres_config.name).remove()
@@ -157,6 +163,29 @@ class ModelTest(unittest.TestCase):
         adapter = dummy.get_adapter()
         self.assertTrue(interfaces.IMambaSQL.providedBy(adapter))
 
+    def test_sqlite_raises_missing_primary_key_exception(self):
+
+        dummy = NotPrimaryModel()
+
+        sqlite = SQLite(dummy)
+        self.assertRaises(SQLiteMissingPrimaryKey, sqlite.detect_primary_key)
+
+    def test_mysql_raises_missing_primary_key_exception(self):
+
+        dummy = NotPrimaryModel()
+
+        mysql = MySQL(dummy)
+        self.assertRaises(MySQLMissingPrimaryKey, mysql.detect_primary_key)
+
+    def test_postgres_raises_missing_primary_key_exception(self):
+
+        dummy = NotPrimaryModel()
+
+        postgres = PostgreSQL(dummy)
+        self.assertRaises(
+            PostgreSQLMissingPrimaryKey, postgres.detect_primary_key
+        )
+
 
 class DummyModel(Model):
     """Dummy Model for testing purposes"""
@@ -170,6 +199,15 @@ class DummyModel(Model):
 
         if name is not None:
             self.name = unicode(name)
+
+
+class NotPrimaryModel(Model):
+    """Failing model for testing purposes"""
+
+    __storm_table__ = 'dummy'
+    id = Int(primary=False)
+    name = Unicode(size=64, allow_none=False)
+    _storm_columns = {}
 
 
 class DummyThreadPool(FakeThreadPool):
