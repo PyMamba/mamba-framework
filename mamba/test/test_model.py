@@ -7,6 +7,7 @@ Tests for mamba.application.model
 """
 
 import tempfile
+import functools
 
 from storm.uri import URI
 from twisted.trial import unittest
@@ -22,6 +23,56 @@ from mamba.core import interfaces
 from mamba.enterprise.mysql import MySQLMissingPrimaryKey, MySQL
 from mamba.enterprise.sqlite import SQLiteMissingPrimaryKey, SQLite
 from mamba.enterprise.postgres import PostgreSQLMissingPrimaryKey, PostgreSQL
+
+
+def common_config(
+        engine='sqlite:', existance=True, restrict=True, cascade=False):
+    """Decorator for common config needed for SQL engine testing"""
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            db_config = tempfile.NamedTemporaryFile(delete=False)
+            db_config.write('''
+                {
+                    "uri": "%s",
+                    "min_threads": 5,
+                    "max_threads": 20,
+                    "auto_adjust_pool_size": false,
+                    "create_table_behaviours": {
+                        "create_if_not_exists": %s,
+                        "drop_table": false
+                    },
+                    "drop_table_behaviours": {
+                        "drop_if_exists": %s,
+                        "restrict": %s,
+                        "cascade": %s
+                    }
+                }
+            ''' % (
+                engine,
+                'true' if existance else 'false',
+                'true' if existance else 'false',
+                'true' if restrict else 'false',
+                'true' if cascade else 'false')
+            )
+            db_config.close()
+
+            config.Database(db_config.name)
+            assert(config.Database().loaded)
+
+            result = func(*args, **kwargs)
+
+            config.Database(
+                '../mamba/test/application/config/database.json'
+            )
+            filepath.FilePath(db_config.name).remove()
+
+            return result
+
+        return wrapper
+
+    return decorator
 
 
 class ModelTest(unittest.TestCase):
@@ -42,6 +93,10 @@ class ModelTest(unittest.TestCase):
 
     def tearDown(self):
         self.flushLoggedErrors()
+
+    def get_adapter(self):
+
+        return DummyModel().get_adapter()
 
     def test_model_create(self):
         dummy = DummyModel('Dummy')
@@ -76,26 +131,14 @@ class ModelTest(unittest.TestCase):
     def test_model_dump_table(self):
         dummy = DummyModel()
         script = dummy.dump_table()
+
         self.assertTrue('CREATE TABLE IF NOT EXISTS dummy' in script)
         self.assertTrue('PRIMARY KEY(id)' in script)
         self.assertTrue('name VARCHAR' in script)
         self.assertTrue('id INTEGER' in script)
 
+    @common_config(engine='mysql:')
     def test_model_dump_table_with_mysql(self):
-        mysql_config = tempfile.NamedTemporaryFile(delete=False)
-        mysql_config.write('''
-            {
-                "uri": "mysql:memory",
-                "min_threads": 5,
-                "max_threads": 20,
-                "auto_adjust_pool_size": false,
-                "create_table_behaviour": "create_if_not_exists"
-            }
-        ''')
-        mysql_config.close()
-
-        config.Database(mysql_config.name)
-        self.assertTrue(config.Database().loaded)
 
         dummy = DummyModel()
         script = dummy.dump_table()
@@ -107,24 +150,8 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('ENGINE=InnoDB' in script)
         self.assertTrue('DEFAULT CHARSET=utf8' in script)
 
-        config.Database('../mamba/test/application/config/database.json')
-        filepath.FilePath(mysql_config.name).remove()
-
+    @common_config(engine='postgres:')
     def test_model_dump_table_with_postgres(self):
-        postgres_config = tempfile.NamedTemporaryFile(delete=False)
-        postgres_config.write('''
-            {
-                "uri": "postgres:fake",
-                "min_threads": 5,
-                "max_threads": 20,
-                "auto_adjust_pool_size": false,
-                "create_table_behaviour": "create_if_not_exists"
-            }
-        ''')
-        postgres_config.close()
-
-        config.Database(postgres_config.name)
-        self.assertTrue(config.Database().loaded)
 
         dummy = DummyModel()
         script = dummy.dump_table()
@@ -133,9 +160,6 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('PRIMARY KEY(\'id\')' in script)
         self.assertTrue('\'name\' varchar(64)' in script)
         self.assertTrue('\'id\' serial' in script)
-
-        config.Database('../mamba/test/application/config/database.json')
-        filepath.FilePath(postgres_config.name).remove()
 
     @inlineCallbacks
     def test_model_create_table(self):
@@ -184,6 +208,70 @@ class ModelTest(unittest.TestCase):
         postgres = PostgreSQL(dummy)
         self.assertRaises(
             PostgreSQLMissingPrimaryKey, postgres.detect_primary_key
+        )
+
+    def test_sqlite_drop_table(self):
+
+        adapter = self.get_adapter()
+        self.assertEqual(adapter.drop_table(), 'DROP TABLE IF EXISTS dummy')
+
+    @common_config(existance=False)
+    def test_sqlite_drop_table_no_existance(self):
+
+        adapter = self.get_adapter()
+        self.assertEqual(adapter.drop_table(), 'DROP TABLE dummy')
+
+    @common_config(engine='mysql:')
+    def test_mysql_drop_table(self):
+
+        adapter = self.get_adapter()
+        self.assertEqual(adapter.drop_table(), "DROP TABLE IF EXISTS `dummy`")
+
+    @common_config(engine='mysql:', existance=False)
+    def test_mysql_drop_table_no_existance(self):
+
+        adapter = self.get_adapter()
+        self.assertEqual(adapter.drop_table(), "DROP TABLE `dummy`")
+
+    @common_config(engine='postgres:')
+    def test_postgres_drop_table(self):
+
+        adapter = self.get_adapter()
+        self.assertEqual(
+            adapter.drop_table(), "DROP TABLE IF EXISTS 'dummy' RESTRICT"
+        )
+
+    @common_config(engine='postgres:', existance=False)
+    def test_postgres_drop_table_no_existance(self):
+
+        adapter = self.get_adapter()
+        self.assertEqual(adapter.drop_table(), "DROP TABLE 'dummy' RESTRICT")
+
+    @common_config(engine='postgres:', cascade=True)
+    def test_postgres_drop_table_on_cascade(self):
+
+        adapter = self.get_adapter()
+        self.assertEqual(
+            adapter.drop_table(),
+            "DROP TABLE IF EXISTS 'dummy' RESTRICT CASCADE"
+        )
+
+    @common_config(engine='postgres:', cascade=False, restrict=False)
+    def test_postgres_drop_table_no_restrict(self):
+
+        adapter = self.get_adapter()
+        self.assertEqual(
+            adapter.drop_table(),
+            "DROP TABLE IF EXISTS 'dummy'"
+        )
+
+    @common_config(engine='postgres:', cascade=True, restrict=False)
+    def test_postgres_drop_table_no_restrict_on_cascade(self):
+
+        adapter = self.get_adapter()
+        self.assertEqual(
+            adapter.drop_table(),
+            "DROP TABLE IF EXISTS 'dummy' CASCADE"
         )
 
 

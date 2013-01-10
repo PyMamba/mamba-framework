@@ -111,7 +111,8 @@ class SQLite(CommonSQL):
 
         query = 'CREATE TABLE {} (\n'.format((
             'IF NOT EXISTS {}'.format(self.model.__storm_table__) if (
-            config.Database().create_table_bevaviour != 'drop_table')
+            config.Database().create_table_behaviours.get(
+                'create_if_not_exists'))
             else self.model.__storm_table__
         ))
 
@@ -120,6 +121,21 @@ class SQLite(CommonSQL):
             query += '  {},\n'.format(self.parse_column(column))
 
         query += '  {})\n'.format(self.detect_primary_key())
+
+        return query
+
+    def drop_table(self):
+        """
+        Return SQLite syntax for drop this model table
+        """
+
+        existance = config.Database().drop_table_behaviours.get(
+            'drop_if_exists')
+
+        query = 'DROP TABLE {}{}'.format(
+            'IF EXISTS ' if existance else '',
+            self.model.__storm_table__
+        )
 
         return query
 

@@ -3,5 +3,13 @@
     "min_threads": 5,
     "max_threads": 20,
     "auto_adjust_pool_size": false,
-    "create_table_behaviour": "create_if_not_exists"
+    "create_table_behaviours": {
+        "create_if_not_exists": true,
+        "drop_table": false
+    },
+    "drop_table_behaviours": {
+        "drop_if_exists": true,
+        "restrict": true,
+        "cascade": false
+    }
 }

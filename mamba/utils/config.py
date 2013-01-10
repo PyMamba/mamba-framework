@@ -70,7 +70,15 @@ class Database(BaseConfig):
             'min_threads': 5,
             'max_threads': 20,
             'auto_adjust_pool_size': false,
-            'create_table_behaviour': 'create_if_not_exists'
+            'create_table_behaviours': {
+                'create_if_not_exists': true,
+                'drop_table': false
+            },
+            'drop_table_behaviours': {
+                'drop_if_exists': true,
+                'restrict': true,
+                'cascade': false
+            }
         }
 
     Where uri is the Storm URI format for create ZStores and min, max threads
@@ -130,12 +138,22 @@ class Database(BaseConfig):
         self.min_threads = 0
         self.max_threads = 10
         self.auto_adjust_pool_size = False
-        self.create_table_bevaviour = 'create_if_not_exists'
+        self.create_table_behaviours = {
+            'create_if_not_exists': True,
+            'drop_table': False
+        }
+        self.drop_table_behaviours = {
+            'drop_if_exists': True,
+            'restrict': True,
+            'cascade': False
+        }
 
     def __repr__(self):
         return 'config.Database(%s)' % (
-            ', '.join(map(repr, [self.uri, self.min_threads, self.max_threads,
-            self.auto_adjust_pool_size, self.create_table_bevaviour]))
+            ', '.join(map(repr, [
+            self.uri, self.min_threads, self.max_threads,
+            self.auto_adjust_pool_size, self.create_table_behaviours,
+            self.drop_table_behaviours]))
         )
 
 

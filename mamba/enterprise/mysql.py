@@ -153,7 +153,8 @@ class MySQL(CommonSQL):
 
         query = 'CREATE TABLE {} (\n'.format((
             'IF NOT EXISTS `{}`'.format(self.model.__storm_table__) if (
-            config.Database().create_table_bevaviour != 'drop_table')
+            config.Database().create_table_behaviours.get(
+                'create_if_not_exists'))
             else '`' + self.model.__storm_table__ + '`'
         ))
         for i in range(len(self.model._storm_columns.keys())):
@@ -163,6 +164,21 @@ class MySQL(CommonSQL):
         query += '  {}\n'.format(self.detect_primary_key())
         # TODO: indexes and keys
         query += ') {} DEFAULT CHARSET=utf8\n'.format(self.engine)
+
+        return query
+
+    def drop_table(self):
+        """
+        Return MySQL syntax for drop this model table
+        """
+
+        existance = config.Database().drop_table_behaviours.get(
+            'drop_if_exists')
+
+        query = 'DROP TABLE {}`{}`'.format(
+            'IF EXISTS ' if existance else '',
+            self.model.__storm_table__
+        )
 
         return query
 
