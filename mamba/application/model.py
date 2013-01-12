@@ -57,6 +57,17 @@ class Model(object):
 
         self.transactor = Transactor(self.database.pool)
 
+    @property
+    def uri(self):
+        """
+        Returns the database URI for this model
+        """
+
+        if hasattr(self, '__uri__'):
+            return self.__uri__
+
+        return None
+
     @transact
     def create(self):
         """
@@ -65,6 +76,7 @@ class Model(object):
 
         store = self.database.store(self)
         store.add(self)
+        store.commit()
 
     @transact
     def read(self, id):
@@ -99,17 +111,6 @@ class Model(object):
 
         store = self.database.store(self)
         store.remove(self)
-
-    @property
-    def uri(self):
-        """
-        Returns the database URI for this model
-        """
-
-        if hasattr(self, '__uri__'):
-            return self.__uri__
-
-        return None
 
     @transact
     def create_table(self):
