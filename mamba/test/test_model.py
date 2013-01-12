@@ -8,6 +8,7 @@ Tests for mamba.application.model
 
 import tempfile
 import functools
+import transaction
 
 from storm.uri import URI
 from twisted.trial import unittest
@@ -93,6 +94,8 @@ class ModelTest(unittest.TestCase):
 
     def tearDown(self):
         self.flushLoggedErrors()
+        self.database.store().reset()
+        transaction.manager.free(transaction.get())
 
     def get_adapter(self):
 
@@ -164,6 +167,7 @@ class ModelTest(unittest.TestCase):
     @inlineCallbacks
     def test_model_create_table(self):
         dummy = DummyModel()
+
         yield dummy.create_table()
 
         store = dummy.database.store(dummy)
@@ -177,6 +181,34 @@ class ModelTest(unittest.TestCase):
             ''').get_one()[0],
             u'dummy'
         )
+
+    @inlineCallbacks
+    def test_model_create_and_delete_table(self):
+        dummy = DummyModelTwo()
+
+        yield dummy.create_table()
+        store = dummy.database.store(dummy)
+
+        data = store.execute('''
+            SELECT name
+            FROM sqlite_master
+            WHERE type="table"
+            ORDER BY name
+        ''').get_all()
+
+        self.assertEqual(len(data), 2)
+        self.assertEqual(data[1][0], u'dummy_two')
+
+        yield dummy.drop_table()
+        data = store.execute('''
+            SELECT name
+            FROM sqlite_master
+            WHERE type="table"
+            ORDER BY name
+        ''').get_all()
+
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0][0], u'dummy')
 
     def test_get_uri(self):
         dummy = DummyModel()
@@ -284,6 +316,20 @@ class DummyModel(Model):
 
     def __init__(self, name=None):
         super(DummyModel, self).__init__()
+
+        if name is not None:
+            self.name = unicode(name)
+
+
+class DummyModelTwo(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_two'
+    id = Int(primary=True, auto_increment=True, unsigned=True)
+    name = Unicode(size=64, allow_none=False)
+
+    def __init__(self, name=None):
+        super(DummyModelTwo, self).__init__()
 
         if name is not None:
             self.name = unicode(name)
