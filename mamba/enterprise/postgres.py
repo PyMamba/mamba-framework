@@ -11,8 +11,11 @@
 
 """
 
+import inspect
+
 from storm import variables
 from twisted.python import components
+from storm.references import Reference
 
 from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL
@@ -21,19 +24,23 @@ from mamba.core.adapters import MambaSQLAdapter
 
 
 class PostgreSQLError(Exception):
-    """Base class for PostgreSQL errors"""
+    """Base class for PostgreSQL errors
+    """
 
 
 class PostgreSQLMissingPrimaryKey(PostgreSQLError):
-    """Fired when the model is missing the primary key"""
+    """Fired when the model is missing the primary key
+    """
 
 
 class PostgreSQLMissingArrayDefinition(PostgreSQLError):
-    """Fired when a List variable has no array definition"""
+    """Fired when a List variable has no array definition
+    """
 
 
 class PostgreSQLNotEnumColumn(PostgreSQLError):
-    """Fired when parse_enum is called with a column that is not an Enum"""
+    """Fired when parse_enum is called with a column that is not an Enum
+    """
 
 
 class PostgreSQL(CommonSQL):
@@ -46,6 +53,46 @@ class PostgreSQL(CommonSQL):
 
     def __init__(self, model):
         self.model = model
+
+    def parse_references(self):
+        """
+        Get all the :class:`storm.references.Reference` and create foreign
+        keys for the SQL creation script
+
+        .. warning:
+
+            If you need a many2many relation you
+            should add a Reference for the compound primary key in the
+            relation table
+        """
+
+        references = []
+        for attr in inspect.classify_class_attrs(self.model.__class__):
+
+            if type(attr.object) is Reference:
+                relation = attr.object._relation
+                keys = {
+                    'remote': relation.remote_key[0],
+                    'local': relation.local_key[0]
+                }
+                remote_table = relation.remote_cls.__storm_table__
+
+                query = (
+                    'CONSTRAINT {remote_table}_ind FOREIGN KEY ({localkey}) '
+                    'REFERENCES {remote_table}({id}) '
+                    'ON UPDATE {on_update} ON DELETE {on_delete}'.format(
+                        remote_table=remote_table,
+                        localkey=keys.get('local').name,
+                        id=keys.get('remote').name,
+                        on_update=getattr(
+                            self.model, '__on_update__', 'RESTRICT'),
+                        on_delete=getattr(
+                            self.model, '__on_delete__', 'RESTRICT')
+                    )
+                )
+                references.append(query)
+
+        return ', '.join(references)
 
     def parse_column(self, column):
         """
@@ -93,7 +140,7 @@ class PostgreSQL(CommonSQL):
         else:
             column_type = 'text'  # fallback to text (tears are comming)
 
-        column_type = '\'{}\' {}{}{}'.format(
+        column_type = '{} {}{}{}'.format(
             column._detect_attr_name(self.model.__class__),
             column_type,
             self._null_allowed(column),
@@ -117,10 +164,10 @@ class PostgreSQL(CommonSQL):
             )
 
         data = column._variable_kwargs.get('get_map', {})
-        return 'CREATE TYPE \'{}\' AS ENUM {};'.format(
+        return 'CREATE TYPE {} AS ENUM {};'.format(
             'enum_{}'.format(column._detect_attr_name(self.model.__class__)),
             '({})'.format(
-                ', '.join('\'{}\''.format(
+                ', '.join("'{}'".format(
                     data[i]) for i in range(1, len(data) + 1)
                 )
             )
@@ -141,28 +188,31 @@ class PostgreSQL(CommonSQL):
         if not hasattr(self.model, '__storm_primary__'):
             for column in self.model._storm_columns.values():
                 if column.primary == 1:
-                    return 'PRIMARY KEY(\'{}\')'.format(column.name)
+                    return 'CONSTRAINT {} PRIMARY KEY({})'.format(
+                        self.model.__storm_table__ + '_pkey',
+                        column.name
+                    )
 
             raise PostgreSQLMissingPrimaryKey(
                 'PostgreSQL based model {} is missing a primary '
                 'key column'.format(repr(self.model))
             )
 
-        return 'PRIMARY KEY {}'.format(
+        return 'CONSTRAINT {} PRIMARY KEY {}'.format(
+            self.model.__storm_table__ + '_pkey',
             str(self.model.__storm_primary__)
         )
 
     def create_table(self):
-        """
-        Return the PostgreSQL syntax for create a table with this model
+        """Return the PostgreSQL syntax for create a table with this model
         """
 
         enums = []
         query = 'CREATE TABLE {} (\n'.format((
-            'IF NOT EXISTS \'{}\''.format(self.model.__storm_table__) if (
+            'IF NOT EXISTS {}'.format(self.model.__storm_table__) if (
             config.Database().create_table_behaviours.get(
                 'create_if_not_exists'))
-            else '\'' + self.model.__storm_table__ + '\''
+            else self.model.__storm_table__
         ))
         for i in range(len(self.model._storm_columns.keys())):
             column = self.model._storm_columns.keys()[i]
@@ -170,16 +220,19 @@ class PostgreSQL(CommonSQL):
                 query += '  {},\n'.format(self.parse_column(column))
             else:
                 enums.append(self.parse_enum(column))
-                query += '  {},\n'.format()
+                query += '  {},\n'.format(self.parse_column(column))
 
-        query += '  {})\n'.format(self.detect_primary_key())
-        # TODO: Constrains
+        query += '  {}\n'.format(self.detect_primary_key())
+        query += '{}'.format(
+            ', {})'.format(self.parse_references()) if self.parse_references()
+            else ')\n'
+        )
+        query = ''.join(enums) + query
 
         return query
 
     def drop_table(self):
-        """
-        Return PostgreSQL syntax for drop this model table
+        """Return PostgreSQL syntax for drop this model table
         """
 
         existance = config.Database().drop_table_behaviours.get(
@@ -188,7 +241,7 @@ class PostgreSQL(CommonSQL):
             'restrict', True)
         cascade = config.Database().drop_table_behaviours.get('cascade', False)
 
-        query = 'DROP TABLE {}\'{}\'{}{}'.format(
+        query = 'DROP TABLE {}{}{}{}'.format(
             'IF EXISTS ' if existance else '',
             self.model.__storm_table__,
             ' RESTRICT' if restrict else '',
@@ -280,7 +333,8 @@ class PostgreSQL(CommonSQL):
 
     @staticmethod
     def register():
-        """Register this component"""
+        """Register this component
+        """
 
         try:
             components.registerAdapter(MambaSQLAdapter, PostgreSQL, IMambaSQL)

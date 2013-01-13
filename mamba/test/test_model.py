@@ -13,9 +13,9 @@ import transaction
 from storm.uri import URI
 from twisted.trial import unittest
 from twisted.python import filepath
-from storm.locals import Int, Unicode
 from storm.twisted.testing import FakeThreadPool
 from twisted.internet.defer import inlineCallbacks
+from storm.locals import Int, Unicode, Reference, Enum, List
 
 from mamba import Model
 from mamba import Database
@@ -97,7 +97,10 @@ class ModelTest(unittest.TestCase):
         self.database.store().reset()
         transaction.manager.free(transaction.get())
 
-    def get_adapter(self):
+    def get_adapter(self, reference=False):
+
+        if reference:
+            return DummyModelThree().get_adapter()
 
         return DummyModel().get_adapter()
 
@@ -159,10 +162,28 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModel()
         script = dummy.dump_table()
 
-        self.assertTrue('CREATE TABLE IF NOT EXISTS \'dummy\'' in script)
-        self.assertTrue('PRIMARY KEY(\'id\')' in script)
-        self.assertTrue('\'name\' varchar(64)' in script)
-        self.assertTrue('\'id\' serial' in script)
+        self.assertTrue('CREATE TABLE IF NOT EXISTS dummy' in script)
+        self.assertTrue('PRIMARY KEY(id)' in script)
+        self.assertTrue('name varchar(64)' in script)
+        self.assertTrue('id serial' in script)
+
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_and_enum(self):
+
+        dummy = DummyModelEnum()
+        script = dummy.dump_table()
+
+        self.assertTrue("CREATE TYPE enum_mood AS ENUM" in script)
+        self.assertTrue("('sad', 'ok', 'happy')" in script)
+        self.assertTrue("mood enum_mood" in script)
+
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_and_array(self):
+
+        dummy = DummyModelArray()
+        script = dummy.dump_table()
+
+        self.assertTrue('this_array integer[3][3],' in script)
 
     @inlineCallbacks
     def test_model_create_table(self):
@@ -242,6 +263,7 @@ class ModelTest(unittest.TestCase):
             PostgreSQLMissingPrimaryKey, postgres.detect_primary_key
         )
 
+    @common_config(engine='sqlite:')
     def test_sqlite_drop_table(self):
 
         adapter = self.get_adapter()
@@ -270,14 +292,14 @@ class ModelTest(unittest.TestCase):
 
         adapter = self.get_adapter()
         self.assertEqual(
-            adapter.drop_table(), "DROP TABLE IF EXISTS 'dummy' RESTRICT"
+            adapter.drop_table(), "DROP TABLE IF EXISTS dummy RESTRICT"
         )
 
     @common_config(engine='postgres:', existance=False)
     def test_postgres_drop_table_no_existance(self):
 
         adapter = self.get_adapter()
-        self.assertEqual(adapter.drop_table(), "DROP TABLE 'dummy' RESTRICT")
+        self.assertEqual(adapter.drop_table(), "DROP TABLE dummy RESTRICT")
 
     @common_config(engine='postgres:', cascade=True)
     def test_postgres_drop_table_on_cascade(self):
@@ -285,7 +307,7 @@ class ModelTest(unittest.TestCase):
         adapter = self.get_adapter()
         self.assertEqual(
             adapter.drop_table(),
-            "DROP TABLE IF EXISTS 'dummy' RESTRICT CASCADE"
+            "DROP TABLE IF EXISTS dummy RESTRICT CASCADE"
         )
 
     @common_config(engine='postgres:', cascade=False, restrict=False)
@@ -294,7 +316,7 @@ class ModelTest(unittest.TestCase):
         adapter = self.get_adapter()
         self.assertEqual(
             adapter.drop_table(),
-            "DROP TABLE IF EXISTS 'dummy'"
+            "DROP TABLE IF EXISTS dummy"
         )
 
     @common_config(engine='postgres:', cascade=True, restrict=False)
@@ -303,8 +325,60 @@ class ModelTest(unittest.TestCase):
         adapter = self.get_adapter()
         self.assertEqual(
             adapter.drop_table(),
-            "DROP TABLE IF EXISTS 'dummy' CASCADE"
+            "DROP TABLE IF EXISTS dummy CASCADE"
         )
+
+    @common_config(engine='mysql:')
+    def test_mysql_reference_generates_foreign_keys(self):
+
+        adapter = self.get_adapter(reference=True)
+        script = adapter.create_table()
+
+        self.assertTrue('INDEX `dummy_two_ind` (`remote_id`)' in script)
+        self.assertTrue(
+            'FOREIGN KEY (`remote_id`) REFERENCES `dummy_two`(`id`)' in script
+        )
+        self.assertTrue('ON UPDATE RESTRICT ON DELETE RESTRICT' in script)
+
+    @common_config(engine='mysql:')
+    def test_mysql_reference_in_cascade(self):
+
+        DummyModelThree.__on_delete__ = 'CASCADE'
+        DummyModelThree.__on_update__ = 'CASCADE'
+
+        adapter = self.get_adapter(reference=True)
+        script = adapter.create_table()
+
+        self.assertTrue('ON UPDATE CASCADE ON DELETE CASCADE' in script)
+        del DummyModelThree.__on_delete__
+        del DummyModelThree.__on_update__
+
+    @common_config(engine='postgres:')
+    def test_postgres_reference_generates_foreign_keys(self):
+
+        adapter = self.get_adapter(reference=True)
+        script = adapter.create_table()
+
+        self.assertTrue(
+            'CONSTRAINT dummy_two_ind FOREIGN KEY (remote_id)' in script
+        )
+        self.assertTrue(
+            'REFERENCES dummy_two(id) ON UPDATE RESTRICT ON DELETE RESTRICT'
+            in script
+        )
+
+    @common_config(engine='postgres:')
+    def test_postgres_reference_in_cascade(self):
+
+        DummyModelThree.__on_delete__ = 'CASCADE'
+        DummyModelThree.__on_update__ = 'CASCADE'
+
+        adapter = self.get_adapter(reference=True)
+        script = adapter.create_table()
+
+        self.assertTrue('ON UPDATE CASCADE ON DELETE CASCADE' in script)
+        del DummyModelThree.__on_delete__
+        del DummyModelThree.__on_update__
 
 
 class DummyModel(Model):
@@ -333,6 +407,31 @@ class DummyModelTwo(Model):
 
         if name is not None:
             self.name = unicode(name)
+
+
+class DummyModelThree(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_three'
+    id = Int(primary=True)
+    remote_id = Int()
+    dummy_two = Reference(remote_id, DummyModelTwo.id)
+
+
+class DummyModelEnum(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_enum'
+    id = Int(primary=True)
+    mood = Enum(map={'sad': 1, 'ok': 2, 'happy': 3})
+
+
+class DummyModelArray(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_array'
+    id = Int(primary=True)
+    this_array = List(array='integer[3][3]')
 
 
 class NotPrimaryModel(Model):

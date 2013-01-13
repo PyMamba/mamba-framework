@@ -11,9 +11,12 @@
 
 """
 
+import inspect
+
 from storm.expr import Undef
-from storm import variables, properties
 from twisted.python import components
+from storm.references import Reference
+from storm import variables, properties
 
 from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL
@@ -22,11 +25,13 @@ from mamba.core.adapters import MambaSQLAdapter
 
 
 class MySQLError(Exception):
-    """Base class for MySQL related exceptions"""
+    """Base class for MySQL related exceptions
+    """
 
 
 class MySQLMissingPrimaryKey(MySQLError):
-    """Fired when the model is missing the primary key"""
+    """Fired when the model is missing the primary key
+    """
 
 
 class TinyInt(properties.Int):
@@ -65,6 +70,51 @@ class MySQL(CommonSQL):
 
     def __init__(self, model):
         self.model = model
+
+    def parse_references(self):
+        """
+        Get all the :class:`storm.references.Reference` and create foreign
+        keys for the SQL creation script
+
+        .. warning:
+
+            If no InnoDB is used as engine in MySQL then this is skipped.
+            :class:`storm.references.ReferenceSet` does not generate
+            foreign keys by itself. If you need a many2many relation you
+            should add a Reference for the compound primary key in the
+            relation table
+        """
+
+        if self.engine != 'InnoDB':
+            return
+
+        references = []
+        for attr in inspect.classify_class_attrs(self.model.__class__):
+
+            if type(attr.object) is Reference:
+                relation = attr.object._relation
+                keys = {
+                    'remote': relation.remote_key[0],
+                    'local': relation.local_key[0]
+                }
+                remote_table = relation.remote_cls.__storm_table__
+
+                query = (
+                    'INDEX `{remote_table}_ind` (`{localkey}`), FOREIGN KEY '
+                    '(`{localkey}`) REFERENCES `{remote_table}`(`{id}`) '
+                    'ON UPDATE {on_update} ON DELETE {on_delete}'.format(
+                        remote_table=remote_table,
+                        localkey=keys.get('local').name,
+                        id=keys.get('remote').name,
+                        on_update=getattr(
+                            self.model, '__on_update__', 'RESTRICT'),
+                        on_delete=getattr(
+                            self.model, '__on_delete__', 'RESTRICT')
+                    )
+                )
+                references.append(query)
+
+        return ', '.join(references)
 
     def parse_column(self, column):
         """
@@ -147,8 +197,7 @@ class MySQL(CommonSQL):
         )
 
     def create_table(self):
-        """
-        Return the MySQL syntax for create a table with this model
+        """Return the MySQL syntax for create a table with this model
         """
 
         query = 'CREATE TABLE {} (\n'.format((
@@ -157,19 +206,22 @@ class MySQL(CommonSQL):
                 'create_if_not_exists'))
             else '`' + self.model.__storm_table__ + '`'
         ))
+
         for i in range(len(self.model._storm_columns.keys())):
             column = self.model._storm_columns.keys()[i]
             query += '  {},\n'.format(self.parse_column(column))
 
         query += '  {}\n'.format(self.detect_primary_key())
-        # TODO: indexes and keys
-        query += ') {} DEFAULT CHARSET=utf8\n'.format(self.engine)
+        query += '{}'.format(
+            ', {}'.format(self.parse_references()) if self.parse_references()
+            else ''
+        )
+        query += ') ENGINE={} DEFAULT CHARSET=utf8\n'.format(self.engine)
 
         return query
 
     def drop_table(self):
-        """
-        Return MySQL syntax for drop this model table
+        """Return MySQL syntax for drop this model table
         """
 
         existance = config.Database().drop_table_behaviours.get(
@@ -215,13 +267,14 @@ class MySQL(CommonSQL):
         """
 
         if not hasattr(self.model, '__engine__'):
-            return 'ENGINE=InnoDB'
+            return 'InnoDB'
 
-        return 'ENGINE={}'.format(self.model.__engine__)
+        return self.model.__engine__
 
     @staticmethod
     def register():
-        """Register this component"""
+        """Register this component
+        """
 
         try:
             components.registerAdapter(MambaSQLAdapter, MySQL, IMambaSQL)

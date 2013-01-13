@@ -21,11 +21,13 @@ from mamba.core.adapters import MambaSQLAdapter
 
 
 class SQLiteError(Exception):
-    """Base class for SQLite related errors"""
+    """Base class for SQLite related errors
+    """
 
 
 class SQLiteMissingPrimaryKey(SQLiteError):
-    """Fired when the model is missing the primary key"""
+    """Fired when the model is missing the primary key
+    """
 
 
 class SQLite(CommonSQL):
@@ -38,6 +40,11 @@ class SQLite(CommonSQL):
 
     def __init__(self, model):
         self.model = model
+
+    def parse_references(self):
+        """Just skips because SQLite doen't know anything about foreign keys
+        """
+        pass
 
     def parse_column(self, column):
         """
@@ -105,8 +112,7 @@ class SQLite(CommonSQL):
         )
 
     def create_table(self):
-        """
-        Return the SQLite syntax for create a table with this model
+        """Return the SQLite syntax for create a table with this model
         """
 
         query = 'CREATE TABLE {} (\n'.format((
@@ -125,8 +131,7 @@ class SQLite(CommonSQL):
         return query
 
     def drop_table(self):
-        """
-        Return SQLite syntax for drop this model table
+        """Return SQLite syntax for drop this model table
         """
 
         existance = config.Database().drop_table_behaviours.get(
@@ -141,7 +146,8 @@ class SQLite(CommonSQL):
 
     @staticmethod
     def register():
-        """Register this component"""
+        """Register this component
+        """
 
         try:
             components.registerAdapter(MambaSQLAdapter, SQLite, IMambaSQL)
