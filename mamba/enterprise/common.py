@@ -55,7 +55,8 @@ class DoublePrecission(properties.Float):
 
 
 class CommonSQL:
-    """I do nothing, my only purpse is serve as dummy object"""
+    """I do nothing, my only purpse is serve as dummy object
+    """
 
     def _parse_float(self, column):
         """

@@ -28,12 +28,14 @@ class MambaSQLAdapter:
             get_obj_info(self.original.model)
 
     def parse_column(self, column):
-        """Parse a Storm column to the correct SQL value"""
+        """Parse a Storm column to the correct SQL value
+        """
 
         return self.original.parse_column(column)
 
     def detect_primary_key(self):
-        """Detect and reeturn the primary key for the table"""
+        """Detect and reeturn the primary key for the table
+        """
 
         return self.original.detect_primary_key()
 

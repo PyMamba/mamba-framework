@@ -15,8 +15,7 @@ from zope.interface import Interface, Attribute
 
 
 class INotifier(Interface):
-    """
-    Every Inotifier class will implement this interface
+    """Every Inotifier class will implement this interface
     """
 
     def _notify(ignore, file_path, mask):

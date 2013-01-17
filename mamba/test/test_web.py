@@ -27,7 +27,7 @@ from mamba.test.test_less import less_file
 from mamba.test.application.controller.dummy import DummyController
 
 
-class StylesheetTest(unittest.SynchronousTestCase):
+class StylesheetTest(unittest.TestCase):
 
     def setUp(self):
         pass

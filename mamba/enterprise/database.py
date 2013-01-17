@@ -87,7 +87,8 @@ class Database(object):
             self.monkey_patched = True
 
     def start(self):
-        """Starts the Database (and the threadpool)"""
+        """Starts the Database (and the threadpool)
+        """
 
         if self.started:
             return
@@ -96,7 +97,8 @@ class Database(object):
         self.started = True
 
     def stop(self):
-        """Stops the Database (and the threadpool)"""
+        """Stops the Database (and the threadpool)
+        """
 
         if not self.started:
             return
