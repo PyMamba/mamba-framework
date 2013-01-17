@@ -72,7 +72,8 @@ class Controller(resource.Resource):
     _router = routing.Router()
 
     def __init__(self):
-        """Initialize."""
+        """Initialize
+        """
 
         resource.Resource.__init__(self)
         self._router.install_routes(self)
@@ -198,8 +199,7 @@ class Controller(resource.Resource):
         return server.NOT_DONE_YET
 
     def get_register_path(self):
-        """
-        Return the controller register path for URL Rewritting
+        """Return the controller register path for URL Rewritting
         """
 
         try:

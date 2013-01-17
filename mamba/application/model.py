@@ -20,11 +20,13 @@ from mamba.enterprise.database import Database, AdapterFactory
 
 
 class ModelError(Exception):
-    """Base class for Model Exceptions"""
+    """Base class for Model Exceptions
+    """
 
 
 class InvalidModelSchema(ModelError):
-    """Fired when an invalid scheme is detected"""
+    """Fired when an invalid scheme is detected
+    """
 
 
 class Model(object):
@@ -59,8 +61,7 @@ class Model(object):
 
     @property
     def uri(self):
-        """
-        Returns the database URI for this model
+        """Returns the database URI for this model
         """
 
         if hasattr(self, '__uri__'):
@@ -70,8 +71,7 @@ class Model(object):
 
     @transact
     def create(self):
-        """
-        Create a new register in the database
+        """Create a new register in the database
         """
 
         store = self.database.store(self)
@@ -96,8 +96,7 @@ class Model(object):
 
     @transact
     def update(self):
-        """
-        Update a register in the database
+        """Update a register in the database
         """
 
         store = self.database.store(self)
@@ -105,8 +104,7 @@ class Model(object):
 
     @transact
     def delete(self):
-        """
-        Delete a register from the database
+        """Delete a register from the database
         """
 
         store = self.database.store(self)
@@ -114,8 +112,7 @@ class Model(object):
 
     @transact
     def create_table(self):
-        """
-        Create the table for this model in the underlying database system
+        """Create the table for this model in the underlying database system
         """
 
         store = self.database.store(self)
@@ -123,8 +120,7 @@ class Model(object):
 
     @transact
     def drop_table(self):
-        """
-        Delete the table for this model in the underlying database system
+        """Delete the table for this model in the underlying database system
         """
 
         adapter = self.get_adapter()
@@ -143,7 +139,8 @@ class Model(object):
         return adapter.create_table()
 
     def get_uri(self):
-        """Return an URI instance using the uri config for this model"""
+        """Return an URI instance using the uri config for this model
+        """
 
         if self.uri is not None:
             uri = URI(self.uri)
@@ -153,7 +150,8 @@ class Model(object):
         return uri
 
     def get_adapter(self):
-        """Get a valid adapter for this model"""
+        """Get a valid adapter for this model
+        """
 
         uri = self.get_uri()
 
