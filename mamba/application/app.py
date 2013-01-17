@@ -13,7 +13,6 @@
 import os
 
 from twisted.python import versions, log, filepath
-from twisted.python.dist import twisted_subprojects
 
 from mamba import _version as _mamba_version
 from mamba.application import controller, appstyles
@@ -25,8 +24,8 @@ _app_project_ver = versions.Version('Project', 0, 1, 0)
 
 
 class ApplicationError(Exception):
-    """ApplicationError raises when an error occurs"""
-    pass
+    """ApplicationError raises when an error occurs
+    """
 
 
 class Mamba(borg.Borg):
@@ -107,6 +106,7 @@ class Mamba(borg.Borg):
             )
 
         self._log_file = file
+        log.startLogging(open(file, 'w'))
 
     @property
     def project_ver(self):
@@ -138,4 +138,4 @@ class Mamba(borg.Borg):
         raise ApplicationError("'ver' is readonly")
 
 
-__all__ = ['Application', 'ApplicationError']
+__all__ = ['Mamba', 'ApplicationError']
