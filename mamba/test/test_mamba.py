@@ -3,7 +3,7 @@
 # Ses LICENSE for more details
 
 """
-Tests for L{mamba.application.app} and L{mamba.scripts.mamba}
+Tests for mamba.application.app and mamba.scripts.mamba
 """
 
 from twisted.trial import unittest

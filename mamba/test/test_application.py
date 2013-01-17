@@ -2,8 +2,7 @@
 # Copyright (c) 2012 - Oscar Campos <oscar.campos@member.fsf.org>
 # Ses LICENSE for more details
 
-"""
-Tests for L{mamba.application.app}
+"""Tests for mamba.application.app
 """
 
 from twisted.trial import unittest
@@ -12,7 +11,8 @@ from mamba.application import app, controller, appstyles
 
 
 class ApplicationTests(unittest.TestCase):
-    """Tests for L{mamba.application.app}"""
+    """Tests for mamba.application.app
+    """
 
     def setUp(self):
         self.app = app.Mamba()
@@ -97,24 +97,3 @@ class ApplicationTests(unittest.TestCase):
     def test_appstyles_manager_is_instanced(self):
         manager = self.app.managers.get('styles')
         self.assertIsInstance(manager, appstyles.AppStyles)
-
-
-#    def test_get_template_was_called(self):
-#        self.spy.get_template('tac')
-#
-#        assert_that_method(self.spy.get_template).was_called()
-#
-#    def test_get_template_raises_error(self):
-#        self.failUnlessRaises(app.ApplicationError, self.spy.get_template, (
-#            'dontexists'
-#        ))
-#
-#    def test_get_template_works(self):
-#        self.assertNotEqual(None, self.spy.get_template('tac'))
-#
-#    def test_build_template_files(self):
-#        self.app.build_template_files()
-#        app_config = self.app.options.get('app_config', None)
-#        self.assertNotEqual(app_config, None)
-#        self.assertNotEqual(self.app.get_template('tac'), None)
-#        self.assertNotEqual(self.app.get_template('home'), None)

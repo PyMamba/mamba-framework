@@ -3,7 +3,12 @@
 # Ses LICENSE for more details
 
 """
-Mamba Emacs variable declarations related class and methods
+.. module:: filevariables
+    :platform: Unix, Windows
+    :synopsis: Mamba Emacs variables declarations related class and methods
+
+.. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
+
 """
 
 

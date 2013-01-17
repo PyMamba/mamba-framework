@@ -63,7 +63,8 @@ class Page(resource.Resource):
         self.register_controllers()
 
     def getChild(self, path, request):
-        """twisted.web.resource.Resource.getChild overwrite"""
+        """twisted.web.resource.Resource.getChild overwrite
+        """
 
         if path == '' or path is None or path == 'index' or path == 'app':
             return self
@@ -71,7 +72,8 @@ class Page(resource.Resource):
         return resource.Resource.getChild(self, path, request)
 
     def render_GET(self, request):
-        """Renders the index page"""
+        """Renders the index page
+        """
 
         _page = []
         a = _page.append
@@ -112,18 +114,21 @@ class Page(resource.Resource):
         return ''.join(_page)
 
     def add_meta(self, meta):
-        """Adds a meta to the page header"""
+        """Adds a meta to the page header
+        """
 
         self._options['meta'].append(meta)
 
     def add_script(self, script):
-        """Adds a script to the page"""
+        """Adds a script to the page
+        """
 
         self._scripts.append(script)
         self.putChild(script.prefix, static.File(script.path))
 
     def register_controllers(self):
-        """Add a child for each controller in the ControllerManager"""
+        """Add a child for each controller in the ControllerManager
+        """
 
         for controller in self._controllers_manager.get_controllers().values():
             log.msg(
