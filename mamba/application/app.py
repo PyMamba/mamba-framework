@@ -79,8 +79,14 @@ class Mamba(borg.Borg):
         }
 
         if options:
-            for k, v in options.iteritems():
-                setattr(self, k, v)
+            for key in dir(options):
+                if not key.startswith('__'):
+                    if key == 'port':
+                        setattr(self, '_port', getattr(options, key))
+                    elif key == 'version':
+                        setattr(self, '_ver', getattr(options, key))
+                    else:
+                        setattr(self, key, getattr(options, key))
 
     @property
     def port(self):
