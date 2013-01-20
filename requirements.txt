@@ -1,0 +1,9 @@
+# Run/Install requeriments
+twisted >= 10.2.0
+storm >= 0.19
+
+# Testing utils
+doublex >= 1.5.1
+
+# Documentation
+sphinx >= 1.1.3
