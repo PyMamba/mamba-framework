@@ -161,8 +161,40 @@ class NoSQL(BaseConfig):
     """
     """
 
-    def __init__(self):
+    def __init__(self, config_file=''):
         super(NoSQL, self).__init__()
+        self.load(config_file)
 
     def _defaults(self):
-        self.uri = 'pollas'
+        self.uri = ''
+
+
+class Application(BaseConfig):
+    """
+    Application configuration object
+
+    This object loads and parses the Mamba application configuration options
+    using a JSON file with the following format:
+
+        {
+            "name": "Mamba Application",
+            "description": "Mamba application description",
+            "version": 1.0
+            "port": 8080
+        }
+
+    :param config_file: the JSON file to load
+    :type config_file: str
+    """
+
+    def __init__(self, config_file=''):
+        super(Application, self).__init__()
+        self.load(config_file)
+
+    def _defaults(self):
+        """Set dedault data to config
+        """
+        pass
+
+
+__all__ = ['Database', 'Application']
