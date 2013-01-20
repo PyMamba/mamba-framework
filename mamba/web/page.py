@@ -22,9 +22,6 @@ class Page(resource.Resource):
     This represents a full web page in mamba applications. It's usually
     the root page of your web site/application.
 
-    TODO: Reimplement this class to use Jinja2 templating system and a
-    better and more flexible way of add/render scripts, styles and content.
-
     :param app: The Mamba Application that implements this page
     :type app: :class:`~mamba.application.app.Application`
     """
