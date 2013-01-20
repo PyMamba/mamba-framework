@@ -23,7 +23,11 @@ class ApplicationTests(unittest.TestCase):
 
     def test_constructor_overwrite_options(self):
         name1 = self.app.name
-        app_tmp = app.Mamba({'name': 'Test'})
+
+        class Dummy:
+            name = 'Test'
+
+        app_tmp = app.Mamba(Dummy())
         self.addCleanup(
             app_tmp.managers.get('controller').notifier.loseConnection)
         self.addCleanup(
