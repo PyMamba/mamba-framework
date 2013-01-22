@@ -45,9 +45,10 @@ setup(
         'test/application/view/stylesheets/*.less'
     ]},
     test_suite='tests',
-    tests_require=['twisted>=10.2.0', 'doublex'],
+    tests_require=['twisted>=10.2.0', 'doublex', 'PyHamcrest'],
     install_requires=['twisted>=10.2.0', 'storm>=0.19'],
-    requires=['twisted(>=10.2.0)', 'storm(>=0.19)'],
+    requires=[
+        'twisted(>=10.2.0)', 'storm(>=0.19)', 'zope.component', 'transaction'],
     entry_points={
         'console_scripts': [
             'mamba-admin = mamba.scripts.mamba_admin:run',
