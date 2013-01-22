@@ -24,7 +24,7 @@ class MambaAdminTest(unittest.TestCase):
 
         subCommands = config.subCommands
         expectedOrder = [
-            'application', 'database', 'controller', 'model', 'view', 'entity',
+            'application', 'sql', 'controller', 'model', 'view', 'entity',
             'test', 'start', 'stop'
         ]
 
