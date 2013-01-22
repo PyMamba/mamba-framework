@@ -59,7 +59,7 @@ class Mamba(borg.Borg):
         self._mamba_ver = _mamba_version.version.short()
         self._ver = _app_ver.short()
         self._port = 1936
-        self._log_file = '/var/log/mamba/my_mamba_app.log'
+        self._log_file = None
         self._project_ver = _app_project_ver.short()
 
         self.name = 'Mamba Webservice v%s' % _mamba_version.version.short()
@@ -85,6 +85,8 @@ class Mamba(borg.Borg):
                         setattr(self, '_port', getattr(options, key))
                     elif key == 'version':
                         setattr(self, '_ver', getattr(options, key))
+                    elif key == 'logfile':
+                        setattr(self, '_log_file', getattr(options, key))
                     else:
                         setattr(self, key, getattr(options, key))
 
@@ -112,7 +114,6 @@ class Mamba(borg.Borg):
             )
 
         self._log_file = file
-        log.startLogging(open(file, 'w'))
 
     @property
     def project_ver(self):
