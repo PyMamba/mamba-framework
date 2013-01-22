@@ -46,10 +46,11 @@ class Interaction(object):
                 create_color_func('darkgreen'),
                 create_color_func('darkred')
             )
-        elif type(colors) is not tuple and type(colors) is not list:
-            print('Error: colors must be tuple or list')
-            sys.exit(1)
         else:
+            if type(colors) is not tuple and type(colors) is not list:
+                print('Error: colors must be tuple or list')
+                sys.exit(1)
+
             colors = tuple([create_color_func(color) for color in colors])
 
         print('\n{}'.format(prompt), end=' ')
@@ -73,7 +74,7 @@ class Interaction(object):
             print('Interrupted')
             sys.exit(1)
         except IndexError:
-            print('Response number is greather than colors tuple')
+            print('Response number is greater than colors tuple')
             sys.exit(1)
 
     @staticmethod
@@ -92,6 +93,17 @@ class Interaction(object):
         :param help: the help to be shown
         :type help: tuple or list
         """
+
+        if help is None:
+            raise RuntimeError('Help can not be None')
+
+        if len(choices) != len(help):
+            raise RuntimeError(
+                'Choices and Help should has the same number of items'
+            )
+
+        if len(choices) == 0 or len(help) == 0:
+            raise RuntimeError('Nor choices or help can be empty')
 
         color = create_color_func('blue')
         print('\n{}'.format(prompt))
