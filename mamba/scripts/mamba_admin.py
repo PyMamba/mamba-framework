@@ -16,6 +16,7 @@ from mamba import version, license
 from mamba import copyright as mamba_copyright
 from mamba.utils.output import darkgreen, darkred
 from _project import ApplicationOptions, Application
+from _sql import SqlOptions, Sql
 
 
 class StartOptions(usage.Options):
@@ -35,7 +36,7 @@ class Options(usage.Options):
 
     subCommands = [
         ['application', None, ApplicationOptions, 'Generate new application'],
-        ['database', None, None, 'Manipulate database'],
+        ['sql', None, SqlOptions, 'Manipulate SQL database'],
         ['controller', None, None, 'Generate new controller'],
         ['model', None, None, 'Generate new model'],
         ['view', None, None, 'Generate new view'],
@@ -61,8 +62,8 @@ class Options(usage.Options):
     def opt_version(self):
         """Print version information and exit
         """
-        print('Mamba Framework v{}').format(version.short())
-        print('Twisted version: {}').format(copyright.version)
+        print('Mamba Framework v{}'.format(version.short()))
+        print('Twisted version: {}'.format(copyright.version))
         print(mamba_copyright.copyright)
 
     def opt_disclaimer(self):
@@ -82,6 +83,80 @@ class Options(usage.Options):
             print(self)
 
 
+def handle_application_command(options):
+    """I handle the application command
+    """
+
+    Application(
+        options.subOptions.opts['name'],
+        options.subOptions.opts['description'],
+        options.subOptions.opts['app-version'],
+        (options.subOptions.opts['configfile'],
+            options.subOptions.opts['logfile']),
+        options.subOptions.opts['port'],
+        True if options.subOptions.opts['noquestions'] == 1 else False
+    )
+
+
+def handle_start_command(options):
+    """I handle the start command
+    """
+
+    args = ['twistd']
+    try:
+        app_name = glob.glob(
+            'twisted/plugins/*.py')[0].split('/')[-1].split('_')[0]
+    except IndexError:
+        print(
+            'error: twisted directory can\'t be found. You should be in '
+            'the application directory in order to start it'
+        )
+        sys.exit(-1)
+
+    if filepath.exists('twistd.pid'):
+        print(
+            'error: twistd.pid found, seems like the application is '
+            'running already. If the application is not running, please '
+            'delete twistd.pid and try again'
+        )
+        sys.exit(-1)
+
+    args.append(app_name)
+
+    if options.subOptions.opts['port']:
+        args.append('--port={}'.format(options.subOptions.opts['port']))
+
+    print('starting application {}...'.format(app_name).ljust(73), end='')
+    if subprocess.call(args) == 0:
+        print('[{}]'.format(darkgreen('Ok')))
+        sys.exit(0)
+    else:
+        print('[{}]'.format(darkred('Fail')))
+        sys.exit(-1)
+
+
+def handle_stop_command():
+    """I handle the stop command
+    """
+    twisted_pid = filepath.FilePath('twistd.pid')
+    if not twisted_pid.exists():
+        print(
+            'error: twistd.pid file can\'t be found. You should be in the '
+            'application directory in order to stop it'
+        )
+        sys.exit(-1)
+
+    pid = twisted_pid.open().read()
+    print('killing process id {} with SIGINT signal'.format(
+        pid).ljust(73), end='')
+    try:
+        filepath.os.kill(int(pid), signal.SIGINT)
+        print('[{}]'.format(darkgreen('Ok')))
+    except:
+        print('[{}]'.format(darkred('Fail')))
+        raise
+
+
 def run():
 
     try:
@@ -92,66 +167,16 @@ def run():
         sys.exit(1)
 
     if options.subCommand == 'application':
-        Application(
-            options.subOptions.opts['name'],
-            options.subOptions.opts['description'],
-            options.subOptions.opts['app-version'],
-            options.subOptions.opts['file'],
-            options.subOptions.opts['port'],
-            True if options.subOptions.opts['noquestions'] == 1 else False
-        )
+        handle_application_command(options)
 
     if options.subCommand == 'start':
-        args = ['twistd']
-        try:
-            app_name = glob.glob(
-                'twisted/plugins/*.py')[0].split('/')[-1].split('_')[0]
-        except IndexError:
-            print(
-                'error: twisted directory can\'t be found. You should be in '
-                'the application directory in order to start it'
-            )
-            sys.exit(-1)
-
-        if filepath.exists('twistd.pid'):
-            print(
-                'error: twistd.pid found, seems like the application is '
-                'running already. If the application is not running, please '
-                'delete twistd.pid and try again'
-            )
-            sys.exit(-1)
-
-        args.append(app_name)
-
-        if options.subOptions.opts['port']:
-            args.append('--port={}'.format(options.subOptions.opts['port']))
-
-        print('starting application {}...'.format(app_name).ljust(73), end='')
-        if subprocess.call(args) == 0:
-            print('[{}]'.format(darkgreen('Ok')))
-            sys.exit(0)
-        else:
-            print('[{}]'.format(darkred('Fail')))
-            sys.exit(-1)
+        handle_start_command(options)
 
     if options.subCommand == 'stop':
-        twisted_pid = filepath.FilePath('twistd.pid')
-        if not twisted_pid.exists():
-            print(
-                'error: twistd.pid file can\'t be found. You should be in the '
-                'application directory in order to stop it'
-            )
-            sys.exit(-1)
+        handle_stop_command()
 
-        pid = twisted_pid.open().read()
-        print('killing process id {} with SIGINT signal'.format(
-            pid).ljust(73), end='')
-        try:
-            filepath.os.kill(int(pid), signal.SIGINT)
-            print('[{}]'.format(darkgreen('Ok')))
-        except:
-            print('[{}]'.format(darkred('Fail')))
-            raise
+    if options.subCommand == 'sql':
+        Sql(options)
 
 
 if __name__ == '__main__':
