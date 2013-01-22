@@ -38,8 +38,13 @@ class ApplicationOptions(usage.Options):
         ['description', 'd', 'A new Mamba application',
             'mamba application description', str],
         ['app-version', 'v', '1.0', 'mamba application version', str],
-        ['file', 'f', 'application.json',
+        ['configfile', 'f', 'application.json',
             'mamba application JSON config file', str],
+        ['logfile', 'l', None,
+            'log file (mamba already logs to twistd.log file in the root of '
+            'the application directory. If you set a value to this parameter, '
+            'mamba will log all the activity as daily rotations to that file '
+            'as well)'],
         ['port', 'p', 1936, 'mamba application listening port', int]
     ]
 
@@ -58,8 +63,12 @@ class ApplicationOptions(usage.Options):
     def postOptions(self):
         """Post options processing
         """
-        if not self['file'].endswith('.json'):
-            self['file'] = '{}.json'.format(self['file'])
+        if not self['configfile'].endswith('.json'):
+            self['configfile'] = '{}.json'.format(self['configfile'])
+
+        if self['logfile'] is not None:
+            if not self['logfile'].endswith('.log'):
+                self['logfile'] = '{}.log'.format(self['logfile'])
 
 
 def decorate_output(func):
@@ -93,11 +102,12 @@ class Application(object):
     :type port: int
     """
 
-    def __init__(self, name, description, version, file, port, noask=False):
+    def __init__(self, name, description, version, files, port, noask=False):
         self.name = name
         self.description = description
         self.version = version
-        self.file = file
+        self.file = files[0]
+        self.logfile = files[1]
         self.port = port
         self.noask = noask
 
@@ -289,7 +299,8 @@ class Application(object):
             'name': self.name,
             'description': self.description,
             'version': self.version,
-            'port': self.port
+            'port': self.port,
+            'logfile': self.logfile if self.logfile is not None else 'null'
         }
 
         config_file.open('w').write(config_template.safe_substitute(**args))

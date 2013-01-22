@@ -11,6 +11,7 @@
 """
 
 from twisted.python import log
+from twisted.python.logfile import DailyLogFile
 from twisted.internet import reactor
 from twisted.web import resource, static, server
 
@@ -45,6 +46,10 @@ class Page(resource.Resource):
             'description': app.description,
             'language': app.language
         })
+
+        # Register log file if any
+        if app.log_file is not None:
+            log.startLogging(DailyLogFile.fromFullPath(app.log_file))
 
         # Set page language
         self._header.language = app.language
@@ -131,14 +136,14 @@ class Page(resource.Resource):
             log.msg(
                 'Registering controller {} with route {} {}({})'.format(
                     controller.get('object').name,
-                    controller.get('object').__route__,
+                    controller.get('object').get_register_path(),
                     controller.get('object').name,
                     controller.get('module')
                 )
             )
 
             self.putChild(
-                controller.get('object').__route__,
+                controller.get('object').get_register_path(),
                 controller.get('object')
             )
 

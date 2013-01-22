@@ -2,5 +2,6 @@
     "name": "${name}",
     "description": "${description}",
     "version": "${version}",
-    "port": ${port}
+    "port": ${port},
+    "logfile": "${logfile}"
 }
