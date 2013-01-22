@@ -13,6 +13,7 @@ import transaction
 from storm.uri import URI
 from twisted.trial import unittest
 from twisted.python import filepath
+from storm.exceptions import DatabaseModuleError
 from storm.twisted.testing import FakeThreadPool
 from twisted.internet.defer import inlineCallbacks
 from storm.locals import Int, Unicode, Reference, Enum, List
@@ -80,17 +81,20 @@ class ModelTest(unittest.TestCase):
 
     def setUp(self):
 
-        threadpool = DummyThreadPool()
-        self.database = Database(threadpool)
-        Model.database = self.database
+        try:
+            threadpool = DummyThreadPool()
+            self.database = Database(threadpool)
+            Model.database = self.database
 
-        store = self.database.store()
-        store.execute(
-            'CREATE TABLE IF NOT EXISTS `dummy` ('
-            '    id INTEGER PRIMARY KEY, name TEXT'
-            ')'
-        )
-        store.commit()
+            store = self.database.store()
+            store.execute(
+                'CREATE TABLE IF NOT EXISTS `dummy` ('
+                '    id INTEGER PRIMARY KEY, name TEXT'
+                ')'
+            )
+            store.commit()
+        except DatabaseModuleError, error:
+            raise unittest.SkipTest(error)
 
     def tearDown(self):
         self.flushLoggedErrors()

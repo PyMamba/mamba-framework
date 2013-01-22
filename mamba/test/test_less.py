@@ -89,6 +89,11 @@ class LessCompilerTests(unittest.TestCase):
 
     @defer.inlineCallbacks
     def test_less_compiles(self):
+        try:
+            result = yield utils.getProcessOutput('lessc', [''], os.environ)
+        except utils._UnexpectedErrorOutput:
+            raise unittest.SkipTest('lessc is not available')
+
         lc = less.LessCompiler(self.file.name)
         result = yield lc.compile()
 
@@ -97,12 +102,15 @@ class LessCompilerTests(unittest.TestCase):
     @defer.inlineCallbacks
     def test_less_compile_to_css(self):
 
-        result = yield utils.getProcessOutput(
-            'lessc', [self.file.name], os.environ)
-        lc = less.LessCompiler(self.file.name)
-        retval = yield lc.compile()
+        try:
+            result = yield utils.getProcessOutput(
+                'lessc', [self.file.name], os.environ)
+            lc = less.LessCompiler(self.file.name)
+            retval = yield lc.compile()
 
-        self.assertEqual(retval, result)
+            self.assertEqual(retval, result)
+        except utils._UnexpectedErrorOutput:
+            raise unittest.SkipTest('lessc is not available')
 
     @defer.inlineCallbacks
     def test_less_compile_fallbacks(self):
@@ -148,6 +156,14 @@ class LessResourceTest(unittest.TestCase):
     @defer.inlineCallbacks
     def test_render(self):
         request = DummyRequest([self.fd.name])
+
+        def _get_script(self, ignore):
+            return filepath.FilePath(self.stylesheet).getContent().decode(
+                'utf-8'
+            )
+
+        # Monkeypatch to avoid unclean reactor state from mamba.app
+        self.patch(less.LessCompiler, '_get_script', _get_script)
         result = yield self._render(self.r, request)
         result = ''.join(result.written)
         lc = less.LessCompiler(self.fd.name)
