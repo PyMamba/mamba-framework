@@ -16,6 +16,7 @@ from twisted.python import filepath
 from twisted.web.server import Request
 from twisted.web.http_headers import Headers
 from twisted.web.test.test_web import DummyRequest
+from twisted.internet.error import ProcessTerminated
 from doublex import Stub, ProxySpy, Spy, called, assert_that
 
 from mamba.application import appstyles, controller
@@ -24,7 +25,7 @@ from mamba.web import stylesheet, page, asyncjson, response
 from mamba.web.routing import Route, Router, RouteDispatcher
 
 from mamba.test.test_less import less_file
-from mamba.test.application.controller.dummy import DummyController
+from mamba.test.dummy_app.application.controller.dummy import DummyController
 
 
 class StylesheetTest(unittest.TestCase):
@@ -34,6 +35,7 @@ class StylesheetTest(unittest.TestCase):
 
     def tearDown(self):
         self.doCleanups()
+        self.flushLoggedErrors(ProcessTerminated)
 
     def test_stylesheet_raises_on_not_existent_file(self):
 
@@ -48,7 +50,7 @@ class StylesheetTest(unittest.TestCase):
         self.assertRaises(
             stylesheet.InvalidFileExtension,
             stylesheet.Stylesheet,
-            '../mamba/test/application/controller/dummy.py'
+            '../mamba/test/dummy_app/application/controller/dummy.py'
         )
 
     def test_stylesheet_raises_on_invalid_file_content(self):
@@ -70,7 +72,7 @@ class StylesheetTest(unittest.TestCase):
     def test_stylesheet_load_valid_file(self):
 
         style = stylesheet.Stylesheet(
-            '../mamba/test/application/view/stylesheets/dummy.less'
+            '../mamba/test/dummy_app/application/view/stylesheets/dummy.less'
         )
 
         self.assertTrue(style.data != '')
@@ -87,13 +89,15 @@ class StylesheetManagerTest(unittest.TestCase):
         self.flushLoggedErrors()
 
     def load_style(self):
-        self.mgr.load('../mamba/test/application/view/stylesheets/dummy.less')
+        self.mgr.load(
+            '../mamba/test/dummy_app/application/view/stylesheets/dummy.less')
 
     def test_setup_doesnt_works_until_correct_path(self):
         self.mgr.setup()
         self.assertFalse(len(self.mgr._stylesheets))
 
-        self.mgr._styles_store = '../mamba/test/application/view/stylesheets'
+        self.mgr._styles_store = (
+            '../mamba/test/dummy_app/application/view/stylesheets')
 
         self.mgr.setup()
         self.assertTrue(len(self.mgr._stylesheets))
@@ -155,6 +159,7 @@ class PageTest(unittest.TestCase):
             app.name = 'Testing App'
             app.language = 'en_EN'
             app.description = 'Test Description'
+            app.log_file = 'application.log'
 
             with Stub() as controllers:
                 controllers.get_controllers().returns({})
@@ -215,7 +220,7 @@ class PageTest(unittest.TestCase):
 
         root = page.Page(self.get_commons())
         style = stylesheet.Stylesheet(
-            '../mamba/test/application/view/stylesheets/dummy.less'
+            '../mamba/test/dummy_app/application/view/stylesheets/dummy.less'
         )
         root.add_script(style)
 
@@ -231,8 +236,8 @@ class PageTest(unittest.TestCase):
         root = page.Page(self.get_commons())
         mgr = controller.ControllerManager()
         self.addCleanup(mgr.notifier.loseConnection)
-        sys.path.append('../mamba/test')
-        mgr.load('../mamba/test/application/controller/dummy.py')
+        sys.path.append('../mamba/test/dummy_app')
+        mgr.load('../mamba/test/dummy_app/application/controller/dummy.py')
 
         root._controllers_manager = mgr
         root.register_controllers()
@@ -361,6 +366,13 @@ class RouterTest(unittest.TestCase):
         self.assertEqual(result.headers, {'content-type': 'text/html'})
 
     @defer.inlineCallbacks
+    def test_defer_routing_methods(self):
+
+        request = request_generator(['/defer'])
+        result = yield StubController().render(request)
+        self.assertEqual(result.subject, 'Hello Defer!')
+
+    @defer.inlineCallbacks
     def test_dispatch_route_returns_json_on_response_object(self):
 
         StubController.test2 = routes_generator(
@@ -430,7 +442,7 @@ class RouterTest(unittest.TestCase):
         router = Router()
         router.install_routes(StubController())
 
-        self.assertTrue(len(router.routes['GET']) == 1)
+        self.assertTrue(len(router.routes['GET']) == 2)
 
         del router
         router = Router()
@@ -442,7 +454,7 @@ class RouterTest(unittest.TestCase):
         StubController.another_test = another_test
         router.install_routes(StubController())
 
-        self.assertTrue(len(router.routes['GET']) == 2)
+        self.assertTrue(len(router.routes['GET']) == 3)
 
     def test_install_router_fails_when_give_wrong_arguments(self):
 
@@ -456,7 +468,7 @@ class RouterTest(unittest.TestCase):
         router.install_routes(StubController())
 
         # only one of the routes should be installed
-        self.assertTrue(len(router.routes['GET']) == 1)
+        self.assertTrue(len(router.routes['GET']) == 2)
 
 
 class TestRouteDispatcher(unittest.TestCase):
@@ -520,6 +532,13 @@ class StubController(object):
     @decoroute('/test/<int:user_id>')
     def test(self, request, user_id, **kwargs):
         return 'User ID : {}'.format(user_id)
+
+    @decoroute('/defer')
+    @defer.inlineCallbacks
+    def deferred(self, request, **kwargs):
+        val1 = yield 'Hello '
+        val2 = yield 'Defer!'
+        defer.returnValue(val1 + val2)
 
 
 def routes_generator(retval, method='GET'):

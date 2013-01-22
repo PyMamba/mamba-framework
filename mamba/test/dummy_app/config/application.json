@@ -1,0 +1,7 @@
+{
+    "name": "dummy",
+    "description": "This a Dummy application just for testing purposes",
+    "version": "0.1.2",
+    "port": 8080,
+    "logfile": null
+}

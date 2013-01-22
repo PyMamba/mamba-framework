@@ -13,7 +13,7 @@ from mamba import __version__
 from mamba.core import interfaces
 from mamba.plugin import ExtensionPoint
 from mamba.application import controller
-from mamba.test.application.controller import dummy
+from mamba.test.dummy_app.application.controller import dummy
 
 
 class MambaTest(unittest.TestCase):

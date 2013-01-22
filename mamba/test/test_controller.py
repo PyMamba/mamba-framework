@@ -19,7 +19,7 @@ from twisted.web.test.test_web import DummyRequest
 from doublex import Spy, ProxySpy, assert_that, ANY_ARG, called
 
 from mamba.web.routing import Router
-from mamba.test.application.controller.dummy import DummyController
+from mamba.test.dummy_app.application.controller.dummy import DummyController
 
 from mamba.web.response import Ok
 from mamba.application import controller
@@ -134,8 +134,9 @@ class ControllerManagerTest(unittest.TestCase):
         self.addCleanup(self.mgr.notifier.loseConnection)
 
     def load_manager(self):
-        sys.path.append('../mamba/test')
-        self.mgr.load('../mamba/test/application/controller/dummy.py')
+        sys.path.append('../mamba/test/dummy_app')
+        self.mgr.load(
+            '../mamba/test/dummy_app/application/controller/dummy.py')
 
     def test_inotifier_provided_by_controller_manager(self):
         self.assertTrue(INotifier.providedBy(self.mgr))
@@ -149,7 +150,7 @@ class ControllerManagerTest(unittest.TestCase):
     def test_is_valid_file_works_on_valid(self):
         import os
         currdir = os.getcwd()
-        os.chdir('../mamba/test/')
+        os.chdir('../mamba/test/dummy_app/')
         self.assertTrue(self.mgr.is_valid_file('dummy.py'))
         os.chdir(currdir)
 

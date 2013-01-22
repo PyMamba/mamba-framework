@@ -20,7 +20,7 @@ class DatabaseTest(unittest.TestCase):
         config.Database('default')
 
     def test_database_load(self):
-        config.Database('../mamba/test/application/config/database.json')
+        config.Database('../mamba/test/dummy_app/config/database.json')
         self.assertTrue(config.Database().loaded)
         self.assertEqual(config.Database().uri, 'sqlite:')
         self.assertEqual(config.Database().min_threads, 5)
@@ -47,7 +47,7 @@ class DatabaseTest(unittest.TestCase):
         filepath.FilePath(bad_file.name).remove()
 
     def test_database_dont_fallback_on_no_existent_when_valid_previous(self):
-        config.Database('../mamba/test/application/config/database.json')
+        config.Database('../mamba/test/dummy_app/config/database.json')
         config.Database('unknown.json')
         self.assertTrue(config.Database().loaded)
         self.assertEqual(config.Database().min_threads, 5)
