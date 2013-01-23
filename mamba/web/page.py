@@ -10,7 +10,7 @@
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 """
 
-from twisted.python import log
+from twisted.python import log, filepath
 from twisted.python.logfile import DailyLogFile
 from twisted.internet import reactor
 from twisted.web import resource, static, server
@@ -64,6 +64,9 @@ class Page(resource.Resource):
         # register controllers
         self.register_controllers()
 
+        # static data
+        self.putChild('mamba', static.File(filepath.os.getcwd() + '/static'))
+
     def getChild(self, path, request):
         """twisted.web.resource.Resource.getChild overwrite
         """
@@ -93,7 +96,7 @@ class Page(resource.Resource):
         if 'resPath' in self._options and 'media' in self._options['resPath']:
             media = self._options['resPath']['media']
         else:
-            media = 'media'
+            media = 'mamba'
         a('        {}\n'.format(self._header.get_favicon_content(media)))
 
         # Iterate over the defined meta keys and add it to the header's page

@@ -156,6 +156,8 @@ class Application(object):
         self._write_factory()
         # write config file
         self._write_config()
+        # writing favicon file
+        self._write_favicon()
 
     @decorate_output
     def _generate_application_directory(self):
@@ -244,7 +246,7 @@ class Application(object):
                 template if template.endswith('.tpl') else '{}.tpl'.format(
                     template
                 )
-            )).open().read()
+            )).open('rb' if template.endswith('.ico') else 'r').read()
         )
 
     @decorate_output
@@ -295,12 +297,30 @@ class Application(object):
         config_file = filepath.FilePath(
             '{}/config/{}'.format(self.app_dir, self.file))
         config_template = self._load_template_from_mamba('application.json')
+
+        if self.logfile is not None:
+            logfile = '"{}"'.format(self.logfile)
+        else:
+            logfile = 'null'
+
         args = {
             'name': self.name,
             'description': self.description,
             'version': self.version,
             'port': self.port,
-            'logfile': self.logfile if self.logfile is not None else 'null'
+            'logfile': logfile
         }
 
         config_file.open('w').write(config_template.safe_substitute(**args))
+
+    @decorate_output
+    def _write_favicon(self):
+        """Write the favicon.ico file to the static directory
+        """
+
+        print('Writting favicon.ico file...'.ljust(73), end='')
+        favicon_file = filepath.FilePath(
+            '{}/static/favicon.ico'.format(self.app_dir)
+        )
+        favicon_template = self._load_template_from_mamba('favicon.ico')
+        favicon_file.open('wb').write(favicon_template.template)
