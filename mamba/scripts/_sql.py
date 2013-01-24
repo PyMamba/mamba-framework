@@ -4,9 +4,13 @@
 
 from __future__ import print_function
 
-from twisted.python import usage
+import sys
+
+from twisted.python import usage, filepath
 
 from mamba import copyright
+from mamba.scripts import commons
+from mamba.utils.output import darkred, darkgreen
 
 __version__ = '0.1.0'
 
@@ -28,7 +32,13 @@ class SqlConfigOptions(usage.Options):
             'If present, mamba will add an `IF EXISTS` clause to any intent '
             'to DROP a table'],
         ['non-restrict', None, 'If present, mamba will NOT use restrict drop'],
-        ['cascade', None, 'If present, mamba will use CASCADE in drops']
+        ['cascade', None, 'If present, mamba will use CASCADE in drops'],
+        ['noquestions', 'n',
+            'When this option is set, mamba will NOT ask anything to the user '
+            'that means it will delete any previous database configuration '
+            'and will accept any options that are passed to it (even default '
+            'ones).'
+            'Use with caution']
     ]
 
     optParameters = [
@@ -50,18 +60,21 @@ class SqlConfigOptions(usage.Options):
             'Minimum number of threads to use by the thread pool', int],
         ['max-threads', None, 20,
             'Maximum number of thread to use by the thread pool', int],
-        ['hostname', 'h', None, 'Hostname (this is optional)', str],
-        ['port', 'p', None, 'Port (this is optional)', int],
-        ['username', 'U', None,
+        ['hostname', None, None, 'Hostname (this is optional)', str],
+        ['port', None, None, 'Port (this is optional)', int],
+        ['username', None, None,
             'Username which connect to (this is optional)', str],
-        ['password', 'p', None, 'Password to connect (this is optional)', str],
-        ['backend', 'b', 'sqlite',
+        ['password', None, None,
+            'Password to connect (this is optional)', str],
+        ['backend', None, 'sqlite',
             'SQL backend to use. Should be one of [sqlite|mysql|postgres] '
             '(this is optional but should be present if no URI is being to be '
             'used)', str],
-        ['database', 'd', None,
+        ['database', None, None,
             'database (this is optional but should be suply if not using '
-            'URI type configuration)', str]
+            'URI type configuration)', str],
+        ['path', None, None, 'database path (only for sqlite)'],
+        ['option', None, None, 'SQLite additional option']
     ]
 
     def postOptions(self):
@@ -78,7 +91,7 @@ class SqlConfigOptions(usage.Options):
                 'min-threads should be a positive value greater than zero'
             )
 
-        if self['max-threads'] <= 4 or self['max-threads'] >= 1024:
+        if self['max-threads'] <= 4 or self['max-threads'] > 1024:
             raise usage.UsageError, (
                 'max-threads should be a positive number between 5 and 1024'
             )
@@ -98,30 +111,33 @@ class SqlConfigOptions(usage.Options):
                 )
 
             self['uri'] = self._generate_uri()
-            print(self['uri'])
 
     def _generate_uri(self):
         """Generate an URI string through --hostname and friends options
         """
 
-        slash = self['backend'] if self['backend'] == 'sqlite' else ''
-        password = self['password'] if self['password'] is not None else ''
-
-        uri = (
-            '{b}:{slash}{user}{colon}{password}{at}{host}{port_colon}{port}/'
-            '{database_name}'.format(
-                b=self['backend'],
-                slash=slash,
-                user=self['username'] if self['username'] is not None else '',
-                colon=':' if self['password'] is not None else '',
-                password=password,
-                at='@' if self['username'] is not None else '',
-                host=self['hostname'],
-                port_colon=':' if self['port'] is not None else '',
-                port=self['port'] if self['port'] is not None else '',
-                database_name=self['database']
+        if self['backend'] == 'sqlite':
+            uri = 'sqlite:{path}{option}'.format(
+                path=self['path'] if self['path'] is not None else '',
+                option='?' + self['option'] if self['option'] else ''
             )
-        )
+        else:
+            password = self['password'] if self['password'] is not None else ''
+
+            uri = (
+                '{b}://{user}{colon}{password}{at}{host}{port_colon}{port}/'
+                '{database_name}'.format(
+                    b=self['backend'],
+                    user=self['username'] if self['username'] else '',
+                    colon=':' if self['password'] is not None else '',
+                    password=password,
+                    at='@' if self['username'] is not None else '',
+                    host=self['hostname'],
+                    port_colon=':' if self['port'] is not None else '',
+                    port=self['port'] if self['port'] is not None else '',
+                    database_name=self['database']
+                )
+            )
 
         return uri
 
@@ -191,11 +207,67 @@ class Sql(object):
         if self.options.subCommand == 'configure':
             self._handle_configure_command()
         else:
-            if not self.options.subOptions.opts['version']:
+            if not self.options['version']:
                 print(self.options)
 
     def _handle_configure_command(self):
         """Take care of SQL configuration to generate config/database.json file
         """
 
+        try:
+            mamba_services = commons.import_services()
+        except Exception:
+            print(
+                'error: make sure you are inside a mmaba application root '
+                'directory and then run this command again'
+            )
+            sys.exit(-1)
 
+        if not self.options.subOptions.opts['noquestions']:
+            query = (
+                'You are going to generate (and possible overwrite) a '
+                'database.json configuration file for your database. Are you '
+                'sure do you want to do that? (Ctrl+c to abort)'
+            )
+            if commons.Interaction.userquery(query) == 'No':
+                print('Skiping...')
+                sys.exit(0)
+
+        options = {
+            'uri': self.options.subOptions.opts['uri'],
+            'min_threads': self.options.subOptions.opts['min-threads'],
+            'max_threads': self.options.subOptions.opts['max-threads'],
+            'auto_adjust_pool_size': (True if (
+                self.options.subOptions.opts['autoadjust-pool'])
+                else False
+            ),
+            'create_table_behaviours': {
+                'create_table_if_not_exists': (True if (
+                    self.options.subOptions.opts['create-if-not-exists'])
+                    else False
+                ),
+                'drop_table': (True if (
+                    self.options.subOptions['drop-table']) else False
+                )
+            },
+            'drop_table_behaviours': {
+                'drop_if_exists': (True if(
+                    self.options.subOptions.opts['drop-if-exists']) else False
+                ),
+                'restrict': (False if(
+                    self.options.subOptions.opts['non-restrict']) else True
+                ),
+                'cascade': (True if(
+                    self.options.subOptions.opts['cascade']) else False
+                )
+            }
+        }
+
+        try:
+            print('Wriing databse config file...'.ljust(73), end='')
+            mamba_services.config.Database.write(options)
+            print('[{}]'.format(darkgreen('Ok')))
+        except OSError:
+            print('[{}]'.format(darkred('Fail')))
+            raise
+            sys.exit(-1)
