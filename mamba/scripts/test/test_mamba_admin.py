@@ -14,6 +14,7 @@ from twisted.trial import unittest
 
 from mamba.scripts import mamba_admin
 from mamba.scripts._project import Application
+from mamba.scripts._sql import Sql, SqlConfigOptions
 
 
 class MambaAdminTest(unittest.TestCase):
@@ -129,7 +130,82 @@ class ApplcationTest(unittest.TestCase):
         self.assertTrue(filepath.exists('test/application/view'))
 
 
-class MambaAdminDatabaseTest(unittest.TestCase):
+class MambaAdminSqlTest(unittest.TestCase):
 
     def setUp(self):
-        self.config = mamba_admin.DatabaseOptions()
+        self.config = SqlConfigOptions()
+
+    def test_wrong_number_of_args(self):
+        self.assertRaises(usage.UsageError, self.config.parseOptions, ['test'])
+
+    def test_drop_table_and_create_if_not_exists_conflicts(self):
+        self.assertRaises(
+            usage.UsageError,
+            self.config.parseOptions,
+            ['--drop-table', '--create-if-not-exists']
+        )
+
+    def test_min_thread_can_not_be_less_or_equals_to_zero(self):
+        self.assertRaises(
+            usage.UsageError,
+            self.config.parseOptions,
+            ['--min-threads=0']
+        )
+        self.assertRaises(
+            usage.UsageError,
+            self.config.parseOptions,
+            ['--min-threads=-1']
+        )
+
+    def test_max_threads_can_not_be_less_than_five_or_more_than_1024(self):
+        self.assertRaises(
+            usage.UsageError,
+            self.config.parseOptions,
+            ['--max-threads=4']
+        )
+        self.assertRaises(
+            usage.UsageError,
+            self.config.parseOptions,
+            ['--max-threads=1025']
+        )
+
+    def test_backend_must_be_valid_on_hostname_or_username_options(self):
+        self.assertRaises(
+            usage.UsageError,
+            self.config.parseOptions,
+            ['--hostname=localhost', '--backend=test', '--database=test']
+        )
+
+    def test_database_should_be_passed_on_hostanme_or_username_options(self):
+        self.assertRaises(
+            usage.UsageError,
+            self.config.parseOptions,
+            ['--hostname=localhost', '--backend=sqlite']
+        )
+
+    def test_generate_uri(self):
+        self.config.parseOptions([
+            '--username', 'testuser', '--password', 'testpassword',
+            '--backend', 'mysql', '--database', 'testdb'
+        ])
+        self.assertEqual(
+            self.config['uri'],
+            'mysql://testuser:testpassword@localhost/testdb'
+        )
+
+        self.config.parseOptions([
+            '--username', 'testuser', '--password', 'testpassword',
+            '--backend', 'postgres', '--database', 'testdb'
+        ])
+        self.assertEqual(
+            self.config['uri'],
+            'postgres://testuser:testpassword@localhost/testdb'
+        )
+
+        self.config.parseOptions([
+            '--backend', 'sqlite', '--path', 'testdb'
+        ])
+        self.assertEqual(
+            self.config['uri'],
+            'sqlite:testdb'
+        )
