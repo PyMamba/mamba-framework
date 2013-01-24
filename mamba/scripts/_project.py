@@ -154,6 +154,8 @@ class Application(object):
         self._write_plugin()
         # write factory
         self._write_factory()
+        # write services file
+        self._write_services()
         # write config file
         self._write_config()
         # writing favicon file
@@ -254,7 +256,7 @@ class Application(object):
         """Write the plugin template to the file system
         """
 
-        print('Writting Twisted plugin...'.ljust(73), end='')
+        print('Writing Twisted plugin...'.ljust(73), end='')
         plugin_file = filepath.FilePath('{}/twisted/plugins/{}'.format(
             self.app_dir, '{}_plugin.py'.format(self.name.lower())
         ))
@@ -272,7 +274,7 @@ class Application(object):
         """Write the factory template to the file system
         """
 
-        print('Writting plugin factory...'.ljust(73), end='')
+        print('Writing plugin factory...'.ljust(73), end='')
         factory_file = filepath.FilePath('{}/{}.py'.format(
             self.app_dir, self.name.lower()
         ))
@@ -289,11 +291,23 @@ class Application(object):
         factory_file.open('w').write(factory_template.safe_substitute(**args))
 
     @decorate_output
+    def _write_services(self):
+        """Write the mamba services template to the file system
+        """
+
+        print('Writing mamba service...'.ljust(73), end='')
+        service_file = filepath.FilePath('{}/mamba_services.py'.format(
+            self.app_dir
+        ))
+        service_template = self._load_template_from_mamba('mamba_services')
+        service_file.open('w').write(service_template.template)
+
+    @decorate_output
     def _write_config(self):
         """Write config file template to the file system
         """
 
-        print('Writting configuration file...'.ljust(73), end='')
+        print('Writing configuration file...'.ljust(73), end='')
         config_file = filepath.FilePath(
             '{}/config/{}'.format(self.app_dir, self.file))
         config_template = self._load_template_from_mamba('application.json')
@@ -318,7 +332,7 @@ class Application(object):
         """Write the favicon.ico file to the static directory
         """
 
-        print('Writting favicon.ico file...'.ljust(73), end='')
+        print('Writing favicon.ico file...'.ljust(73), end='')
         favicon_file = filepath.FilePath(
             '{}/static/favicon.ico'.format(self.app_dir)
         )
