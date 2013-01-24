@@ -11,6 +11,7 @@ import subprocess
 
 from twisted import copyright
 from twisted.python import usage, filepath
+from storm import version as storm_version
 
 from mamba import version, license
 from mamba import copyright as mamba_copyright
@@ -63,7 +64,8 @@ class Options(usage.Options):
         """Print version information and exit
         """
         print('Mamba Framework v{}'.format(version.short()))
-        print('Twisted version: {}'.format(copyright.version))
+        print('Twisted version: v{}'.format(copyright.version))
+        print('Storm ORM version v{}'.format(storm_version))
         print(mamba_copyright.copyright)
 
     def opt_disclaimer(self):
@@ -176,7 +178,7 @@ def run():
         handle_stop_command()
 
     if options.subCommand == 'sql':
-        Sql(options)
+        Sql(options.subOptions)
 
 
 if __name__ == '__main__':
