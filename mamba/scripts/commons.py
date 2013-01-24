@@ -13,6 +13,9 @@
 
 from __future__ import print_function
 import sys
+import imp
+
+from twisted.python import filepath
 
 from mamba.utils.output import bold, create_color_func
 
@@ -150,3 +153,31 @@ class Interaction(object):
         except (EOFError, KeyboardInterrupt):
             print('Interrupted')
             sys.exit(1)
+
+
+def import_services():
+    """I try to import services file from application directory
+    """
+
+    path = filepath.FilePath('mamba_services.py')
+    if not path.exists():
+        raise ImportError('mamba_services.py file does not exists')
+
+    code = compile(path.open('U').read(), path.path, 'exec')
+
+    # create a new module
+    module = imp.new_module('mamba_services')
+    sys.modules['mamba_services'] = module
+
+    # fill the module scope
+    module.__name__ = 'mamba_services'
+    module.__file__ = 'mamba_services.py'
+
+    try:
+        exec code in module.__dict__
+    except:
+        del sys.modules['mamba_services']
+        # propagate
+        raise
+
+    return module
