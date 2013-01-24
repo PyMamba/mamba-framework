@@ -13,6 +13,7 @@ from mamba import __version__
 from mamba.core import interfaces
 from mamba.plugin import ExtensionPoint
 from mamba.application import controller
+from twisted.internet.error import ProcessTerminated
 from mamba.test.dummy_app.application.controller import dummy
 
 
@@ -20,6 +21,9 @@ class MambaTest(unittest.TestCase):
 
     def setUp(self):
         pass
+
+    def tearDown(self):
+        self.flushLoggedErrors(ProcessTerminated)
 
     def test_get_version_is_string(self):
         self.assertIs(type(__version__), type(str()))
