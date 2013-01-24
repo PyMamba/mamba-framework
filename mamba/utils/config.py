@@ -148,6 +148,20 @@ class Database(BaseConfig):
             'cascade': False
         }
 
+    @staticmethod
+    def write(options):
+        """
+        Write options to the configuration file
+
+        :param options: the options from the mamba-admin commands tool
+        :type options: dict
+        """
+
+        config_file = filepath.FilePath(
+            '{}/config/database.json'.format(filepath.abspath('.'))
+        )
+        config_file.open('w').write(json.dumps(options, indent=4))
+
     def __repr__(self):
         return 'config.Database(%s)' % (
             ', '.join(map(repr, [
