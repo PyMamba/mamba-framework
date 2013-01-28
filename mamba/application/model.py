@@ -11,11 +11,14 @@
 
 """
 
+from os.path import normpath
+
 from storm.uri import URI
 from storm.twisted.transact import Transactor, transact
 
+from mamba import plugin
 from mamba.utils import config
-from mamba.core import interfaces
+from mamba.core import interfaces, module
 from mamba.enterprise.database import Database, AdapterFactory
 
 
@@ -138,6 +141,14 @@ class Model(object):
         adapter = self.get_adapter()
         return adapter.create_table()
 
+    @transact
+    def dump_data(self):
+        """Dumps the SQL data
+        """
+
+        adapter = self.get_adapter()
+        return adapter.insert_data(self.database.store(self))
+
     def get_uri(self):
         """Return an URI instance using the uri config for this model
         """
@@ -170,3 +181,45 @@ class Model(object):
             )
 
         return adapter
+
+
+class ModelProvider:
+    """Mount point for plugins which refer to Models for our applications
+    """
+
+    __metaclass__ = plugin.ExtensionPoint
+
+
+class ModelManager(module.ModuleManager):
+    """
+    Uses a ModelProvider to load, store and reload Mamba Models.
+
+    :attr:`_model_store` A private attribute that sets the prefix
+    path for the models store
+    """
+
+    def __init__(self):
+        """Initialize
+        """
+
+        self._module_store = 'application/model'
+        super(ModelManager, self).__init__()
+
+    def get_models(self):
+        """Return the models pool
+        """
+
+        return self._modules
+
+    def is_valid_file(self, file_path):
+        """
+        Check if a file is a Mamba model file
+
+        :param file_path: the file path of the file to check
+        :type file_path: str
+        """
+
+        return self._valid_file(
+            normpath('{}/{}'.format(self._module_store, file_path)),
+            'mamba-model'
+        )

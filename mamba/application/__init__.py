@@ -15,7 +15,7 @@ from .controller import (
     Controller, ControllerManager, ControllerProvider, ControllerError
 )
 from .appstyles import AppStyles
-from .model import Model
+from .model import Model, ModelManager
 from mamba.web.routing import Router
 
 route = Router().route
@@ -24,6 +24,6 @@ __all__ = [
     'Mamba', 'ApplicationError', '_app_ver',
     'Controller', 'ControllerManager', 'ControllerProvider', 'ControllerError',
     'AppStyles',
-    'Model',
+    'Model', 'ModelManager',
     'route'
 ]

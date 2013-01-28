@@ -228,13 +228,15 @@ class ControllerManager(module.ModuleManager):
     """
 
     def __init__(self):
-        """Initialize"""
+        """Initialize
+        """
 
         self._module_store = 'application/controller'
         super(ControllerManager, self).__init__()
 
     def get_controllers(self):
-        """Return the controllers pool"""
+        """Return the controllers pool
+        """
 
         return self._modules
 
