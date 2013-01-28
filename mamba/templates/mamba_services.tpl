@@ -12,4 +12,7 @@
     need this file as is
 """
 
+import sys
+sys.path.append('.')
+
 from mamba.utils import config
