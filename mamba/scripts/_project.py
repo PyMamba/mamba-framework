@@ -137,6 +137,8 @@ class Application(object):
         self._generate_application_directory()
         # create application directories
         self._generate_application_directories()
+        # create needed __init__.py files
+        self._generate_init_scripts()
         # write page plugin
         self._write_plugin()
         # write factory
@@ -220,6 +222,25 @@ class Application(object):
         print('Generating {} directory...'.format(directory).ljust(73), end='')
         fp = filepath.FilePath('{}/{}'.format(self.app_dir, directory))
         fp.createDirectory()
+
+    def _generate_init_scripts(self):
+        """Generated the needed __init__.py script files
+        """
+
+        # application level
+        script = filepath.FilePath(
+            '{}/application/__init__.py'.format(self.app_dir))
+        script.open('w').write('# Mamba application root directory\n')
+
+        # controller level
+        script = filepath.FilePath(
+            '{}/application/controller/__init__.py'.format(self.app_dir))
+        script.open('w').write('# Controllers should be placed here\n')
+
+        # model level
+        script = filepath.FilePath(
+            '{}/application/model/__init__.py'.format(self.app_dir))
+        script.open('w').write('# Models should be placed here\n')
 
     def _load_template_from_mamba(self, template):
         """
