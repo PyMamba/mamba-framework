@@ -6,10 +6,8 @@ from __future__ import print_function
 
 import re
 import sys
-import datetime
 from cStringIO import StringIO
 
-from storm.uri import URI
 from twisted.python import usage
 
 from mamba import copyright
