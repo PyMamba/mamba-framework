@@ -10,9 +10,9 @@
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 """
 
+from twisted.internet import reactor
 from twisted.python import log, filepath
 from twisted.python.logfile import DailyLogFile
-from twisted.internet import reactor
 from twisted.web import resource, static, server
 
 from mamba.http import headers
