@@ -14,10 +14,11 @@
 from __future__ import print_function
 import sys
 import imp
+import functools
 
 from twisted.python import filepath
 
-from mamba.utils.output import bold, create_color_func
+from mamba.utils.output import bold, darkgreen, darkred, create_color_func
 
 
 class Interaction(object):
@@ -181,3 +182,18 @@ def import_services():
         raise
 
     return module
+
+
+def decorate_output(func):
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            result = func(*args, **kwargs)
+            print('[{}]'.format(darkgreen('Ok')))
+            return result
+        except:
+            print('[{}]'.format(darkred('Fail')))
+            raise
+
+    return wrapper

@@ -4,17 +4,17 @@
 
 from __future__ import print_function
 
+import re
 import sys
 import getpass
-import functools
 from string import Template
 
 from twisted.python import usage, filepath
 
 from mamba import copyright
-from commons import Interaction
+from commons import Interaction, decorate_output
 from mamba.utils.output import (
-    blue, brown, darkred, darkgreen, resetColor as reset
+    blue, brown, darkred, resetColor as reset
 )
 
 __version__ = '0.1.0'
@@ -58,7 +58,9 @@ class ApplicationOptions(usage.Options):
         """Parse command arguments
         """
 
-        self['name'] = name
+        regex = re.compile(r'[\W]')
+        name = name.replace(' ', '_')
+        self['name'] = regex.sub('', name)
 
     def postOptions(self):
         """Post options processing
@@ -69,21 +71,6 @@ class ApplicationOptions(usage.Options):
         if self['logfile'] is not None:
             if not self['logfile'].endswith('.log'):
                 self['logfile'] = '{}.log'.format(self['logfile'])
-
-
-def decorate_output(func):
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        try:
-            result = func(*args, **kwargs)
-            print('[{}]'.format(darkgreen('Ok')))
-            return result
-        except:
-            print('[{}]'.format(darkred('Fail')))
-            raise
-
-    return wrapper
 
 
 class Application(object):
@@ -145,7 +132,7 @@ class Application(object):
         """Generates the application on the file system
         """
 
-        self.app_dir = self.name.lower().replace(' ', '_')
+        self.app_dir = self.name.lower()
         # create directory
         self._generate_application_directory()
         # create application directories
@@ -183,7 +170,7 @@ class Application(object):
                         directory.path, '{}{}'.format(directory.path, rnd)
                     )
 
-                    print('The old dircectory has been saved as {}'.format(
+                    print('The old directory has been saved as {}'.format(
                         brown('{}{}'.format(directory.path, rnd))
                     ))
                 else:

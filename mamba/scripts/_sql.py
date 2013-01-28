@@ -4,15 +4,35 @@
 
 from __future__ import print_function
 
+import re
 import sys
+import datetime
+from cStringIO import StringIO
 
-from twisted.python import usage, filepath
+from storm.uri import URI
+from twisted.python import usage
 
 from mamba import copyright
 from mamba.scripts import commons
+from mamba.enterprise import database
+from mamba.test.test_model import DummyThreadPool
 from mamba.utils.output import darkred, darkgreen
+from mamba.application.model import ModelManager, Model
 
 __version__ = '0.1.0'
+
+
+def show_version():
+    print('Mamba Sql Tools v{}'.format(__version__))
+    print('{}'.format(copyright.copyright))
+
+
+def mamba_services_not_found():
+    print(
+        'error: make sure you are inside a mmaba application root '
+        'directory and then run this command again'
+    )
+    sys.exit(-1)
 
 
 class SqlConfigOptions(usage.Options):
@@ -76,6 +96,12 @@ class SqlConfigOptions(usage.Options):
         ['path', None, None, 'database path (only for sqlite)'],
         ['option', None, None, 'SQLite additional option']
     ]
+
+    def opt_version(self):
+        """Show version information and exit
+        """
+        show_version()
+        sys.exit(0)
 
     def postOptions(self):
         """Post options processing
@@ -147,15 +173,77 @@ class SqlCreateOptions(usage.Options):
     """
     synopsis = '[options] <file>'
 
-    def parseArgs(self, file):
+    optFlags = [
+        ['dump', 'd', 'dump SQL scripts to standrad output'],
+        ['live', 'l', 'live changes to the databse using database config file']
+    ]
+
+    def parseArgs(self, file=None):
         """Parse command arguments
         """
 
-        self['file'] = file
+        if file is None:
+            self['file'] = None
+        else:
+            self['file'] = file if file.endswith('.sql') else '{}.sql'.format(
+                file)
+
+    def opt_version(self):
+        """Print version information and exit
+        """
+        show_version()
+        sys.exit(0)
+
+    def postOptions(self):
+        """Post options processing
+        """
+
+        if self['file'] is None and not self['dump'] and not self['live']:
+            print(self)
+
+        if self['live'] and (self['dump'] or self['file'] is not None):
+            if commons.Interaction.userchoice(
+                'What do you want to do. Dump the script or execute it?',
+                ('1', '2'), ('Dump it', 'Execute it')
+            ) == '1':
+                self['live'] = 0
+            else:
+                self['dump'] = 0
+                self['file'] = None
 
 
 class SqlDumpOptions(usage.Options):
-    pass
+    """Sql Dump options for mamba-admin tool
+    """
+    synopsis = '<file>'
+
+    def parseArgs(self, file=None):
+        """Parse command arguments
+        """
+
+        if file is None:
+            self['file'] = None
+        else:
+            self['file'] = file if file.endswith('.sql') else '{}.sql'.format(
+                file)
+
+    def opt_version(self):
+        """Print version information and exit
+        """
+        show_version()
+        sys.exit(0)
+
+
+class SqlResetOptions(usage.Options):
+    """Sql Reset options for mamba-admin tool
+    """
+    synopsis = '[options]'
+
+    def opt_version(self):
+        """Show version information and exit
+        """
+        show_version()
+        sys.exit(0)
 
 
 class SqlOptions(usage.Options):
@@ -173,18 +261,17 @@ class SqlOptions(usage.Options):
             'Create or dump SQL from the application model'],
         ['dump', None, SqlDumpOptions,
             'Dump a database to the local file system'],
-        ['reset', None, usage.Options,
+        ['reset', None, SqlResetOptions,
             'Reset the application database (this means all the data should '
             'be deleted. Use with caution)']
 
     ]
 
     def opt_version(self):
-        """Print version information and exist
+        """Print version information and exit
         """
-        print('Mamba Sql Tools v{}'.format(__version__))
-        print('{}'.format(copyright.copyright))
-        self['version'] = 1
+        show_version()
+        sys.exit(0)
 
 
 class Sql(object):
@@ -206,9 +293,12 @@ class Sql(object):
 
         if self.options.subCommand == 'configure':
             self._handle_configure_command()
+        elif self.options.subCommand == 'create':
+            self._handle_create_command()
+        elif self.options.subCommand == 'dump':
+            self._handle_dump_command()
         else:
-            if not self.options['version']:
-                print(self.options)
+            print(self.options)
 
     def _handle_configure_command(self):
         """Take care of SQL configuration to generate config/database.json file
@@ -217,11 +307,7 @@ class Sql(object):
         try:
             mamba_services = commons.import_services()
         except Exception:
-            print(
-                'error: make sure you are inside a mmaba application root '
-                'directory and then run this command again'
-            )
-            sys.exit(-1)
+            mamba_services_not_found()
 
         if not self.options.subOptions.opts['noquestions']:
             query = (
@@ -271,3 +357,121 @@ class Sql(object):
             print('[{}]'.format(darkred('Fail')))
             raise
             sys.exit(-1)
+
+    def _handle_create_command(self):
+        """Take care of SQL creation scripts using the application model
+        """
+
+        try:
+            mamba_services = commons.import_services()
+        except Exception:
+            mamba_services_not_found()
+
+        # load database configuration
+        mamba_services.config.Database('config/database.json')
+
+        # this is needed to don't have a reactor waiting forever
+        db = database.Database(DummyThreadPool())
+        Model.database = db
+
+        # generate script
+        script = db.dump(ModelManager())
+
+        # headers and footer
+        app_config = mamba_services.config.Database('config/application.json')
+        header = (
+            '--\n'
+            '-- Mamba application SQL creation dump\n'
+            '--\n'
+            '-- dump date: {}\n'
+            '-- application: {}\n'
+            '-- description: {}\n'
+            '-- version: {}\n'
+            '-- backend: {}\n'
+            '--\n\n'
+        ).format(
+            datetime.datetime.now().isoformat(),
+            app_config.name,
+            app_config.description,
+            app_config.version,
+            mamba_services.config.Database().uri.split(':')[0]
+        )
+
+        footer = '--\n-- End of Mamba SQL creation dump\n--\n'
+
+        stdout = sys.stdout
+        capture = StringIO()
+        sys.stdout = capture
+
+        print(header)
+        print(script)
+        print(footer)
+
+        sys.stdout = stdout
+
+        if self.options.subOptions.opts['file'] is not None:
+            with open(self.options.subOptions.opts['file'], 'w') as dump_file:
+                dump_file.write(capture.getvalue())
+
+        if self.options.subOptions.opts['dump']:
+            print(capture.getvalue())
+
+        if self.options.subOptions.opts['live']:
+            if mamba_services.config.Database().create_table_behaviours.get(
+                'drop_table'
+            ) is True:
+                pattern = re.compile(r'((?<=:)[\w\d\$]+(?=@))')
+                question = (
+                    'You have `DROP TABLE` option set as True in your '
+                    'creation tables configuration behaviour, this means '
+                    'Mamba will perform a table drop before create any table '
+                    'so you can lose important data if the table exists and '
+                    'this is a production system\n\nAre you sure do you want '
+                    'to run this query in the {} database?'
+                ).format(
+                    pattern.sub('*****', mamba_services.config.Database().uri)
+                )
+
+                if commons.Interaction.userquery(question) == 'Yes':
+                    real_database = database.Database()
+                    store = real_database.store()
+                    if real_database.backend() == 'sqlite':
+                        # the pysqlite module does not allow us to use more
+                        # than one operations per query
+                        for operation in capture.getvalue().split(';'):
+                            store.execute(operation)
+                    else:
+                        store.execute(capture.getvalue())
+                    store.commit()
+
+        sys.exit(0)
+
+    def _handle_dump_command(self):
+        """Take care of SQL dumping
+        """
+
+        try:
+            mamba_services = commons.import_services()
+        except Exception:
+            mamba_services_not_found()
+
+        # load database configuration
+        mamba_services.config.Database('config/database.json')
+        real_database = database.Database()
+        stdout = sys.stdout
+        capture = StringIO()
+        sys.stdout = capture
+
+        print(real_database.dump(ModelManager(), True))
+
+        sys.stdout = stdout
+
+        if self.options.subOptions.opts['file'] is None:
+            print(capture.getvalue())
+        else:
+            with open(self.options.subOptions.opts['file'], 'w') as dump_file:
+                dump_file.write(capture.getvalue())
+
+        real_database.store().commit()
+
+        sys.exit(0)

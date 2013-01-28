@@ -99,6 +99,14 @@ class MambaAdminApplicationTest(unittest.TestCase):
         self.config.parseOptions(['-l', 'test', 'test'])
         self.assertEqual(self.config['logfile'], 'test.log')
 
+    def test_name_with_spaces_replace_to_underscores(self):
+        self.config.parseOptions(['-n', 'spaces name'])
+        self.assertEqual(self.config['name'], 'spaces_name')
+
+    def test_name_with_non_alphanumeric_characters_are_removed(self):
+        self.config.parseOptions(['-n', 'test/with.tons%of&non$alpha#chars@'])
+        self.assertEqual(self.config['name'], 'testwithtonsofnonalphachars')
+
 
 class ApplcationTest(unittest.TestCase):
 
