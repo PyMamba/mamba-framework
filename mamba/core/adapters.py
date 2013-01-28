@@ -54,3 +54,9 @@ class MambaSQLAdapter:
         """
 
         return self.original.drop_table()
+
+    def insert_data(self):
+        """Return the SQL syntax string to insert data that populate a table
+        """
+
+        return self.original.insert_data()

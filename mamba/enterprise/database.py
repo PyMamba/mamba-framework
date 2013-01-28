@@ -12,6 +12,7 @@
 """
 
 import sys
+import datetime
 
 if '__pypy__' in sys.modules:
     # try to use psycopg2ct if we are on PyPy
@@ -46,6 +47,7 @@ from twisted.python.monkey import MonkeyPatcher
 from twisted.python.threadpool import ThreadPool
 from zope.component import provideUtility, getUtility
 
+from mamba import version
 from mamba.utils import config
 from mamba.enterprise.mysql import MySQL
 from mamba.enterprise.sqlite import SQLite
@@ -143,26 +145,68 @@ class Database(object):
         :type full: bool
         """
 
-        sql = []
-        if full is False:
+        app = config.Application('config/application.json')
+        try:
             sql = [
+                '--',
+                '-- Mamba SQL dump {}'.format(version.short()),
+                '--',
+                '-- Database Backend: {}'.format(self.backend),
+                '-- Host: {}\tDatabase: {}'.format(self.host, self.database),
+                '-- Application: {}'.format(app.name),
+                '-- Application Version: {}'.format(app.version),
+                '-- Application Description: {}'.format(app.description),
+                '-- ---------------------------------------------------------',
+                '-- Dumped on: {}'.format(datetime.datetime.now().isoformat()),
+                '--'
+            ]
+        except AttributeError:
+            return 'error: \'config/application.json\' is missing... skipping'
+
+        if full is False:
+            sql.append('')
+            sql += [
                 model.get('object').dump_table()
                 for model in model_manager.get_models().values()
             ]
         else:
             for model in model_manager.get_models().values():
                 model_object = model.get('object')
+                sql.append('--')
+                sql.append('-- Table structure for table {}'.format(
+                    model_object.__storm_table__
+                ))
+                sql.append('--\n')
                 sql.append(model_object.dump_table())
-                sql.append('--\n-- INSERT DATA\n--\n')
+                sql.append('--')
+                sql.append('-- Dumping data for table {}'.format(
+                    model_object.__storm_table__
+                ))
+                sql.append('--\n')
                 sql.append(model_object.dump_data())
 
         return '\n'.join(sql)
 
+    @property
     def backend(self):
         """Return the type of backend this databse is using
         """
 
         return URI(config.Database().uri).scheme
+
+    @property
+    def host(self):
+        """Return the hostname this database is using
+        """
+
+        return URI(config.Database().uri).host
+
+    @property
+    def database(self):
+        """Return the database name we are using
+        """
+
+        return URI(config.Database().uri).database
 
 
 class AdapterFactory(object):

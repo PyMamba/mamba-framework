@@ -119,7 +119,13 @@ class DatabaseTest(unittest.TestCase):
         self.assertIsInstance(store, Store)
 
     def test_database_backend(self):
-        self.assertEqual(self.database.backend(), 'sqlite')
+        self.assertEqual(self.database.backend, 'sqlite')
+
+    def test_database_host(self):
+        self.assertEqual(self.database.host, None)
+
+    def test_database_database(self):
+        self.assertEqual(self.database.database, None)
 
     def test_database_dump(self):
         import sys

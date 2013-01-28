@@ -139,10 +139,6 @@ class IMambaSQL(Interface):
         underlying database system
         """
 
-    def insert_data(self, store):
-        """
-        Return the SQL syntax string to insert the data that populate a table
-
-        :param store: the Strom store to use
-        :type store::class:`storm.store.Store`
+    def insert_data(self):
+        """Return the SQL syntax string to insert data that populate a table
         """

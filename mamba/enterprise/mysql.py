@@ -13,6 +13,7 @@
 
 import inspect
 
+from storm.locals import Store, create_database
 from storm.expr import Undef
 from twisted.python import components
 from storm.references import Reference
@@ -228,15 +229,13 @@ class MySQL(CommonSQL):
 
         return query
 
-    def insert_data(self, store):
+    def insert_data(self):
         """
         Return the MySQL syntax needed to insert the data already present
-        in the table
-
-        :param store: the Storm store
-        :type store: :class:`storm.store.Store`
+        in the table.
         """
 
+        store = Store(create_database(config.Database().uri))
         registers = []
         rows = store.find(self.model.__class__)
         fields = [

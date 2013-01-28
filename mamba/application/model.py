@@ -141,13 +141,12 @@ class Model(object):
         adapter = self.get_adapter()
         return adapter.create_table()
 
-    @transact
     def dump_data(self):
         """Dumps the SQL data
         """
 
         adapter = self.get_adapter()
-        return adapter.insert_data(self.database.store(self))
+        return adapter.insert_data()
 
     def get_uri(self):
         """Return an URI instance using the uri config for this model

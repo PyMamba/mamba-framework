@@ -374,38 +374,15 @@ class Sql(object):
         db = database.Database(DummyThreadPool())
         Model.database = db
 
-        # generate script
-        script = db.dump(ModelManager())
-
         # headers and footer
-        app_config = mamba_services.config.Database('config/application.json')
-        header = (
-            '--\n'
-            '-- Mamba application SQL creation dump\n'
-            '--\n'
-            '-- dump date: {}\n'
-            '-- application: {}\n'
-            '-- description: {}\n'
-            '-- version: {}\n'
-            '-- backend: {}\n'
-            '--\n\n'
-        ).format(
-            datetime.datetime.now().isoformat(),
-            app_config.name,
-            app_config.description,
-            app_config.version,
-            mamba_services.config.Database().uri.split(':')[0]
-        )
-
-        footer = '--\n-- End of Mamba SQL creation dump\n--\n'
+        mamba_services.config.Application('config/application.json')
 
         stdout = sys.stdout
         capture = StringIO()
         sys.stdout = capture
 
-        print(header)
-        print(script)
-        print(footer)
+        # generate script
+        print(db.dump(ModelManager()))
 
         sys.stdout = stdout
 
@@ -435,7 +412,7 @@ class Sql(object):
                 if commons.Interaction.userquery(question) == 'Yes':
                     real_database = database.Database()
                     store = real_database.store()
-                    if real_database.backend() == 'sqlite':
+                    if real_database.backend == 'sqlite':
                         # the pysqlite module does not allow us to use more
                         # than one operations per query
                         for operation in capture.getvalue().split(';'):
@@ -457,12 +434,13 @@ class Sql(object):
 
         # load database configuration
         mamba_services.config.Database('config/database.json')
-        real_database = database.Database()
+        db = database.Database(DummyThreadPool())
+        Model.database = db
         stdout = sys.stdout
         capture = StringIO()
         sys.stdout = capture
 
-        print(real_database.dump(ModelManager(), True))
+        print(db.dump(ModelManager(), True))
 
         sys.stdout = stdout
 
@@ -471,7 +449,5 @@ class Sql(object):
         else:
             with open(self.options.subOptions.opts['file'], 'w') as dump_file:
                 dump_file.write(capture.getvalue())
-
-        real_database.store().commit()
 
         sys.exit(0)
