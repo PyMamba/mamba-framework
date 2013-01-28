@@ -20,6 +20,7 @@ class ApplicationTests(unittest.TestCase):
             self.app.managers.get('controller').notifier.loseConnection)
         self.addCleanup(
             self.app.managers.get('styles').notifier.loseConnection)
+        self.addCleanup(self.app.managers.get('model').notifier.loseConnection)
 
     def test_constructor_overwrite_options(self):
         name1 = self.app.name
@@ -32,6 +33,7 @@ class ApplicationTests(unittest.TestCase):
             app_tmp.managers.get('controller').notifier.loseConnection)
         self.addCleanup(
             self.app.managers.get('styles').notifier.loseConnection)
+        self.addCleanup(self.app.managers.get('model').notifier.loseConnection)
 
         self.assertNotEqual(name1, app_tmp.name)
 

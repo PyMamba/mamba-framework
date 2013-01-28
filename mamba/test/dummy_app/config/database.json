@@ -4,8 +4,8 @@
     "max_threads": 20,
     "auto_adjust_pool_size": false,
     "create_table_behaviours": {
-        "create_if_not_exists": true,
-        "drop_table": false
+        "create_if_not_exists": false,
+        "drop_table": true
     },
     "drop_table_behaviours": {
         "drop_if_exists": true,

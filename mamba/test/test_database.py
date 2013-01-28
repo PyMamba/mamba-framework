@@ -13,6 +13,7 @@ from doublex import Spy, assert_that, called, ANY_ARG
 
 from mamba.utils import config
 from mamba.enterprise import Database
+from mamba.application.model import ModelManager
 from mamba.enterprise.database import AdapterFactory
 
 
@@ -116,6 +117,47 @@ class DatabaseTest(unittest.TestCase):
     def test_database_store(self):
         store = self.database.store()
         self.assertIsInstance(store, Store)
+
+    def test_database_backend(self):
+        self.assertEqual(self.database.backend(), 'sqlite')
+
+    def test_database_dump(self):
+        import sys
+        sys.path.append('../mamba/test/dummy_app')
+        mgr = ModelManager()
+        self.addCleanup(mgr.notifier.loseConnection)
+
+        from mamba import Model
+        from mamba.test.test_model import DummyThreadPool, DatabaseModuleError
+        try:
+            threadpool = DummyThreadPool()
+            database = Database(threadpool)
+            Model.database = database
+
+            store = database.store()
+            store.execute(
+                'CREATE TABLE IF NOT EXISTS `dummy` ('
+                '    id INTEGER PRIMARY KEY, name TEXT'
+                ')'
+            )
+            store.commit()
+        except DatabaseModuleError, error:
+            raise unittest.SkipTest(error)
+
+        mgr.load('../mamba/test/dummy_app/application/model/dummy.py')
+        mgr.load('../mamba/test/dummy_app/application/model/stubing.py')
+        sql = self.database.dump(mgr)
+        self.assertTrue('CREATE TABLE IF NOT EXISTS dummy (\n' in sql)
+        self.assertTrue('  name VARCHAR NOT NULL,\n' in sql)
+        self.assertTrue('  id INTEGER,\n' in sql)
+        self.assertTrue('  PRIMARY KEY(id)\n);\n\n' in sql)
+        self.assertTrue('CREATE TABLE IF NOT EXISTS stubing (\n' in sql)
+        self.assertTrue('  id INTEGER,\n' in sql)
+        self.assertTrue('  name VARCHAR NOT NULL,\n' in sql)
+        self.assertTrue('  PRIMARY KEY(id)\n);\n' in sql)
+
+        self.flushLoggedErrors()
+        self.database.store().reset()
 
 
 class AdapterFactoryTest(unittest.TestCase):

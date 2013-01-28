@@ -162,7 +162,7 @@ class ControllerManagerTest(unittest.TestCase):
         self.assertTrue(self.mgr.length() != 0)
 
     def test_lookup(self):
-        unknown = self.mgr.lookup('unkwnown')
+        unknown = self.mgr.lookup('unknown')
         self.assertEqual(unknown, {})
 
         self.load_manager()

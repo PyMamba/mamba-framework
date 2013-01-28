@@ -295,6 +295,9 @@ class RouteTest(unittest.TestCase):
 
 class RouterTest(unittest.TestCase):
 
+    def tearDown(self):
+        self.flushLoggedErrors()
+
     @defer.inlineCallbacks
     def test_dispatch_route(self):
 

@@ -6,9 +6,11 @@
 Tests for mamba.application.model
 """
 
+import sys
 import tempfile
 import functools
 import transaction
+from collections import OrderedDict
 
 from storm.uri import URI
 from twisted.trial import unittest
@@ -18,10 +20,10 @@ from storm.twisted.testing import FakeThreadPool
 from twisted.internet.defer import inlineCallbacks
 from storm.locals import Int, Unicode, Reference, Enum, List
 
-from mamba import Model
 from mamba import Database
 from mamba.utils import config
 from mamba.core import interfaces
+from mamba import Model, ModelManager
 from mamba.enterprise.mysql import MySQLMissingPrimaryKey, MySQL
 from mamba.enterprise.sqlite import SQLiteMissingPrimaryKey, SQLite
 from mamba.enterprise.postgres import PostgreSQLMissingPrimaryKey, PostgreSQL
@@ -383,6 +385,79 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('ON UPDATE CASCADE ON DELETE CASCADE' in script)
         del DummyModelThree.__on_delete__
         del DummyModelThree.__on_update__
+
+
+class ModelManagerTest(unittest.TestCase):
+    """Tests for mamba.application.model.ModelManager
+    """
+
+    def setUp(self):
+        self.mgr = ModelManager()
+        self.addCleanup(self.mgr.notifier.loseConnection)
+        try:
+            threadpool = DummyThreadPool()
+            self.database = Database(threadpool)
+            Model.database = self.database
+
+            store = self.database.store()
+            store.execute(
+                'CREATE TABLE IF NOT EXISTS `dummy` ('
+                '    id INTEGER PRIMARY KEY, name TEXT'
+                ')'
+            )
+            store.commit()
+        except DatabaseModuleError, error:
+            raise unittest.SkipTest(error)
+
+    def tearDown(self):
+        self.flushLoggedErrors()
+        self.database.store().reset()
+        transaction.manager.free(transaction.get())
+
+    def load_manager(self):
+        sys.path.append('../mamba/test/dummy_app')
+        self.mgr.load('../mamba/test/dummy_app/application/model/dummy.py')
+
+    def test_inotifier_provided_by_controller_manager(self):
+        self.assertTrue(interfaces.INotifier.providedBy(self.mgr))
+
+    def test_get_models_is_ordered_dict(self):
+        self.assertIsInstance(self.mgr.get_models(), OrderedDict)
+
+    def test_get_models_is_empty(self):
+        self.assertNot(self.mgr.get_models())
+
+    def test_is_valid_file_works_on_valid(self):
+        import os
+        currdir = os.getcwd()
+        os.chdir('../mamba/test/dummy_app')
+        self.assertTrue(self.mgr.is_valid_file('dummy.py'))
+        os.chdir(currdir)
+
+    def test_is_valid_file_works_on_invalid(self):
+        self.assertFalse(self.mgr.is_valid_file('./test.log'))
+
+    def test_load_modules_works(self):
+        self.load_manager()
+        self.assertTrue(self.mgr.length() != 0)
+
+    def test_lookup(self):
+        unknown = self.mgr.lookup('unknown')
+        self.assertEqual(unknown, {})
+
+        self.load_manager()
+        dummy = self.mgr.lookup('dummy').get('object')
+        self.assertTrue(dummy.__storm_table__ == 'dummy')
+        self.assertTrue(dummy.loaded)
+
+    def test_reload(self):
+        self.load_manager()
+        dummy = self.mgr.lookup('dummy').get('object')
+
+        self.mgr.reload('dummy')
+        dummy2 = self.mgr.lookup('dummy').get('object')
+
+        self.assertNotEqual(dummy, dummy2)
 
 
 class DummyModel(Model):
