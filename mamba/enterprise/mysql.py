@@ -216,7 +216,49 @@ class MySQL(CommonSQL):
             ', {}'.format(self.parse_references()) if self.parse_references()
             else ''
         )
-        query += ') ENGINE={} DEFAULT CHARSET=utf8\n'.format(self.engine)
+        query += '\n) ENGINE={} DEFAULT CHARSET=utf8;\n'.format(self.engine)
+
+        if (config.Database().create_table_behaviours.get('drop_table')
+            and not config.Database().create_table_behaviours.get(
+                'create_if_not_exists')):
+            query = '{};\n{}'.format(
+                self.drop_table(),
+                query
+            )
+
+        return query
+
+    def insert_data(self, store):
+        """
+        Return the MySQL syntax needed to insert the data already present
+        in the table
+
+        :param store: the Storm store
+        :type store: :class:`storm.store.Store`
+        """
+
+        registers = []
+        rows = store.find(self.model.__class__)
+        fields = [
+            r._detect_attr_name(self.model.__class__) for r in
+            self.model._storm_columns.keys()
+        ]
+        for r in rows:
+            tmp_row = {}
+            for field in fields:
+                tmp_row[field] = getattr(r, field)
+            registers.append(tmp_row)
+
+        query = ''
+        for register in registers:
+            query += ('INSERT INTO `{}` ({}) VALUES ({});\n').format(
+                self.model.__storm_table__,
+                ', '.join(register.keys()),
+                ', '.join([
+                    "'{}'".format(str(value))
+                    for value in register.values()
+                ])
+            )
 
         return query
 

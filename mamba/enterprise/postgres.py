@@ -224,10 +224,19 @@ class PostgreSQL(CommonSQL):
 
         query += '  {}\n'.format(self.detect_primary_key())
         query += '{}'.format(
-            ', {})'.format(self.parse_references()) if self.parse_references()
-            else ')\n'
+            ', {}\n);'.format(
+            self.parse_references()) if self.parse_references()
+            else '\n);\n'
         )
         query = ''.join(enums) + query
+
+        if (config.Database().create_table_behaviours.get('drop_table')
+            and not config.Database().create_table_behaviours.get(
+                'create_if_not_exists')):
+            query = '{};\n{}'.format(
+                self.drop_table(),
+                query
+            )
 
         return query
 

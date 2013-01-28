@@ -38,6 +38,7 @@ if '__pypy__' in sys.modules:
         )
 
 from storm import properties
+from storm.database import URI
 from storm.expr import Undef, Column
 from storm.zope.interfaces import IZStorm
 from storm.zope.zstorm import global_zstorm
@@ -131,6 +132,37 @@ class Database(object):
             return self.zstorm.get('main')
 
         return self.zstorm.get(model.__class__.__name__, model.uri)
+
+    def dump(self, model_manager, full=False):
+        """
+        Dumps the full database
+
+        :param model_manager: the model manager from mamba application
+        :type model_manager: :class:`~mamba.application.model.ModelManager`
+        :param full: should be dumped full?
+        :type full: bool
+        """
+
+        sql = []
+        if full is False:
+            sql = [
+                model.get('object').dump_table()
+                for model in model_manager.get_models().values()
+            ]
+        else:
+            for model in model_manager.get_models().values():
+                model_object = model.get('object')
+                sql.append(model_object.dump_table())
+                sql.append('--\n-- INSERT DATA\n--\n')
+                sql.append(model_object.dump_data())
+
+        return '\n'.join(sql)
+
+    def backend(self):
+        """Return the type of backend this databse is using
+        """
+
+        return URI(config.Database().uri).scheme
 
 
 class AdapterFactory(object):

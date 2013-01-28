@@ -126,7 +126,15 @@ class SQLite(CommonSQL):
             column = self.model._storm_columns.keys()[i]
             query += '  {},\n'.format(self.parse_column(column))
 
-        query += '  {})\n'.format(self.detect_primary_key())
+        query += '  {}\n);\n'.format(self.detect_primary_key())
+
+        if (config.Database().create_table_behaviours.get('drop_table')
+            and not config.Database().create_table_behaviours.get(
+                'create_if_not_exists')):
+            query = '{};\n{}'.format(
+                self.drop_table(),
+                query
+            )
 
         return query
 
