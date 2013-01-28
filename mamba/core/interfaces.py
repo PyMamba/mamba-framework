@@ -120,10 +120,12 @@ class IMambaSQL(Interface):
     )
 
     def parse_column(self, column):
-        """Parse a Storm column to the correct SQL value"""
+        """Parse a Storm column to the correct SQL value
+        """
 
     def detect_primary_key(self):
-        """Detect and reeturn the primary key for the table"""
+        """Detect and reeturn the primary key for the table
+        """
 
     def create_table(self):
         """
@@ -135,4 +137,12 @@ class IMambaSQL(Interface):
         """
         Return the SQL syntax string to drop a table from the selected
         underlying database system
+        """
+
+    def insert_data(self, store):
+        """
+        Return the SQL syntax string to insert the data that populate a table
+
+        :param store: the Strom store to use
+        :type store::class:`storm.store.Store`
         """

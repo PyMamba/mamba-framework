@@ -14,8 +14,8 @@
 import re
 from collections import OrderedDict
 
+from twisted.python import filepath
 from zope.interface import implements
-from twisted.python import filepath, log
 from twisted.internet import inotify
 from twisted.python._inotify import INotifyError
 
@@ -66,7 +66,7 @@ class ModuleManager(object):
 
         try:
             files = filepath.listdir(self._module_store)
-            pattern = re.compile('[^_?]\.py$', re.IGNORECASE)
+            pattern = re.compile(r'[^_?]\.py$', re.IGNORECASE)
             for py_file in filter(pattern.search, files):
                 if self.is_valid_file(py_file):
                     self.load(py_file)
@@ -82,7 +82,7 @@ class ModuleManager(object):
         """
 
         module_name = filepath.splitext(filepath.basename(filename))[0]
-        module_path = '%s.%s' % (
+        module_path = '{}.{}'.format(
             self._module_store.replace('/', '.'),
             module_name
         )
