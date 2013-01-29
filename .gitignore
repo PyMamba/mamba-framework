@@ -44,3 +44,4 @@ _trial_temp/
 sql/
 release/
 docs/_build/
+*.log
