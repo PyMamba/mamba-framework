@@ -145,23 +145,28 @@ class Database(object):
         :type full: bool
         """
 
+        sql = [
+            '--',
+            '-- Mamba SQL dump {}'.format(version.short()),
+            '--',
+            '-- Database Backend: {}'.format(self.backend),
+            '-- Host: {}\tDatabase: {}'.format(self.host, self.database)
+        ]
         app = config.Application('config/application.json')
         try:
-            sql = [
-                '--',
-                '-- Mamba SQL dump {}'.format(version.short()),
-                '--',
-                '-- Database Backend: {}'.format(self.backend),
-                '-- Host: {}\tDatabase: {}'.format(self.host, self.database),
+            sql += [
                 '-- Application: {}'.format(app.name),
                 '-- Application Version: {}'.format(app.version),
-                '-- Application Description: {}'.format(app.description),
-                '-- ---------------------------------------------------------',
-                '-- Dumped on: {}'.format(datetime.datetime.now().isoformat()),
-                '--'
+                '-- Application Description: {}'.format(app.description)
             ]
         except AttributeError:
-            return 'error: \'config/application.json\' is missing... skipping'
+            pass
+
+        sql += [
+            '-- ---------------------------------------------------------',
+            '-- Dumped on: {}'.format(datetime.datetime.now().isoformat()),
+            '--'
+        ]
 
         if full is False:
             sql.append('')

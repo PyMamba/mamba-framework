@@ -22,7 +22,7 @@ class DatabaseTest(unittest.TestCase):
     def test_database_load(self):
         config.Database('../mamba/test/dummy_app/config/database.json')
         self.assertTrue(config.Database().loaded)
-        self.assertEqual(config.Database().uri, 'sqlite:')
+        self.assertEqual(config.Database().uri, 'sqlite:///db/dummy.db')
         self.assertEqual(config.Database().min_threads, 5)
         self.assertEqual(config.Database().max_threads, 20)
 

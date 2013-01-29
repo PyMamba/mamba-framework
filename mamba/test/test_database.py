@@ -28,6 +28,36 @@ class DatabaseTest(unittest.TestCase):
     def tearDown(self):
         self.database.pool.stop()
 
+    def get_commons_for_dump(self):
+        import sys
+        sys.path.append('../mamba/test/dummy_app')
+        mgr = ModelManager()
+        self.addCleanup(mgr.notifier.loseConnection)
+
+        from mamba import Model
+        from mamba.test.test_model import DummyThreadPool, DatabaseModuleError
+        try:
+            threadpool = DummyThreadPool()
+            database = Database(threadpool)
+            Model.database = database
+
+            store = database.store()
+            store.execute(
+                'CREATE TABLE IF NOT EXISTS `dummy` ('
+                '    id INTEGER PRIMARY KEY, name TEXT'
+                ')'
+            )
+            store.execute(
+                'CREATE TABLE IF NOT EXISTS `stubing` ('
+                '   id INTEGER PRIMARY KEY, name TEXT'
+                ')'
+            )
+            store.commit()
+        except DatabaseModuleError, error:
+            raise unittest.SkipTest(error)
+
+        return mgr
+
     def get_pool(self):
 
         with Spy() as pool:
@@ -128,27 +158,7 @@ class DatabaseTest(unittest.TestCase):
         self.assertEqual(self.database.database, None)
 
     def test_database_dump(self):
-        import sys
-        sys.path.append('../mamba/test/dummy_app')
-        mgr = ModelManager()
-        self.addCleanup(mgr.notifier.loseConnection)
-
-        from mamba import Model
-        from mamba.test.test_model import DummyThreadPool, DatabaseModuleError
-        try:
-            threadpool = DummyThreadPool()
-            database = Database(threadpool)
-            Model.database = database
-
-            store = database.store()
-            store.execute(
-                'CREATE TABLE IF NOT EXISTS `dummy` ('
-                '    id INTEGER PRIMARY KEY, name TEXT'
-                ')'
-            )
-            store.commit()
-        except DatabaseModuleError, error:
-            raise unittest.SkipTest(error)
+        mgr = self.get_commons_for_dump()
 
         mgr.load('../mamba/test/dummy_app/application/model/dummy.py')
         mgr.load('../mamba/test/dummy_app/application/model/stubing.py')
@@ -164,6 +174,25 @@ class DatabaseTest(unittest.TestCase):
 
         self.flushLoggedErrors()
         self.database.store().reset()
+
+    def test_database_dump_data(self):
+        config.Database('../mamba/test/dummy_app/config/database.json')
+        mgr = self.get_commons_for_dump()
+
+        import os
+        currdir = os.getcwd()
+        os.chdir('../mamba/test/dummy_app/')
+
+        mgr.load('../mamba/test/dummy_app/application/model/dummy.py')
+        mgr.load('../mamba/test/dummy_app/application/model/stubing.py')
+        sql = self.database.dump(mgr, True)
+        self.assertTrue("INSERT INTO 'dummy'" in sql)
+        self.assertTrue("INSERT INTO 'stubing'" in sql)
+        self.assertTrue('Test row 1' in sql)
+        self.assertTrue('Test row 2' in sql)
+        self.assertTrue('Test row 3' in sql)
+
+        os.chdir(currdir)
 
 
 class AdapterFactoryTest(unittest.TestCase):

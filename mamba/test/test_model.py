@@ -223,7 +223,7 @@ class ModelTest(unittest.TestCase):
             ORDER BY name
         ''').get_all()
 
-        self.assertEqual(len(data), 2)
+        self.assertTrue(len(data) >= 2 and len(data) < 4)
         self.assertEqual(data[1][0], u'dummy_two')
 
         yield dummy.drop_table()
@@ -234,7 +234,7 @@ class ModelTest(unittest.TestCase):
             ORDER BY name
         ''').get_all()
 
-        self.assertEqual(len(data), 1)
+        self.assertTrue(len(data) >= 1 and len(data) < 3)
         self.assertEqual(data[0][0], u'dummy')
 
     def test_get_uri(self):

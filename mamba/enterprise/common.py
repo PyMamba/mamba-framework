@@ -13,6 +13,9 @@
 
 from storm import properties
 from storm.expr import Undef
+from storm.locals import create_database, Store
+
+from mamba.utils import config
 
 
 class SmallInt(properties.Int):
@@ -57,6 +60,45 @@ class DoublePrecission(properties.Float):
 class CommonSQL:
     """I do nothing, my only purpse is serve as dummy object
     """
+
+    def insert_data(self):
+        """
+        Return the SQL syntax needed to insert the data already present
+        in the table.
+        """
+
+        store = Store(create_database(config.Database().uri))
+        registers = []
+        rows = store.find(self.model.__class__)
+        fields = [
+            r._detect_attr_name(self.model.__class__) for r in
+            self.model._storm_columns.keys()
+        ]
+        for r in rows:
+            tmp_row = {}
+            for field in fields:
+                tmp_row[field] = getattr(r, field)
+            registers.append(tmp_row)
+
+        if self.__class__.__name__ == 'MySQL':
+            commas = '`'
+        else:
+            commas = "'"
+
+        query = ''
+        for register in registers:
+            query += ('INSERT INTO {}{}{} ({}) VALUES ({});\n'.format(
+                commas,
+                self.model.__storm_table__,
+                commas,
+                ', '.join(register.keys()),
+                ', '.join([
+                    "'{}'".format(str(value))
+                    for value in register.values()
+                ])
+            ))
+
+        return query
 
     def _parse_float(self, column):
         """
