@@ -192,6 +192,12 @@ class Database(object):
 
         return '\n'.join(sql)
 
+    def reset(self):
+        """Delete all the data in the database and return it to primitive state
+        """
+
+        pass
+
     @property
     def backend(self):
         """Return the type of backend this databse is using

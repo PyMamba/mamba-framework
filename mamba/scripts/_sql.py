@@ -8,6 +8,7 @@ import re
 import sys
 from cStringIO import StringIO
 
+from storm.uri import URI
 from twisted.python import usage
 
 from mamba import copyright
@@ -295,6 +296,8 @@ class Sql(object):
             self._handle_create_command()
         elif self.options.subCommand == 'dump':
             self._handle_dump_command()
+        elif self.options.subCommand == 'reset':
+            self._handle_reset_command()
         else:
             print(self.options)
 
@@ -360,17 +363,7 @@ class Sql(object):
         """Take care of SQL creation scripts using the application model
         """
 
-        try:
-            mamba_services = commons.import_services()
-        except Exception:
-            mamba_services_not_found()
-
-        # load database configuration
-        mamba_services.config.Database('config/database.json')
-
-        # this is needed to don't have a reactor waiting forever
-        db = database.Database(DummyThreadPool())
-        Model.database = db
+        mamba_services, db = self._prepare_model_db()
 
         # headers and footer
         mamba_services.config.Application('config/application.json')
@@ -425,15 +418,8 @@ class Sql(object):
         """Take care of SQL dumping
         """
 
-        try:
-            mamba_services = commons.import_services()
-        except Exception:
-            mamba_services_not_found()
+        db = self._prepare_model_db()[1]
 
-        # load database configuration
-        mamba_services.config.Database('config/database.json')
-        db = database.Database(DummyThreadPool())
-        Model.database = db
         stdout = sys.stdout
         capture = StringIO()
         sys.stdout = capture
@@ -449,3 +435,38 @@ class Sql(object):
                 dump_file.write(capture.getvalue())
 
         sys.exit(0)
+
+    def _handle_reset_command(self):
+        """Take care of database reset
+        """
+
+        mamba_services, db = self._prepare_model_db()
+
+        question = (
+            'This operation will {delete} all the data in your database.\n'
+            'Are you really sure this is what you want to do?'.format(
+                delete=darkred('DELETE')
+            )
+        )
+        if commons.Interaction.userquery(question) == 'No':
+            sys.exit(0)
+
+        # db.reset()
+
+        print('All the data in your dataabse has been reset.')
+        sys.exit(0)
+
+    def _prepare_model_db(self):
+        try:
+            mamba_services = commons.import_services()
+        except Exception:
+            mamba_services_not_found()
+
+        # load database configuration
+        mamba_services.config.Database('config/database.json')
+
+        # this is needed to don't have a threadpool waiting forever
+        db = database.Database(DummyThreadPool())
+        Model.database = db
+
+        return mamba_services, db
