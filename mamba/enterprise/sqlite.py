@@ -13,7 +13,6 @@
 
 from storm import variables
 from twisted.python import components
-from storm.locals import Store, create_database
 
 from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL

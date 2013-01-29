@@ -78,7 +78,6 @@ class CommonSQL:
             tmp_row = {}
             for field in fields:
                 tmp_row[field] = getattr(r, field)
-                print type(tmp_row)
             registers.append(tmp_row)
 
         if self.__class__.__name__ == 'MySQL':

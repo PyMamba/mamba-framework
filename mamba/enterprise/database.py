@@ -192,11 +192,24 @@ class Database(object):
 
         return '\n'.join(sql)
 
-    def reset(self):
-        """Delete all the data in the database and return it to primitive state
+    def reset(self, model_manager):
+        """
+        Delete all the data in the database and return it to primitive state
+
+        :param model_manager: the model manager from mamba application
+        :type model_manager: :class:`~mamba.application.model.ModelManager`
         """
 
-        pass
+        cfg = config.Database()
+        cfg.create_table_behaviours['create_table_if_not_exists'] = False
+        cfg.create_table_behaviours['drop_table'] = True
+
+        sql = [
+            model.get('object').dump_table()
+            for model in model_manager.get_models().values()
+        ]
+
+        return '\n'.join(sql)
 
     @property
     def backend(self):

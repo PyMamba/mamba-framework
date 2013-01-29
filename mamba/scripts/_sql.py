@@ -451,9 +451,18 @@ class Sql(object):
         if commons.Interaction.userquery(question) == 'No':
             sys.exit(0)
 
-        # db.reset()
+        reset_data = db.reset(ModelManager())
 
-        print('All the data in your dataabse has been reset.')
+        # PySQLite does not allow us to perform more than one operation
+        if db.backend == 'sqlite':
+            for query in reset_data.split(';'):
+                db.store().execute(query)
+        else:
+            db.store().execute(reset_data)
+
+        db.store().commit()
+
+        print('All the data in your database has been reset.')
         sys.exit(0)
 
     def _prepare_model_db(self):

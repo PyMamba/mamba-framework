@@ -13,7 +13,6 @@
 
 import inspect
 
-from storm.locals import Store, create_database
 from storm.expr import Undef
 from twisted.python import components
 from storm.references import Reference
