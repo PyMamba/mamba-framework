@@ -44,4 +44,6 @@ _trial_temp/
 sql/
 release/
 docs/_build/
+dropin.cache
+*.pid
 *.log

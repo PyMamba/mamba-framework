@@ -78,6 +78,7 @@ class CommonSQL:
             tmp_row = {}
             for field in fields:
                 tmp_row[field] = getattr(r, field)
+                print type(tmp_row)
             registers.append(tmp_row)
 
         if self.__class__.__name__ == 'MySQL':
@@ -92,9 +93,10 @@ class CommonSQL:
                 self.model.__storm_table__,
                 commas,
                 ', '.join(register.keys()),
-                ', '.join([
-                    "'{}'".format(str(value))
-                    for value in register.values()
+                ', '.join([(
+                    str(field) if type(field) is not unicode
+                    else "'{}'".format(field))
+                    for field in register.values()
                 ])
             ))
 
