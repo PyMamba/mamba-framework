@@ -14,7 +14,9 @@ from twisted.python import usage, filepath
 
 from mamba.scripts import mamba_admin, commons
 from mamba.scripts._project import Application
-from mamba.scripts._sql import Sql, SqlConfigOptions, SqlCreateOptions
+from mamba.scripts._sql import (
+    Sql, SqlOptions, SqlConfigOptions, SqlCreateOptions
+)
 
 
 class MambaAdminTest(unittest.TestCase):
@@ -229,7 +231,6 @@ class MambaAdminSqlCreateTest(unittest.TestCase):
 
     def tearDown(self):
         sys.stdout = self.stdout
-        del self.config
 
     def test_wrong_number_of_args(self):
         self.assertRaises(
@@ -256,3 +257,65 @@ class MambaAdminSqlCreateTest(unittest.TestCase):
         )
         self.assertTrue('Dump it' in self.capture.getvalue())
         self.assertTrue('Execute it' in self.capture.getvalue())
+
+
+class SqlCreateTest(unittest.TestCase):
+
+    def setUp(self):
+        self.config = SqlCreateOptions()
+        self.stdout = sys.stdout
+        self.capture = StringIO()
+        sys.stdout = self.capture
+
+    def tearDown(self):
+        sys.stdout = self.stdout
+
+    def test_use_outside_application_directory_fails(self):
+
+        def fake_exit(val):
+            print val
+            pass
+
+        sys.exit = fake_exit
+
+        self.config.parseOptions(['--dump'])
+        sql = Sql(self.config)
+
+        try:
+            sql._handle_create_command()
+        except UnboundLocalError:
+            self.assertEqual(
+                'error: make sure you are inside a mmaba application root '
+                'directory and then run this command again',
+                self.capture.getvalue().split('\n')[-3:-2][0]
+            )
+            # sys.exit(-1) :)
+            self.assertEqual(
+                '-1',
+                self.capture.getvalue().split('\n')[-2:-1][0]
+            )
+
+    # def test_dump_works(self):
+
+    #     import os
+    #     from doublex import Stub
+
+    #     from mamba.application.model import ModelManager
+
+    #     currdir = os.getcwd()
+    #     os.chdir('../mamba/test/dummy_app/')
+    #     sys.path.append('.')
+
+    #     with Stub() as config:
+    #         config.subOptions.opts = {
+    #             'file': None,
+    #             'dump': 1,
+    #             'live': 0
+    #         }
+
+    #     sql = Sql(config)
+    #     mgr = ModelManager()
+    #     self.addCleanup(mgr.notifier.loseConnection)
+    #     sql._handle_create_command()
+
+    #     os.chdir(currdir)

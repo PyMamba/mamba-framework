@@ -414,7 +414,7 @@ class Sql(object):
 
         sys.exit(0)
 
-    def _handle_dump_command(self):
+    def _handle_dump_command(self, mgr=None):
         """Take care of SQL dumping
         """
 
@@ -424,7 +424,10 @@ class Sql(object):
         capture = StringIO()
         sys.stdout = capture
 
-        print(db.dump(ModelManager(), True))
+        if mgr is None:
+            print(db.dump(ModelManager(), True))
+        else:
+            print(db.dump(mgr, True))
 
         sys.stdout = stdout
 
