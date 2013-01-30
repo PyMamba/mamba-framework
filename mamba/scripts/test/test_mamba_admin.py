@@ -9,12 +9,12 @@ Tests for mamba.scripts.mamba_admin and subcommands
 import sys
 from cStringIO import StringIO
 
-from twisted.python import usage, filepath
 from twisted.trial import unittest
+from twisted.python import usage, filepath
 
-from mamba.scripts import mamba_admin
+from mamba.scripts import mamba_admin, commons
 from mamba.scripts._project import Application
-from mamba.scripts._sql import Sql, SqlConfigOptions
+from mamba.scripts._sql import Sql, SqlConfigOptions, SqlCreateOptions
 
 
 class MambaAdminTest(unittest.TestCase):
@@ -108,7 +108,7 @@ class MambaAdminApplicationTest(unittest.TestCase):
         self.assertEqual(self.config['name'], 'testwithtonsofnonalphachars')
 
 
-class ApplcationTest(unittest.TestCase):
+class ApplicationTest(unittest.TestCase):
 
     def setUp(self):
         def fake_exit(value):
@@ -138,7 +138,7 @@ class ApplcationTest(unittest.TestCase):
         self.assertTrue(filepath.exists('test/application/view'))
 
 
-class MambaAdminSqlTest(unittest.TestCase):
+class MambaAdminSqlConfigureTest(unittest.TestCase):
 
     def setUp(self):
         self.config = SqlConfigOptions()
@@ -217,3 +217,42 @@ class MambaAdminSqlTest(unittest.TestCase):
             self.config['uri'],
             'sqlite:testdb'
         )
+
+
+class MambaAdminSqlCreateTest(unittest.TestCase):
+
+    def setUp(self):
+        self.config = SqlCreateOptions()
+        self.stdout = sys.stdout
+        self.capture = StringIO()
+        sys.stdout = self.capture
+
+    def tearDown(self):
+        sys.stdout = self.stdout
+        del self.config
+
+    def test_wrong_number_of_args(self):
+        self.assertRaises(
+            usage.UsageError, self.config.parseOptions, ['test', 'wrong'])
+
+    def test_default_options(self):
+        self.config.parseOptions(['test'])
+        self.assertEqual(self.config['live'], 0)
+        self.assertEqual(self.config['dump'], 0)
+
+    def test_set_options_works(self):
+        self.config.parseOptions(['-d', 'test'])
+        self.assertEqual(self.config['dump'], 1)
+
+    def test_dump_and_live_cant_be_together(self):
+
+        commons.raw_input = lambda _: '0'
+
+        self.config.parseOptions(['-d', '-l', 'test'])
+
+        self.assertTrue(
+            'What do you want to do. Dump the script or execute it?' in
+            self.capture.getvalue()
+        )
+        self.assertTrue('Dump it' in self.capture.getvalue())
+        self.assertTrue('Execute it' in self.capture.getvalue())
