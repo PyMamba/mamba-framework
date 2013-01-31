@@ -8,17 +8,22 @@ Tests for mamba.scripts.mamba_admin and subcommands
 
 import os
 import sys
-import subprocess
 from cStringIO import StringIO
 
+from twisted.internet import utils, defer
 from twisted.trial import unittest
 from twisted.python import usage, filepath
 
 from mamba.scripts import mamba_admin, commons
 from mamba.scripts._project import Application
 from mamba.scripts._sql import (
-    Sql, SqlOptions, SqlConfigOptions, SqlCreateOptions
+    Sql, SqlConfigOptions, SqlCreateOptions, SqlDumpOptions, SqlResetOptions
 )
+
+# set me as True if you want to skip slow command line tests
+# I dont think you want this set as True unless you are adding
+# some tests to command line scripts
+skip_command_line_tests = True
 
 
 class MambaAdminTest(unittest.TestCase):
@@ -264,6 +269,9 @@ class MambaAdminSqlCreateTest(unittest.TestCase):
 class SqlCreateTest(unittest.TestCase):
 
     def setUp(self):
+        if skip_command_line_tests is True:
+            raise unittest.SkipTest('skip_command_line_tests is set as True')
+
         self.config = SqlCreateOptions()
         self.stdout = sys.stdout
         self.capture = StringIO()
@@ -273,65 +281,59 @@ class SqlCreateTest(unittest.TestCase):
         sys.stdout = self.stdout
 
     def test_use_outside_application_directory_fails(self):
+        _test_use_outside_application_directory_fails(self)
 
-        def fake_exit(val):
-            print val
-            pass
-
-        sys.exit = fake_exit
-
-        self.config.parseOptions(['--dump'])
-        sql = Sql(self.config)
-
-        try:
-            sql._handle_create_command()
-        except UnboundLocalError:
-            self.assertEqual(
-                'error: make sure you are inside a mmaba application root '
-                'directory and then run this command again',
-                self.capture.getvalue().split('\n')[-3:-2][0]
-            )
-            # sys.exit(-1) :)
-            self.assertEqual(
-                '-1',
-                self.capture.getvalue().split('\n')[-2:-1][0]
-            )
-
+    @defer.inlineCallbacks
     def test_sql_create_dump(self):
+
+        result = yield utils.getProcessValue('mamba-admin', [], os.environ)
+        if result == 1:
+            raise unittest.SkipTest('mamba framework is not installed yet')
 
         currdir = os.getcwd()
         os.chdir('../mamba/test/dummy_app/')
 
-        proc = subprocess.Popen(
-            ['python',
-                '../../scripts/mamba_admin.py', 'sql', 'create', '--dump'],
-            stdout=subprocess.PIPE
+        result = yield utils.getProcessOutput(
+            'python',
+            ['../../scripts/mamba_admin.py', 'sql', 'create', '--dump'],
+            os.environ
         )
 
-        script, ignore = proc.communicate()
-
-        self.assertTrue('CREATE TABLE IF NOT EXISTS dummy' in script)
-        self.assertTrue('PRIMARY KEY(id)' in script)
-        self.assertTrue('name VARCHAR' in script)
-        self.assertTrue('id INTEGER' in script)
+        self.assertTrue('CREATE TABLE IF NOT EXISTS dummy' in result)
+        self.assertTrue('PRIMARY KEY(id)' in result)
+        self.assertTrue('name VARCHAR' in result)
+        self.assertTrue('id INTEGER' in result)
 
         os.chdir(currdir)
 
+    @defer.inlineCallbacks
     def test_sql_create_file(self):
+
+        result = yield utils.getProcessValue('mamba-admin', [], os.environ)
+        if result == 1:
+            raise unittest.SkipTest('mamba framework is not installed yet')
 
         currdir = os.getcwd()
         os.chdir('../mamba/test/dummy_app/')
-        subprocess.call(
-            ['python', '../../scripts/mamba_admin.py', 'sql', 'create', 'test']
-
+        yield utils.getProcessOutput(
+            'python',
+            ['../../scripts/mamba_admin.py', 'sql', 'create', 'test'],
+            os.environ
         )
+
         dump_file = filepath.FilePath('test.sql')
         self.assertTrue(dump_file.exists())
+        self.assertTrue(dump_file.getsize() > 0)
         dump_file.remove()
 
         os.chdir(currdir)
 
+    @defer.inlineCallbacks
     def test_sql_create_live(self):
+
+        result = yield utils.getProcessValue('mamba-admin', [], os.environ)
+        if result == 1:
+            raise unittest.SkipTest('mamba framework is not installed yet')
 
         currdir = os.getcwd()
         os.chdir('../mamba/test/dummy_app/')
@@ -341,9 +343,11 @@ class SqlCreateTest(unittest.TestCase):
         cfg_file_new = cfg_file_content.replace('dummy.db', 'dummy2.db')
         cfg_file.open('w').write(cfg_file_new)
 
-        subprocess.call(
-            ['python', '../../scripts/mamba_admin.py', 'sql', 'create', '-l']
+        yield utils.getProcessOutput(
+            'python', ['../../scripts/mamba_admin.py', 'sql', 'create', '-l'],
+            os.environ
         )
+
         db_file = filepath.FilePath('db/dummy2.db')
         self.assertTrue(db_file.exists)
         db_file.remove()
@@ -351,3 +355,157 @@ class SqlCreateTest(unittest.TestCase):
         cfg_file.open('w').write(cfg_file_content)
 
         os.chdir(currdir)
+
+
+class MambaAdminSqlDumpTest(unittest.TestCase):
+
+    def setUp(self):
+        self.config = SqlDumpOptions()
+        self.stdout = sys.stdout
+        self.capture = StringIO()
+        sys.stdout = self.capture
+
+    def tearDown(self):
+        sys.stdout = self.stdout
+
+    def test_wrong_number_of_args(self):
+        self.assertRaises(
+            usage.UsageError, self.config.parseOptions, ['test', 'wrong'])
+
+
+class SqlDumpTest(unittest.TestCase):
+
+    def setUp(self):
+        if skip_command_line_tests is True:
+            raise unittest.SkipTest('skip_command_line_tests is set as True')
+
+        self.config = SqlDumpOptions()
+        self.stdout = sys.stdout
+        self.capture = StringIO()
+        sys.stdout = self.capture
+
+    def tearDown(self):
+        sys.stdout = self.stdout
+
+    def test_use_outside_application_directory_fails(self):
+        _test_use_outside_application_directory_fails(self)
+
+    @defer.inlineCallbacks
+    def test_sql_dump(self):
+
+        result = yield utils.getProcessValue('mamba-admin', [], os.environ)
+        if result == 1:
+            raise unittest.SkipTest('mamba framework is not installed yet')
+
+        currdir = os.getcwd()
+        os.chdir('../mamba/test/dummy_app')
+        result = yield utils.getProcessOutput(
+            'python', ['../../scripts/mamba_admin.py', 'sql', 'dump'],
+            os.environ
+        )
+
+        self.assertTrue("INSERT INTO 'dummy'" in result)
+        self.assertTrue("INSERT INTO 'stubing'" in result)
+        self.assertTrue('Test row 1' in result)
+        self.assertTrue('Test row 2' in result)
+        self.assertTrue('Test row 3' in result)
+
+        os.chdir(currdir)
+
+    @defer.inlineCallbacks
+    def test_sql_dump_to_file(self):
+
+        #_check_mamba_admin_tool()
+        result = yield utils.getProcessValue('mamba-admin', [], os.environ)
+        if result == 1:
+            raise unittest.SkipTest('mamba framework is not installed yet')
+
+        currdir = os.getcwd()
+        os.chdir('../mamba/test/dummy_app')
+        yield utils.getProcessOutput(
+            'python', ['../../scripts/mamba_admin.py', 'sql', 'dump', 'test'],
+            os.environ
+        )
+
+        dump_file = filepath.FilePath('test.sql')
+        self.assertTrue(dump_file.exists())
+        self.assertTrue(dump_file.getsize() > 0)
+        dump_file.remove()
+
+        os.chdir(currdir)
+
+
+class MambaAdminSqlResetTest(unittest.TestCase):
+
+    def setUp(self):
+        self.config = SqlResetOptions()
+        self.stdout = sys.stdout
+        self.capture = StringIO()
+        sys.stdout = self.capture
+
+    def tearDown(self):
+        sys.stdout = self.stdout
+
+    def test_wrong_number_of_args(self):
+        self.assertRaises(
+            usage.UsageError, self.config.parseOptions, ['test']
+        )
+
+
+class SqlResetTest(unittest.TestCase):
+
+    @defer.inlineCallbacks
+    def test_sql_reset(self):
+
+        if skip_command_line_tests is True:
+            raise unittest.SkipTest('skip_command_line_tests is set as True')
+
+        result = yield utils.getProcessValue('mamba-admin', [], os.environ)
+        if result == 1:
+            raise unittest.SkipTest('mamba framework is not installed yet')
+
+        currdir = os.getcwd()
+        os.chdir('../mamba/test/dummy_app')
+        db_file = filepath.FilePath('db/dummy.db')
+        db_contents = db_file.open('rb').read()
+        result = yield utils.getProcessOutput(
+            'python',
+            ['../../scripts/mamba_admin.py', 'sql', 'reset', '-n'],
+            os.environ
+        )
+
+        self.assertEqual(
+            result,
+            'All the data in your database has been reset.\n')
+
+        db_file.open('wb').write(db_contents)
+
+        os.chdir(currdir)
+
+
+def _test_use_outside_application_directory_fails(self, dump_opt=False):
+
+    def fake_exit(val):
+        print val
+        pass
+
+    sys.exit = fake_exit
+
+    if dump_opt is not False:
+        self.config.parseOptions(['--dump'])
+
+    sql = Sql(self.config)
+
+    try:
+        sql._handle_create_command()
+    except UnboundLocalError:
+        self.assertEqual(
+            'error: make sure you are inside a mmaba application root '
+            'directory and then run this command again',
+            self.capture.getvalue().split('\n')[-3:-2][0]
+        )
+        # sys.exit(-1) :)
+        self.assertEqual(
+            '-1',
+            self.capture.getvalue().split('\n')[-2:-1][0]
+        )

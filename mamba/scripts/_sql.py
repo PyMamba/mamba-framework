@@ -8,7 +8,6 @@ import re
 import sys
 from cStringIO import StringIO
 
-from storm.uri import URI
 from twisted.python import usage
 
 from mamba import copyright
@@ -238,6 +237,12 @@ class SqlResetOptions(usage.Options):
     """
     synopsis = '[options]'
 
+    optFlags = [
+        ['noquestions', 'n',
+            'When this option is set, mamba will NOT ask anything to the user'
+            'Use with caution']
+    ]
+
     def opt_version(self):
         """Show version information and exit
         """
@@ -450,14 +455,15 @@ class Sql(object):
 
         mamba_services, db = self._prepare_model_db()
 
-        question = (
-            'This operation will {delete} all the data in your database.\n'
-            'Are you really sure this is what you want to do?'.format(
-                delete=darkred('DELETE')
+        if not self.options.subOptions.opts['noquestions']:
+            question = (
+                'This operation will {delete} all the data in your database.\n'
+                'Are you really sure this is what you want to do?'.format(
+                    delete=darkred('DELETE')
+                )
             )
-        )
-        if commons.Interaction.userquery(question) == 'No':
-            sys.exit(0)
+            if commons.Interaction.userquery(question) == 'No':
+                sys.exit(0)
 
         reset_data = db.reset(ModelManager())
 
