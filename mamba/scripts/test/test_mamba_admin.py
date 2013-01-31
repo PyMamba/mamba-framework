@@ -6,7 +6,9 @@
 Tests for mamba.scripts.mamba_admin and subcommands
 """
 
+import os
 import sys
+import subprocess
 from cStringIO import StringIO
 
 from twisted.trial import unittest
@@ -295,27 +297,57 @@ class SqlCreateTest(unittest.TestCase):
                 self.capture.getvalue().split('\n')[-2:-1][0]
             )
 
-    # def test_dump_works(self):
+    def test_sql_create_dump(self):
 
-    #     import os
-    #     from doublex import Stub
+        currdir = os.getcwd()
+        os.chdir('../mamba/test/dummy_app/')
 
-    #     from mamba.application.model import ModelManager
+        proc = subprocess.Popen(
+            ['python',
+                '../../scripts/mamba_admin.py', 'sql', 'create', '--dump'],
+            stdout=subprocess.PIPE
+        )
 
-    #     currdir = os.getcwd()
-    #     os.chdir('../mamba/test/dummy_app/')
-    #     sys.path.append('.')
+        script, ignore = proc.communicate()
 
-    #     with Stub() as config:
-    #         config.subOptions.opts = {
-    #             'file': None,
-    #             'dump': 1,
-    #             'live': 0
-    #         }
+        self.assertTrue('CREATE TABLE IF NOT EXISTS dummy' in script)
+        self.assertTrue('PRIMARY KEY(id)' in script)
+        self.assertTrue('name VARCHAR' in script)
+        self.assertTrue('id INTEGER' in script)
 
-    #     sql = Sql(config)
-    #     mgr = ModelManager()
-    #     self.addCleanup(mgr.notifier.loseConnection)
-    #     sql._handle_create_command()
+        os.chdir(currdir)
 
-    #     os.chdir(currdir)
+    def test_sql_create_file(self):
+
+        currdir = os.getcwd()
+        os.chdir('../mamba/test/dummy_app/')
+        subprocess.call(
+            ['python', '../../scripts/mamba_admin.py', 'sql', 'create', 'test']
+
+        )
+        dump_file = filepath.FilePath('test.sql')
+        self.assertTrue(dump_file.exists())
+        dump_file.remove()
+
+        os.chdir(currdir)
+
+    def test_sql_create_live(self):
+
+        currdir = os.getcwd()
+        os.chdir('../mamba/test/dummy_app/')
+
+        cfg_file = filepath.FilePath('config/database.json')
+        cfg_file_content = cfg_file.open('r').read()
+        cfg_file_new = cfg_file_content.replace('dummy.db', 'dummy2.db')
+        cfg_file.open('w').write(cfg_file_new)
+
+        subprocess.call(
+            ['python', '../../scripts/mamba_admin.py', 'sql', 'create', '-l']
+        )
+        db_file = filepath.FilePath('db/dummy2.db')
+        self.assertTrue(db_file.exists)
+        db_file.remove()
+
+        cfg_file.open('w').write(cfg_file_content)
+
+        os.chdir(currdir)

@@ -359,7 +359,7 @@ class Sql(object):
             raise
             sys.exit(-1)
 
-    def _handle_create_command(self):
+    def _handle_create_command(self, mgr=None):
         """Take care of SQL creation scripts using the application model
         """
 
@@ -373,7 +373,10 @@ class Sql(object):
         sys.stdout = capture
 
         # generate script
-        print(db.dump(ModelManager()))
+        if mgr is None:
+            print(db.dump(ModelManager()))
+        else:
+            print(db.dump(mgr))
 
         sys.stdout = stdout
 
@@ -400,17 +403,19 @@ class Sql(object):
                     pattern.sub('*****', mamba_services.config.Database().uri)
                 )
 
-                if commons.Interaction.userquery(question) == 'Yes':
-                    real_database = database.Database()
-                    store = real_database.store()
-                    if real_database.backend == 'sqlite':
-                        # the pysqlite module does not allow us to use more
-                        # than one operations per query
-                        for operation in capture.getvalue().split(';'):
-                            store.execute(operation)
-                    else:
-                        store.execute(capture.getvalue())
-                    store.commit()
+                if commons.Interaction.userquery(question) == 'No':
+                    sys.exit(0)
+
+            real_database = database.Database()
+            store = real_database.store()
+            if real_database.backend == 'sqlite':
+                # the pysqlite module does not allow us to use more
+                # than one operations per query
+                for operation in capture.getvalue().split(';'):
+                    store.execute(operation)
+            else:
+                store.execute(capture.getvalue())
+            store.commit()
 
         sys.exit(0)
 
