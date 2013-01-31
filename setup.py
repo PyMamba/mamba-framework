@@ -44,7 +44,6 @@ setup(
         'test/application/view/stylesheets/*.css',
         'test/application/view/stylesheets/*.less'
     ]},
-    test_suite='tests',
     tests_require=['twisted>=10.2.0', 'doublex', 'PyHamcrest'],
     install_requires=['twisted>=10.2.0', 'storm>=0.19'],
     requires=[
@@ -56,7 +55,10 @@ setup(
     },
     zip_safe=False,
     classifiers=[
+        'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: Implementation :: PyPy',
         'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'Environmnet :: Web Environment',
