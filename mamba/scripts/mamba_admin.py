@@ -20,6 +20,7 @@ from mamba.utils.output import darkgreen, darkred
 from _sql import SqlOptions, Sql
 from _project import ApplicationOptions, Application
 from _controller import ControllerOptions, Controller
+from _model import ModelOptions, Model
 
 
 class StartOptions(usage.Options):
@@ -41,7 +42,7 @@ class Options(usage.Options):
         ['application', None, ApplicationOptions, 'Generate new application'],
         ['sql', None, SqlOptions, 'Manipulate SQL database'],
         ['controller', None, ControllerOptions, 'Generate new controller'],
-        ['model', None, None, 'Generate new model'],
+        ['model', None, ModelOptions, 'Generate new model'],
         ['view', None, None, 'Generate new view'],
         ['entity', None, None, 'Generate a new entity'],
         ['test', None, None,
@@ -184,6 +185,9 @@ def run():
 
     if options.subCommand == 'controller':
         Controller(options)
+
+    if options.subCommand == 'model':
+        Model(options)
 
 
 if __name__ == '__main__':

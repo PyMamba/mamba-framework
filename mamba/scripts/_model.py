@@ -29,13 +29,13 @@ def mamba_services_not_found():
         'error: make sure you are inside a mamba application root '
         'directory and then run this command again'
     )
-    sys.exit(⁻1)
+    sys.exit(-1)
 
 
 class ModelOptions(usage.Options):
     """Model Configuration options for mamba-admin tool
     """
-    synopsis = '[options] name'
+    synopsis = '[options] name table'
 
     optFlags = [
         ['dump', 'd', 'Dump the configuration to the standard output'],
@@ -62,12 +62,13 @@ class ModelOptions(usage.Options):
         show_version()
         sys.exit(0)
 
-    def parseArgs(self, name=None):
+    def parseArgs(self, name=None, table=None):
         """Parse command arguments
         """
 
-        if name is None:
-            self['name'] = name
+        if name is None or table is None:
+            self['name'] = None
+            self['table'] = None
             return
 
         regex = re.compile(r'[\W]')
@@ -75,6 +76,7 @@ class ModelOptions(usage.Options):
 
         self['filename'] = name.lower()
         self['name'] = CamelCase(name.replace('_', ' ')).camelize(True)
+        self['model_table'] = table
 
     def postOptions(self):
         """Post options processing
@@ -103,9 +105,6 @@ class ModelOptions(usage.Options):
             # just set an invalid RFC2822 email address (thats what irony mean)
             self['email'] = '{}@localhost'.format(self['author'])
 
-        if self['path'] is None:
-            self['path'] = ''
-
         if self['platforms'] is None:
             self['platforms'] = 'Linux'
 
@@ -120,6 +119,7 @@ class Model(object):
 
     def __init__(self, options):
         self.options = options
+        self.model_properties = 'id = Int(primary=True, ungined=True)\n'
 
         self.process()
 
@@ -133,7 +133,7 @@ class Model(object):
             mamba_services_not_found()
 
         if self.options.subOptions.opts['name'] is None:
-            print(self.options)
+            print(self.options.subOptions)
             sys.exit(-1)
 
         if self.options.subOptions.opts['dump']:
@@ -142,3 +142,61 @@ class Model(object):
 
         self._write_model()
         sys.exit(0)
+
+    def _dump_model(self):
+        """Dump the model to the standard output
+        """
+
+        print('\n')
+        print(self._process_template())
+
+    def _write_model(self):
+        """Write the model to a file in the file system
+        """
+
+        model_file = filepath.FilePath(
+            'application/model/{}.py'.format(
+                self.options.subOptions.opts['filename'])
+        )
+
+        if model_file.exists():
+            if commons.Interaction.userquery(
+                '{} file already exists in the file system.'
+                'Are you really sure do you want to overwrite it?.'.format(
+                    model_file.path
+                )
+            ) == 'No':
+                return
+
+        print('Writing the model...'.ljust(73), end='')
+        model_file.open('w').write(self._process_template())
+
+    def _process_template(self):
+        """Prepare the template to write/dump
+        """
+
+        controller_template = Template(
+            filepath.FilePath('{}/templates/model.tpl'.format(
+                '/'.join(filepath.dirname(__file__).split('/')[:-1])
+            )).open('r').read()
+        )
+
+        if self.options.subOptions.opts['classname'] is None:
+            classname = self.options.subOptions.opts['name']
+        else:
+            classname = self.options.subOptions.opts['classname']
+
+        args = {
+            'model_table': self.options.subOptions.opts['model_table'],
+            'model_properties': self.model_properties,
+            'year': datetime.datetime.now().year,
+            'model_name': self.options.subOptions.opts['name'],
+            'platforms': self.options.subOptions.opts['platforms'],
+            'synopsis': self.options.subOptions.opts['description'],
+            'author': self.options.subOptions.opts['author'],
+            'author_email': self.options.subOptions.opts['email'],
+            'synopsis': self.options.subOptions.opts['description'],
+            'model_class': classname
+        }
+
+        return controller_template.safe_substitute(**args)

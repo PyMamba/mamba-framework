@@ -135,7 +135,7 @@ class Controller(object):
             mamba_services_not_found()
 
         if self.options.subOptions.opts['name'] is None:
-            print(self.options)
+            print(self.options.subOptions)
             sys.exit(-1)
 
         if self.options.subOptions.opts['dump']:
