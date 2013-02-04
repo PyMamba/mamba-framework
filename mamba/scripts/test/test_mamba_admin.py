@@ -17,6 +17,7 @@ from twisted.python import usage, filepath
 
 from mamba.scripts import mamba_admin, commons
 from mamba.scripts._project import Application
+from mamba.scripts._model import ModelOptions, Model
 from mamba.scripts._controller import ControllerOptions, Controller
 from mamba.scripts._sql import (
     Sql, SqlConfigOptions, SqlCreateOptions, SqlDumpOptions, SqlResetOptions
@@ -617,6 +618,125 @@ class ControllerScriptTest(unittest.TestCase):
 
         self.assertTrue(controller_file.exists())
         controller_file.remove()
+
+        os.chdir(currdir)
+
+
+class MambaAdminModelTest(unittest.TestCase):
+
+    def setUp(self):
+        self.config = ModelOptions()
+
+    def test_wrong_number_of_args(self):
+        self.assertRaises(
+            usage.UsageError, self.config.parseOptions, ['0', '1', '2']
+        )
+
+    def test_name_camelize(self):
+        self.config.parseOptions(['test_model', 'test'])
+        self.assertEqual(self.config['name'], 'TestModel')
+
+    def test_filename_lowerize_and_normalize(self):
+        self.config.parseOptions(['Tes/t_model$', 'test'])
+        self.assertEqual(self.config['filename'], 'test_model')
+        self.assertEqual(self.config['name'], 'TestModel')
+
+    def test_email_validation(self):
+
+        def fake_exit(value):
+            pass
+
+        exit = sys.exit
+        sys.exit = fake_exit
+
+        stdout = sys.stdout
+        capture = StringIO()
+        sys.stdout = capture
+
+        self.config.parseOptions(['-e', 'no@valid', 'test_model', 'test'])
+        self.assertEqual(
+            capture.getvalue(),
+            'error: the given email address no@valid is not a valid RFC2822 '
+            'email address, check http://www.rfc-editor.org/rfc/rfc2822.txt '
+            'for very extended details\n'
+        )
+
+        sys.stdout = stdout
+
+    def test_default_email(self):
+        self.config.parseOptions(['test_model', 'test'])
+        self.assertEqual(
+            self.config['email'],
+            '{}@localhost'.format(getpass.getuser())
+        )
+
+    def test_default_plaform_is_linux(self):
+        self.config.parseOptions(['test_model', 'test'])
+        self.assertEqual(self.config['platforms'], 'Linux')
+
+    def test_default_synopsis_is_none(self):
+        self.config.parseOptions(['test_model', 'test'])
+        self.assertEqual(self.config['description'], None)
+
+
+class ModelScriptTest(unittest.TestCase):
+
+    def setUp(self):
+        self.config = mamba_admin.Options()
+        self.stdout = sys.stdout
+        self.capture = StringIO()
+        sys.stdout = self.capture
+
+    def tearDown(self):
+        sys.stdout = self.stdout
+
+    def test_use_outside_application_directory_fails(self):
+        _test_use_outside_application_directory_fails(self)
+
+    def test_dump(self):
+        Model.process = lambda _: 0
+
+        self.config.parseOptions(['model', '--dump', 'test_model', 'test'])
+        model = Model(self.config)
+        model._dump_model()
+        self.assertEqual(
+            self.capture.getvalue(),
+            '\n\n'
+            '# -*- encoding: utf-8 -*-\n'
+            '# -*- mamba-file-type: mamba-model -*-\n'
+            '# Copyright (c) 2013 - damnwidget <damnwidget@localhost>\n\n'
+            '"""'
+            '\n'
+            '.. model:: TestModel\n'
+            '    :plarform: Linux\n'
+            '    :synopsis: None\n\n'
+            '.. modelauthor:: damnwidget <damnwidget@localhost>\n'
+            '"""\n\n'
+            'from storm.locals import *\n\n'
+            'from mamba.application import model\n\n\n'
+            'class TestModel(model.Model, model.ModelProvider):\n'
+            '    """\n'
+            '    None\n'
+            '    """\n\n'
+            '    __storm_table__ = \'test\'\n\n'
+            '    id = Int(primary=True, ungined=True)\n\n\n'
+        )
+
+    def test_write_file(self):
+        Model.process = lambda _: 0
+
+        currdir = os.getcwd()
+        os.chdir('../mamba/test/dummy_app/')
+
+        self.config.parseOptions(['model', 'test_model', 'test'])
+        model = Model(self.config)
+        model._write_model()
+        model_file = filepath.FilePath(
+            'application/model/test_model.py'
+        )
+
+        self.assertTrue(model_file.exists())
+        model_file.remove()
 
         os.chdir(currdir)
 

@@ -129,6 +129,7 @@ class Model(object):
 
         try:
             mamba_services = commons.import_services()
+            del mamba_services
         except Exception:
             mamba_services_not_found()
 
@@ -154,6 +155,8 @@ class Model(object):
         """Write the model to a file in the file system
         """
 
+        print('pene')
+        print(self.options.subOptions.opts.keys())
         model_file = filepath.FilePath(
             'application/model/{}.py'.format(
                 self.options.subOptions.opts['filename'])

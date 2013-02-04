@@ -71,6 +71,29 @@ class MySQL(CommonSQL):
     def __init__(self, model):
         self.model = model
 
+    @property
+    def engine(self):
+        """
+        Return back the type of engine defined for this MySQL table, if
+        no engnine has been configured use InnoDB as default
+        """
+
+        if not hasattr(self.model, '__engine__'):
+            return 'InnoDB'
+
+        return self.model.__engine__
+
+    @staticmethod
+    def register():
+        """Register this component
+        """
+
+        try:
+            components.registerAdapter(MambaSQLAdapter, MySQL, IMambaSQL)
+        except ValueError:
+            # component already registered
+            pass
+
     def parse_references(self):
         """
         Get all the :class:`storm.references.Reference` and create foreign
@@ -266,26 +289,3 @@ class MySQL(CommonSQL):
             ' UNSIGNED' if unsigned else '',
             ' AUTO_INCREMENT' if auto_increment else ''
         )
-
-    @property
-    def engine(self):
-        """
-        Return back the type of engine defined for this MySQL table, if
-        no engnine has been configured use InnoDB as default
-        """
-
-        if not hasattr(self.model, '__engine__'):
-            return 'InnoDB'
-
-        return self.model.__engine__
-
-    @staticmethod
-    def register():
-        """Register this component
-        """
-
-        try:
-            components.registerAdapter(MambaSQLAdapter, MySQL, IMambaSQL)
-        except ValueError:
-            # component already registered
-            pass
