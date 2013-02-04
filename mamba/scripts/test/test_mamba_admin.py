@@ -8,6 +8,7 @@ Tests for mamba.scripts.mamba_admin and subcommands
 
 import os
 import sys
+import getpass
 from cStringIO import StringIO
 
 from twisted.internet import utils, defer
@@ -16,6 +17,7 @@ from twisted.python import usage, filepath
 
 from mamba.scripts import mamba_admin, commons
 from mamba.scripts._project import Application
+from mamba.scripts._controller import ControllerOptions, Controller
 from mamba.scripts._sql import (
     Sql, SqlConfigOptions, SqlCreateOptions, SqlDumpOptions, SqlResetOptions
 )
@@ -479,6 +481,142 @@ class SqlResetTest(unittest.TestCase):
             'All the data in your database has been reset.\n')
 
         db_file.open('wb').write(db_contents)
+
+        os.chdir(currdir)
+
+
+class MambaAdminControllerTest(unittest.TestCase):
+
+    def setUp(self):
+        self.config = ControllerOptions()
+
+    def test_wrong_number_of_args(self):
+        self.assertRaises(
+            usage.UsageError, self.config.parseOptions, ['test', 'wrong']
+        )
+
+    def test_name_camelize(self):
+        self.config.parseOptions(['test_controller'])
+        self.assertEqual(self.config['name'], 'TestController')
+
+    def test_filename_lowerize_and_normalize(self):
+        self.config.parseOptions(['Tes/t_controller$'])
+        self.assertEqual(self.config['filename'], 'test_controller')
+        self.assertEqual(self.config['name'], 'TestController')
+
+    def test_email_validation(self):
+
+        def fake_exit(value):
+            pass
+
+        exit = sys.exit
+        sys.exit = fake_exit
+
+        stdout = sys.stdout
+        capture = StringIO()
+        sys.stdout = capture
+
+        self.config.parseOptions(['-e', 'no@valid', 'test_controller'])
+        self.assertEqual(
+            capture.getvalue(),
+            'error: the given email address no@valid is not a valid RFC2822 '
+            'email address, check http://www.rfc-editor.org/rfc/rfc2822.txt '
+            'for very extended details\n'
+        )
+
+        sys.stdout = stdout
+
+    def test_default_email(self):
+        self.config.parseOptions(['test_controller'])
+        self.assertEqual(
+            self.config['email'],
+            '{}@localhost'.format(getpass.getuser())
+        )
+
+    def test_default_plaform_is_linux(self):
+        self.config.parseOptions(['test_controller'])
+        self.assertEqual(self.config['platforms'], 'Linux')
+
+    def test_default_path_is_empty(self):
+        self.config.parseOptions(['test_controller'])
+        self.assertEqual(self.config['path'], '')
+
+    def test_default_synopsis_is_none(self):
+        self.config.parseOptions(['test_controller'])
+        self.assertEqual(self.config['description'], None)
+
+
+class ControllerScriptTest(unittest.TestCase):
+
+    def setUp(self):
+        self.config = mamba_admin.Options()
+        self.stdout = sys.stdout
+        self.capture = StringIO()
+        sys.stdout = self.capture
+
+    def tearDown(self):
+        sys.stdout = self.stdout
+
+    def test_use_outside_application_directory_fails(self):
+        _test_use_outside_application_directory_fails(self)
+
+    def test_dump(self):
+        Controller.process = lambda _: 0
+
+        self.config.parseOptions(['controller', '--dump', 'test_controller'])
+        controller = Controller(self.config)
+        controller._dump_controller()
+        self.assertEqual(
+            self.capture.getvalue(),
+            '\n\n'
+            '# -*- encoding: utf-8 -*-\n'
+            '# -*- mamba-file-type: mamba-controller -*-\n'
+            '# Copyright (c) 2013 - damnwidget <damnwidget@localhost>\n\n'
+            '"""\n'
+            '.. controller:: TestController\n'
+            '    :platform: Linux\n'
+            '    :synopsis: None\n\n'
+            '.. controllerauthor:: damnwidget <damnwidget@localhost>\n'
+            '"""\n\n'
+            'from zope.interface import implements\n\n'
+            'from mamba.web.response import Ok\n'
+            'from mamba.core import interfaces\n'
+            'from mamba.application import route\n'
+            'from mamba.application.controller import '
+            'Controller, ControllerProvider\n\n\n'
+            'class TestController(Controller, ControllerProvider):\n'
+            '    """\n'
+            '    None\n'
+            '    """\n\n'
+            '    implements(interfaces.IController)\n'
+            '    name = \'TestController\'\n'
+            '    loaded = False\n'
+            '    __route__ = \'\'\n\n'
+            '    def __init__(self):\n'
+            '        """\n'
+            '        Put your initializarion code here\n'
+            '        """\n'
+            '        super(TestController, self).__init__()\n\n'
+            '    @route(\'/\')\n'
+            '    def root(self, request, **kwargs):\n'
+            '        return Ok(\'I am the TestController, hello world!\')\n\n'
+        )
+
+    def test_write_file(self):
+        Controller.process = lambda _: 0
+
+        currdir = os.getcwd()
+        os.chdir('../mamba/test/dummy_app/')
+
+        self.config.parseOptions(['controller', 'test_controller'])
+        controller = Controller(self.config)
+        controller._write_controller()
+        controller_file = filepath.FilePath(
+            'application/controller/test_controller.py'
+        )
+
+        self.assertTrue(controller_file.exists())
+        controller_file.remove()
 
         os.chdir(currdir)
 

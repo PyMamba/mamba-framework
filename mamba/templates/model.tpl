@@ -15,9 +15,9 @@ from storm.locals import *
 from mamba.application import model
 
 
-class ${model_class}Model(model.Model, model.ModelProvider):
+class ${model_class}(model.Model, model.ModelProvider):
     """
-    ${model_description}
+    ${synopsis}
     """
 
     __storm_table__ = '${model_table}'

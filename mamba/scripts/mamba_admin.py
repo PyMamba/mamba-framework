@@ -16,8 +16,10 @@ from storm import version as storm_version
 from mamba import version, license
 from mamba import copyright as mamba_copyright
 from mamba.utils.output import darkgreen, darkred
-from _project import ApplicationOptions, Application
+
 from _sql import SqlOptions, Sql
+from _project import ApplicationOptions, Application
+from _controller import ControllerOptions, Controller
 
 
 class StartOptions(usage.Options):
@@ -38,7 +40,7 @@ class Options(usage.Options):
     subCommands = [
         ['application', None, ApplicationOptions, 'Generate new application'],
         ['sql', None, SqlOptions, 'Manipulate SQL database'],
-        ['controller', None, None, 'Generate new controller'],
+        ['controller', None, ControllerOptions, 'Generate new controller'],
         ['model', None, None, 'Generate new model'],
         ['view', None, None, 'Generate new view'],
         ['entity', None, None, 'Generate a new entity'],
@@ -179,6 +181,9 @@ def run():
 
     if options.subCommand == 'sql':
         Sql(options.subOptions)
+
+    if options.subCommand == 'controller':
+        Controller(options)
 
 
 if __name__ == '__main__':

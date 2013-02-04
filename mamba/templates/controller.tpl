@@ -10,8 +10,6 @@
 .. controllerauthor:: ${author} <${author_email}>
 """
 
-import json
-
 from zope.interface import implements
 
 from mamba.web.response import Ok
@@ -20,14 +18,13 @@ from mamba.application import route
 from mamba.application.controller import Controller, ControllerProvider
 
 
-class ${controller_class}Controller(Controller, ControllerProvider):
+class ${controller_class}(Controller, ControllerProvider):
     """
-    ${controller_description}
+    ${synopsis}
     """
 
     implements(interfaces.IController)
     name = '${controller_class}'
-    desc = '${controller_description}'
     loaded = False
     __route__ = '${register_path}'
 
@@ -35,8 +32,8 @@ class ${controller_class}Controller(Controller, ControllerProvider):
         """
         Put your initializarion code here
         """
-        super(${controller_class}Controller, self).__init__()
+        super(${controller_class}, self).__init__()
 
     @route('/')
-    def root(self, request):
+    def root(self, request, **kwargs):
         return Ok('I am the ${controller_class}, hello world!')
