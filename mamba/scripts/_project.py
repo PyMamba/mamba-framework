@@ -38,8 +38,6 @@ class ApplicationOptions(usage.Options):
         ['description', 'd', 'A new Mamba application',
             'mamba application description', str],
         ['app-version', 'v', '1.0', 'mamba application version', str],
-        ['configfile', 'f', 'application.json',
-            'mamba application JSON config file', str],
         ['logfile', 'l', None,
             'log file (mamba already logs to twistd.log file in the root of '
             'the application directory. If you set a value to this parameter, '
@@ -65,8 +63,7 @@ class ApplicationOptions(usage.Options):
     def postOptions(self):
         """Post options processing
         """
-        if not self['configfile'].endswith('.json'):
-            self['configfile'] = '{}.json'.format(self['configfile'])
+        self['configfile'] = 'application.json'
 
         if self['logfile'] is not None:
             if not self['logfile'].endswith('.log'):
