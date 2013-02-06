@@ -47,22 +47,30 @@ class Page(resource.Resource):
             'language': app.language
         })
 
-        # Register log file if any
+        # register log file if any
         if app.log_file is not None:
             log.startLogging(DailyLogFile.fromFullPath(app.log_file))
 
-        # Set page language
+        # set page language
         self._header.language = app.language
 
-        # Set page description
+        # set page description
         self._header.description = app.description
 
-        # Set managers
-        self._styles_manager = app.managers.get('style')
+        # set managers
+        self._styles_manager = app.managers.get('styles')
         self._controllers_manager = app.managers.get('controller')
+
+        # prepare styles container
+        self.styles_container = static.Data(
+            'There is nothing for you here', 'text/css')
+        self.putChild('styles', self.styles_container)
 
         # register controllers
         self.register_controllers()
+
+        # insert stylesheets
+        self.insert_stylesheets()
 
         # static data
         self.putChild('mamba', static.File(filepath.os.getcwd() + '/static'))
@@ -99,15 +107,15 @@ class Page(resource.Resource):
             media = 'mamba'
         a('        {}\n'.format(self._header.get_favicon_content(media)))
 
-        # Iterate over the defined meta keys and add it to the header's page
+        # iterate over the defined meta keys and add it to the header's page
         for meta in self._options['meta']:
             a('        {}\n'.format(meta))
 
-        # Iterate over the defined styles and add it to the header's page
+        # iterate over the defined styles and add it to the header's page
         for style in self._stylesheets:
             a('        {}\n'.format(style.data))
 
-        # Iterate over the defined scripts and add it to the header's page
+        # iterate over the defined scripts and add it to the header's page
         for script in self._scripts:
             a('        {}\n'.format(script.data))
 
@@ -149,6 +157,22 @@ class Page(resource.Resource):
                 controller.get('object').get_register_path(),
                 controller.get('object')
             )
+
+    def insert_stylesheets(self):
+        """Insert stylesheets to the HTML
+        """
+
+        for style_name, style in self._styles_manager.get_styles().iteritems():
+            log.msg(
+                'Inserting Mamberized {} stylesheet into the main HTML page '
+                'with path {} and prefix {}'.format(
+                    style_name, style.path, style.prefix
+                )
+            )
+
+            self.styles_container.putChild(style_name, static.File(style.path))
+
+            self._stylesheets.append(style)
 
     def run(self, port=8080):
         """

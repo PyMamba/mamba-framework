@@ -71,7 +71,8 @@ class Stylesheet(object):
 
                 res = '{}/{}'.format(self.prefix, self._fp.basename())
                 self.data = '{}'.format(
-                    '<link rel="stylesheet" type="text/css" href="%s" />' % res
+                    '<link rel="stylesheet" type="text/css" '
+                    'href="{}" />'.format(res)
                 )
                 self.name = self._fp.basename()
             else:
@@ -136,7 +137,7 @@ class StylesheetManager(object):
         Load a new stylesheet file
         """
 
-        style = Stylesheet(filename, self._styles_store)
+        style = Stylesheet(filename)
         self._stylesheets.update({style.name: style})
 
     def reload(self, style):
