@@ -115,12 +115,13 @@ class Page(resource.Resource):
         for style in self._stylesheets:
             a('        {}\n'.format(style.data))
 
-        # iterate over the defined scripts and add it to the header's page
-        for script in self._scripts:
-            a('        {}\n'.format(script.data))
-
         a('        <title>{}</title>\n'.format(self._options['title']))
         a('    </head>\n')
+
+        # iterate over the defined scripts and add it to the header's page
+        for script in self._scripts:
+            a('  {}\n'.format(script.data))
+
         a('</html>')
 
         # Return the rendered page
