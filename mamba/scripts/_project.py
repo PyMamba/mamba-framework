@@ -268,7 +268,7 @@ class Application(object):
 
         plugin_template = self._load_template_from_mamba('plugin')
         args = {
-            'application': self.name,
+            'application': self.name.lower(),
             'file': self.file
         }
 

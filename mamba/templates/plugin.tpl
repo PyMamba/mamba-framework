@@ -19,7 +19,7 @@ class Options(usage.Options):
 
 class MambaServiceMaker(object):
     implements(IServiceMaker, IPlugin)
-    tapname = settings.name
+    tapname = settings.name.lower()
     description = settings.description
     options = Options
 
