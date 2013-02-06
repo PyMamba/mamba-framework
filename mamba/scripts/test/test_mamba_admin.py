@@ -37,8 +37,8 @@ class MambaAdminTest(unittest.TestCase):
 
         subCommands = config.subCommands
         expectedOrder = [
-            'application', 'sql', 'controller', 'model', 'view', 'entity',
-            'test', 'start', 'stop'
+            'application', 'sql', 'controller',
+            'model', 'view', 'start', 'stop'
         ]
 
         for subCommand, expectedCommand in zip(subCommands, expectedOrder):
@@ -526,6 +526,7 @@ class MambaAdminControllerTest(unittest.TestCase):
         )
 
         sys.stdout = stdout
+        sys.exit = exit
 
     def test_default_email(self):
         self.config.parseOptions(['test_controller'])
@@ -662,6 +663,7 @@ class MambaAdminModelTest(unittest.TestCase):
         )
 
         sys.stdout = stdout
+        sys.exit = exit
 
     def test_default_email(self):
         self.config.parseOptions(['test_model', 'test'])
