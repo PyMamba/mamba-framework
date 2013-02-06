@@ -109,7 +109,7 @@ class Headers(object):
 
         return (
             '<meta name="generator" content="Mamba Web Application Framework '
-            '| {0} version {1}" />'.format(self.description, version.short()))
+            'version {}" />'.format(version.short()))
 
     def get_mamba_content(self):
         """Returns mamba specific meta content"""
