@@ -164,8 +164,11 @@ class PageTest(unittest.TestCase):
             with Stub() as controllers:
                 controllers.get_controllers().returns({})
 
+            with Stub() as styles:
+                styles.get_styles().returns({})
+
             app.managers = {
-                'styles': 'StubStyles',
+                'styles': styles,
                 'controller': controllers
             }
 

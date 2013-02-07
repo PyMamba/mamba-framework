@@ -75,14 +75,6 @@ class MambaAdminApplicationTest(unittest.TestCase):
         self.config.parseOptions(['test'])
         self.assertEqual(self.config['configfile'], 'application.json')
 
-    def test_override_file(self):
-        self.config.parseOptions(['-f', 'test.json', 'test'])
-        self.assertEqual(self.config['configfile'], 'test.json')
-
-    def test_json_extension_for_file_by_default(self):
-        self.config.parseOptions(['-f', 'test.cfg', 'test'])
-        self.assertEqual(self.config['configfile'], 'test.cfg.json')
-
     def test_default_description(self):
         self.config.parseOptions(['test'])
         self.assertEqual(self.config['description'], 'A new Mamba application')
