@@ -40,14 +40,17 @@ setup(
     packages=find_packages(),
     package_data={'mamba': [
         'templates/*.tpl',
+        'templates/jinja/*',
         'test/application/config/*.json',
         'test/application/view/stylesheets/*.css',
         'test/application/view/stylesheets/*.less'
     ]},
     tests_require=['twisted>=10.2.0', 'doublex', 'PyHamcrest'],
-    install_requires=['twisted>=10.2.0', 'storm>=0.19'],
+    install_requires=['twisted>=10.2.0', 'storm>=0.19', 'jinja2>=2.4'],
     requires=[
-        'twisted(>=10.2.0)', 'storm(>=0.19)', 'zope.component', 'transaction'],
+        'twisted(>=10.2.0)', 'storm(>=0.19)', 'zope.component', 'transaction',
+        'jinja2(>=2.4)'
+    ],
     entry_points={
         'console_scripts': [
             'mamba-admin = mamba.scripts.mamba_admin:run',
