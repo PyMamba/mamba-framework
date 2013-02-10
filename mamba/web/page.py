@@ -16,6 +16,7 @@ from twisted.python.logfile import DailyLogFile
 from twisted.web import resource, static, server
 
 from mamba.http import headers
+from mamba.core.templating import MambaTemplate, Template, TemplateNotFound
 
 
 class Page(resource.Resource):
@@ -59,6 +60,7 @@ class Page(resource.Resource):
 
         # set managers
         self._styles_manager = app.managers.get('styles')
+        self._scripts_manager = app.managers.get('scripts')
         self._controllers_manager = app.managers.get('controller')
 
         # prepare styles container
@@ -66,14 +68,25 @@ class Page(resource.Resource):
             'There is nothing for you here', 'text/css')
         self.putChild('styles', self.styles_container)
 
+        # prepare scripts container
+        self.scripts_container = static.Data(
+            'There is nothing for you here', 'text/css')
+        self.putChild('scripts', self.scripts_container)
+
         # register controllers
         self.register_controllers()
 
         # insert stylesheets
         self.insert_stylesheets()
 
+        # insert scripts
+        self.insert_scripts()
+
         # static data
         self.putChild('mamba', static.File(filepath.os.getcwd() + '/static'))
+
+        # load root default template
+        self.root_template = MambaTemplate(template='root_page.html')
 
     def getChild(self, path, request):
         """twisted.web.resource.Resource.getChild overwrite
@@ -88,44 +101,36 @@ class Page(resource.Resource):
         """Renders the index page
         """
 
-        _page = []
-        a = _page.append
-
-        # Create the page headers
-        a('{}\n'.format(self._header.get_doc_type(self._options['doctype'])))
-        a('{}\n'.format(self._header.html_element))
-        a('    <head>\n')
-        a('        {}\n'.format(self._header.content_type))
-        a('        {}\n'.format(self._header.get_generator_content()))
-        a('        {}\n'.format(self._header.get_description_content()))
-        a('        {}\n'.format(self._header.get_language_content()))
-        a('        {}\n'.format(self._header.get_mamba_content()))
-
         if 'resPath' in self._options and 'media' in self._options['resPath']:
             media = self._options['resPath']['media']
         else:
             media = 'mamba'
-        a('        {}\n'.format(self._header.get_favicon_content(media)))
 
-        # iterate over the defined meta keys and add it to the header's page
-        for meta in self._options['meta']:
-            a('        {}\n'.format(meta))
+        options = {
+            'doctype': self._header.get_doc_type(self._options['doctype']),
+            'header': {
+                'content_type': self._header.content_type,
+                'generator_content': self._header.get_generator_content(),
+                'description_content': self._header.get_description_content(),
+                'language_content': self._header.get_language_content(),
+                'mamba_content': self._header.get_mamba_content(),
+                'media': self._header.get_favicon_content(media),
+                'metas': self._options['meta'],
+                'styles': [s.data for s in self._stylesheets],
+                'title': self._options['title'],
+                'scripts': self._scripts
+            }
+        }
 
-        # iterate over the defined styles and add it to the header's page
-        for style in self._stylesheets:
-            a('        {}\n'.format(style.data))
+        # try:
+        template = Template(template='index.html')
+        print template
+        return str(template.render_template(**options))
+        # except TemplateNotFound:
+        #     pass
 
-        a('        <title>{}</title>\n'.format(self._options['title']))
-        a('    </head>\n')
-
-        # iterate over the defined scripts and add it to the header's page
-        for script in self._scripts:
-            a('  {}\n'.format(script.data))
-
-        a('</html>')
-
-        # Return the rendered page
-        return ''.join(_page)
+        # template = MambaTemplate(template='root_page.html')
+        # return str(template.render(**options))
 
     def add_meta(self, meta):
         """Adds a meta to the page header
@@ -163,17 +168,31 @@ class Page(resource.Resource):
         """Insert stylesheets to the HTML
         """
 
-        for style_name, style in self._styles_manager.get_styles().iteritems():
+        for name, style in self._styles_manager.get_styles().iteritems():
             log.msg(
-                'Inserting Mamberized {} stylesheet into the main HTML page '
+                'Inserting mamberized {} stylesheet into the main HTML page '
                 'with path {} and prefix {}'.format(
-                    style_name, style.path, style.prefix
+                    name, style.path, style.prefix
                 )
             )
 
-            self.styles_container.putChild(style_name, static.File(style.path))
-
+            self.styles_container.putChild(name, static.File(style.path))
             self._stylesheets.append(style)
+
+    def insert_scripts(self):
+        """Insert scripts to the HTML
+        """
+
+        for name, script in self._scripts_manager.get_scripts().iteritems():
+            log.msg(
+                'Inserting mamberized {} script into the main HTML page with '
+                'path {} and prefix {}'.format(
+                    name, script.path, script.prefix
+                )
+            )
+
+            self.scripts_container.putChild(name, static.File(script.path))
+            self._scripts.append(script)
 
     def run(self, port=8080):
         """

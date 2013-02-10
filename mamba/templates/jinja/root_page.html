@@ -1,0 +1,18 @@
+<!DOCTYPE {{ doctype }}>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>{% block head %}
+    <meta http-equiv="Content-Type" content="{{ header.content_type }}"; charset="utf-8" />
+    <meta name="generator" content="{{ header.generator_content }}" />
+    <meta neme="description" content="{{ header.description_content }}" />
+    <meta name="language" content="{{ header.language_content }}" />
+    <meta name="mamba-content" content="{{ header.mamba_content }}" />
+    <link rel="shortcut icon" href="{{ header.media }}" />{% for meta in header.metas %}
+    {{ meta }}{% endfor %}{% for style in header.styles %}
+    <link rel="stylesheet" type="text/css" href="{{ style }}" media="screen" />{% endfor %}
+    <title>{{ header.title }}</title>{% endblock %}
+</head>
+<body>
+{% block body %}{% endblock %}
+{% block scripts %}{% for script in header.scripts %}    <script type="{{ script.type }}" src="{{ script.data }}"></script>{% endfor %}{% endblock %}
+</body>
+</html>

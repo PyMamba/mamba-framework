@@ -44,7 +44,7 @@ class DummyController(controller.Controller, controller.ControllerProvider):
         return json.dumps({'success': False, 'error': 'Not implemented yet.'})
 
     @route('/dummy_test')
-    def dumm_test(self, request):
+    def dummy_test(self, request):
         return Ok('<h1>Dummy Test</h1>', {'content-type': 'text/html'})
 
     @route('/')

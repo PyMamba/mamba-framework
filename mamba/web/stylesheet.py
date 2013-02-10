@@ -70,10 +70,7 @@ class Stylesheet(object):
                     )
 
                 res = '{}/{}'.format(self.prefix, self._fp.basename())
-                self.data = '{}'.format(
-                    '<link rel="stylesheet" type="text/css" '
-                    'href="{}" />'.format(res)
-                )
+                self.data = res
                 self.name = self._fp.basename()
             else:
                 raise InvalidFileExtension(

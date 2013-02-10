@@ -17,5 +17,5 @@ class HeadersTest(unittest.TestCase):
 
     def test_get_doctype(self):
         assert_that(
-            self.spy.get_doc_type('html-html5'), is_('<!DOCTYPE html>'))
+            self.spy.get_doc_type('html-html5'), is_('html'))
         assert_that(self.spy.get_doc_type, called().times(1))
