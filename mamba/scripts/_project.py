@@ -203,6 +203,8 @@ class Application(object):
             self._generate_directory_helper('application/controller')
             self._generate_directory_helper('application/model')
             self._generate_directory_helper('application/view')
+            self._generate_directory_helper('application/view/templates')
+            self._generate_directory_helper('application/view/stylesheets')
             self._generate_directory_helper('twisted')
             self._generate_directory_helper('twisted/plugins')
             self._generate_directory_helper('static')

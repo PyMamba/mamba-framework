@@ -140,6 +140,8 @@ class ApplicationTest(unittest.TestCase):
         self.assertTrue(filepath.exists('test/application/controller'))
         self.assertTrue(filepath.exists('test/application/model'))
         self.assertTrue(filepath.exists('test/application/view'))
+        self.assertTrue(filepath.exists('test/application/view/templates'))
+        self.assertTrue(filepath.exists('test/application/view/stylesheets'))
 
 
 class MambaAdminSqlConfigureTest(unittest.TestCase):
