@@ -1,6 +1,6 @@
 # -*- test-case-name: mamba.http.test_headers -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
-# Ses LICENSE for more details
+# See LICENSE for more details
 
 """
 The Page object is the main web application entry point.

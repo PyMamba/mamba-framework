@@ -1,6 +1,6 @@
 # -*- test-case-name: mamba.test.test_web -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
-# Ses LICENSE for more details
+# See LICENSE for more details
 
 """
 .. module: page
@@ -122,15 +122,14 @@ class Page(resource.Resource):
             }
         }
 
-        # try:
-        template = Template(template='index.html')
-        print template
-        return str(template.render_template(**options))
-        # except TemplateNotFound:
-        #     pass
+        try:
+            template = Template(template='index.html')
+            return str(template.render_template(**options))
+        except TemplateNotFound:
+            pass
 
-        # template = MambaTemplate(template='root_page.html')
-        # return str(template.render(**options))
+        template = MambaTemplate(template='root_page.html')
+        return str(template.render(**options))
 
     def add_meta(self, meta):
         """Adds a meta to the page header

@@ -1,6 +1,6 @@
 # -*- test-case-name: mamba.test.test_web -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
-# Ses LICENSE for more details
+# See LICENSE for more details
 
 """
 .. module: script
@@ -100,7 +100,7 @@ class ScriptManager(object):
         self.notifier.startReading()
         try:
             self.notifier.watch(
-                filepath.FilePath(self._styles_store),
+                filepath.FilePath(self._scripts_store),
                 callbacks=[self._notify]
             )
             self._watching = True
@@ -121,11 +121,11 @@ class ScriptManager(object):
         """
 
         try:
-            files = filepath.listdir(self._styles_store)
+            files = filepath.listdir(self._scripts_store)
             pattern = re.compile('[^_?]\%s$' % '.js|.dart', re.IGNORECASE)
             for stylefile in filter(pattern.search, files):
                 stylefile = normpath(
-                    '{}/{}'.format(self._styles_store, stylefile)
+                    '{}/{}'.format(self._scripts_store, stylefile)
                 )
                 self.load(stylefile)
         except OSError:

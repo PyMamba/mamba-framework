@@ -1,6 +1,6 @@
 # -*- test-case-name: mamba.test.test_filevariables -*-
 # Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
-# Ses LICENSE for more details
+# See LICENSE for more details
 
 """
 .. module:: filevariables
