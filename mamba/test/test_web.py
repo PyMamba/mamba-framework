@@ -1,6 +1,6 @@
 
 # Copyright (c) 2012 - Oscar Campos <oscar.campos@member.fsf.org>
-# Ses LICENSE for more details
+# See LICENSE for more details
 
 """
 Tests for mamba.web
@@ -19,9 +19,9 @@ from twisted.web.test.test_web import DummyRequest
 from twisted.internet.error import ProcessTerminated
 from doublex import Stub, ProxySpy, Spy, called, assert_that
 
-from mamba.application import appstyles, controller
+from mamba.application import appstyles, controller, scripts
 from mamba.application import route as decoroute
-from mamba.web import stylesheet, page, asyncjson, response
+from mamba.web import stylesheet, page, asyncjson, response, script
 from mamba.web.routing import Route, Router, RouteDispatcher
 
 from mamba.test.test_less import less_file
@@ -130,6 +130,111 @@ class StylesheetManagerTest(unittest.TestCase):
         )
 
 
+class ScriptTest(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        self.doCleanups()
+        self.flushLoggedErrors(ProcessTerminated)
+
+    def test_script_raises_on_not_existent_file(self):
+
+        self.assertRaises(
+            script.FileDontExists,
+            script.Script,
+            'i_dont_exists'
+        )
+
+    def test_script_raises_on_invalid_file_extension(self):
+
+        self.assertRaises(
+            script.InvalidFileExtension,
+            script.Script,
+            '../mamba/test/dummy_app/application/controller/dummy.py'
+        )
+
+    def test_script_raises_on_invalid_file_content(self):
+
+        tmpdir = tempfile.gettempdir()
+        fp = filepath.FilePath('{}/test.js'.format(tmpdir))
+        fd = fp.open('w')
+        fd.write(
+            '/* -*- mamba-file-type: mamba-javascript */\n'
+            'function dummy() { console.debug(\'dummy_test\'); }'
+        )
+        fd.close()
+
+        self.assertRaises(
+            script.InvalidFile,
+            script.Script,
+            '/tmp/test.js'
+        )
+
+        fp.remove()
+
+    def test_script_load_valid_file(self):
+
+        js = script.Script(
+            '../mamba/test/dummy_app/application/view/scripts/dummy.js'
+        )
+
+        self.assertTrue(js.data != '')
+        self.assertEqual(js.name, 'dummy.js')
+
+
+class ScriptManagerTest(unittest.TestCase):
+
+    def setUp(self):
+        self.mgr = scripts.Scripts()
+        self.addCleanup(self.mgr.notifier.loseConnection)
+
+    def tearDown(self):
+        self.flushLoggedErrors()
+
+    def load_script(self):
+        self.mgr.load(
+            '../mamba/test/dummy_app/application/view/scripts/dummy.js')
+
+    def test_setup_doesnt_works_until_correct_path(self):
+        self.mgr.setup()
+        self.assertFalse(len(self.mgr._scripts))
+
+        self.mgr._scripts_store = (
+            '../mamba/test/dummy_app/application/view/scripts')
+
+        self.mgr.setup()
+        self.assertTrue(len(self.mgr._scripts))
+
+    def test_load(self):
+        self.load_script()
+
+        self.assertTrue(len(self.mgr._scripts))
+
+    def test_loaded_script_is_script_object(self):
+        self.load_script()
+
+        self.assertIsInstance(
+            self.mgr.scripts['dummy.js'],
+            script.Script
+        )
+
+    # def test_reload_just_pass(self):
+    #     self.load_script()
+    #     self.mgr.reload('dummy.js')
+
+    def test_lookup_returns_none_on_unknown_scripts(self):
+        self.assertEqual(self.mgr.lookup('unknown'), None)
+
+    def test_lookup_returns_an_script_object(self):
+        self.load_script()
+        self.assertIsInstance(
+            self.mgr.lookup('dummy.js'),
+            script.Script
+        )
+
+
 class AsyncJSONTest(unittest.TestCase):
 
     @defer.inlineCallbacks
@@ -167,9 +272,13 @@ class PageTest(unittest.TestCase):
             with Stub() as styles:
                 styles.get_styles().returns({})
 
+            with Stub() as scripts:
+                scripts.get_scripts().returns({})
+
             app.managers = {
                 'styles': styles,
-                'controller': controllers
+                'controller': controllers,
+                'scripts': scripts
             }
 
         return app
