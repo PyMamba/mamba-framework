@@ -19,6 +19,8 @@ class ApplicationTests(unittest.TestCase):
         self.addCleanup(
             self.app.managers.get('controller').notifier.loseConnection)
         self.addCleanup(
+            self.app.managers.get('scripts').notifier.loseConnection)
+        self.addCleanup(
             self.app.managers.get('styles').notifier.loseConnection)
         self.addCleanup(self.app.managers.get('model').notifier.loseConnection)
 
@@ -31,6 +33,8 @@ class ApplicationTests(unittest.TestCase):
         app_tmp = app.Mamba(Dummy())
         self.addCleanup(
             app_tmp.managers.get('controller').notifier.loseConnection)
+        self.addCleanup(
+            self.app.managers.get('scripts').notifier.loseConnection)
         self.addCleanup(
             self.app.managers.get('styles').notifier.loseConnection)
         self.addCleanup(self.app.managers.get('model').notifier.loseConnection)

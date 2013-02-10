@@ -16,7 +16,7 @@ from twisted.python import versions, log, filepath
 
 from mamba.utils import borg
 from mamba import _version as _mamba_version
-from mamba.application import controller, appstyles, model
+from mamba.application import controller, scripts, appstyles, model
 
 
 _app_ver = versions.Version('Application', 0, 1, 0)
@@ -75,6 +75,7 @@ class Mamba(borg.Borg):
         self.lessjs = False
         self.managers = {
             'controller': controller.ControllerManager(),
+            'scripts': scripts.Scripts(),
             'styles': appstyles.AppStyles(),
             'model': model.ModelManager()
         }
