@@ -3,6 +3,7 @@ twisted >= 10.2.0
 storm >= 0.19
 zope.component
 transaction
+jinja2 >= 2.4
 
 # Testing utils
 doublex >= 1.5.1
