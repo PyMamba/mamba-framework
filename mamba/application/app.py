@@ -71,7 +71,7 @@ class Mamba(borg.Borg):
         )
         self.file = 'my_mamba_app.tac'
         self.js_dir = 'js'
-        self.language = os.environ['LANG'].split('_')[0]
+        self.language = os.environ.get('LANG', 'en_EN').split('_')[0]
         self.lessjs = False
         self.managers = {
             'controller': controller.ControllerManager(),
