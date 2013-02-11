@@ -31,6 +31,8 @@ class Page(resource.Resource):
     def __init__(self, app):
         resource.Resource.__init__(self)
 
+        self.render_options = {}
+
         self._options = {
             'doctype': 'html-html5',     # HTML5 by default
             'meta': []
@@ -82,6 +84,23 @@ class Page(resource.Resource):
         # insert scripts
         self.insert_scripts()
 
+        # render_options
+        self.render_options = {
+            'doctype': self._header.get_doc_type(self._options['doctype']),
+            'header': {
+                'content_type': self._header.content_type,
+                'generator_content': self._header.get_generator_content(),
+                'description_content': self._header.get_description_content(),
+                'language_content': self._header.get_language_content(),
+                'mamba_content': self._header.get_mamba_content(),
+                'media': self._header.get_favicon_content('assets'),
+                'metas': self._options['meta'],
+                'styles': [s.data for s in self._stylesheets],
+                'title': self._options['title'],
+                'scripts': self._scripts
+            }
+        }
+
         # static data
         self.putChild('assets', static.File(filepath.os.getcwd() + '/static'))
 
@@ -101,26 +120,7 @@ class Page(resource.Resource):
         """Renders the index page
         """
 
-        if 'resPath' in self._options and 'media' in self._options['resPath']:
-            media = self._options['resPath']['media']
-        else:
-            media = 'assets'
-
-        options = {
-            'doctype': self._header.get_doc_type(self._options['doctype']),
-            'header': {
-                'content_type': self._header.content_type,
-                'generator_content': self._header.get_generator_content(),
-                'description_content': self._header.get_description_content(),
-                'language_content': self._header.get_language_content(),
-                'mamba_content': self._header.get_mamba_content(),
-                'media': self._header.get_favicon_content(media),
-                'metas': self._options['meta'],
-                'styles': [s.data for s in self._stylesheets],
-                'title': self._options['title'],
-                'scripts': self._scripts
-            }
-        }
+        options = self.render_options
 
         try:
             template = Template(template='index.html')
