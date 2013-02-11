@@ -83,7 +83,7 @@ class Page(resource.Resource):
         self.insert_scripts()
 
         # static data
-        self.putChild('mamba', static.File(filepath.os.getcwd() + '/static'))
+        self.putChild('assets', static.File(filepath.os.getcwd() + '/static'))
 
         # load root default template
         self.root_template = MambaTemplate(template='root_page.html')
@@ -104,7 +104,7 @@ class Page(resource.Resource):
         if 'resPath' in self._options and 'media' in self._options['resPath']:
             media = self._options['resPath']['media']
         else:
-            media = 'mamba'
+            media = 'assets'
 
         options = {
             'doctype': self._header.get_doc_type(self._options['doctype']),
@@ -124,12 +124,12 @@ class Page(resource.Resource):
 
         try:
             template = Template(template='index.html')
-            return str(template.render_template(**options))
+            return template.render_template(**options).encode('utf-8')
         except TemplateNotFound:
             pass
 
         template = MambaTemplate(template='root_page.html')
-        return str(template.render(**options))
+        return template.render(**options).encode('utf-8')
 
     def add_meta(self, meta):
         """Adds a meta to the page header
