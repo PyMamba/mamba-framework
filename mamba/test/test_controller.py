@@ -18,6 +18,7 @@ from twisted.web.http_headers import Headers
 from twisted.web.test.test_web import DummyRequest
 from doublex import Spy, ProxySpy, assert_that, ANY_ARG, called
 
+from mamba.core import GNU_LINUX
 from mamba.web.routing import Router
 from mamba.test.dummy_app.application.controller.dummy import DummyController
 
@@ -50,6 +51,8 @@ class ControllerTest(unittest.TestCase):
     def setUp(self):
         self.resource = Spy(resource.Resource)
         self.c = controller.Controller()
+        self.addCleanup(self.c._styles_manager.notifier.loseConnection)
+        self.addCleanup(self.c._scripts_manager.notifier.loseConnection)
 
     def get_request(self):
 
@@ -93,6 +96,9 @@ class ControllerTest(unittest.TestCase):
     def test_controller_render_delegates_on_routing(self):
 
         c = DummyController()
+        self.addCleanup(c._styles_manager.notifier.loseConnection)
+        self.addCleanup(c._scripts_manager.notifier.loseConnection)
+
         router = ProxySpy(Router())
         c._router = router
         # request = self.get_request()
@@ -131,14 +137,25 @@ class ControllerManagerTest(unittest.TestCase):
 
     def setUp(self):
         self.mgr = controller.ControllerManager()
-        self.addCleanup(self.mgr.notifier.loseConnection)
+
+        if GNU_LINUX:
+            self.addCleanup(self.mgr.notifier.loseConnection)
+
+    def add_cleanups(self):
+        for c in self.mgr.get_controllers().values():
+            object = c['object']
+            self.addCleanup(object._styles_manager.notifier.loseConnection)
+            self.addCleanup(object._scripts_manager.notifier.loseConnection)
 
     def load_manager(self):
         sys.path.append('../mamba/test/dummy_app')
         self.mgr.load(
             '../mamba/test/dummy_app/application/controller/dummy.py')
+        self.add_cleanups()
 
     def test_inotifier_provided_by_controller_manager(self):
+        if not GNU_LINUX:
+            raise unittest.SkipTest('File monitoring only available on Linux')
         self.assertTrue(INotifier.providedBy(self.mgr))
 
     def test_get_controllers_is_ordered_dict(self):
@@ -173,9 +190,12 @@ class ControllerManagerTest(unittest.TestCase):
 
     def test_reload(self):
         self.load_manager()
+        self.add_cleanups()
+
         dummy = self.mgr.lookup('dummy').get('object')
 
         self.mgr.reload('dummy')
+        self.add_cleanups()
         dummy2 = self.mgr.lookup('dummy').get('object')
 
         self.assertNotEqual(dummy, dummy2)

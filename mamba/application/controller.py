@@ -14,17 +14,15 @@
 
 from os.path import normpath
 
-from twisted.web import http
 from twisted.python import log
-from twisted.web import server
-from twisted.web import resource
 from twisted.internet import reactor
+from twisted.web import http, server
 
 from mamba import plugin
 from mamba.web import routing
-from mamba.core import module
 from mamba.web import asyncjson
 from mamba.utils.output import bold
+from mamba.core import module, resource
 
 
 __all__ = [

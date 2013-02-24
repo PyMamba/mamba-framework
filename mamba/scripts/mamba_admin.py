@@ -13,6 +13,7 @@ from twisted import copyright
 from twisted.python import usage, filepath
 from storm import version as storm_version
 
+from mamba.core import BSD
 from mamba import version, license
 from mamba import copyright as mamba_copyright
 from mamba.utils.output import darkgreen, darkred
@@ -127,6 +128,9 @@ def handle_start_command(options):
             'delete twistd.pid and try again'
         )
         sys.exit(-1)
+
+    if BSD:
+        args.append('--reactor=kqueue')
 
     args.append(app_name)
 

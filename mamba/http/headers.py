@@ -9,6 +9,10 @@ The Page object is the main web application entry point.
 import platform
 
 from mamba._version import version
+from mamba.utils.config import Application
+
+
+config = Application()
 
 
 class Headers(object):
@@ -17,77 +21,18 @@ class Headers(object):
     as a well formated *XHTML/HTML* string.
     """
 
-    _doc_types = {
-        'html': {
-            'html5': 'html',
-            'strict': (
-                'HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" '
-                '"http://www.w3.org/TR/html4/strict.dtd"'
-            ),
-            'transitional': (
-                'HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional'
-                '//EN" "http://www.w3.org/TR/html4/loose.dtd"'
-            ),
-            'frameset': (
-                'HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" '
-                '"http://www.w3.org/TR/html4/frameset.dtd"'
-            )
-        },
-        'xhtml': {
-            'xhtml5': 'html',
-            'strict': (
-                'html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" '
-                '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"'
-            ),
-            'transitional': (
-                'html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional'
-                '//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-'
-                'transitional.dtd"'
-            ),
-            'frameset': (
-                'html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" '
-                '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd"'
-            )
-        }
-    }
+    doctype = config.doctype
+    content_type = config.content_type
+    description = config.description
+    language = config.language
+    favicon = config.favicon
+    platform_debug = config.platform_debug
 
-    content_type = 'text/html'
-    description = 'No Description'
-    language = 'en'
-    favicon = 'favicon.ico'
-    platform_debug = False
-
-    def get_doc_type(self, doctype):
-        """
-        Translate a :class:`mamba.web.Page` docType options to a valid
-        **DOCTYPE** Header string.
-
-        :param doctype: the doctype key to get
-        :type doctype: str
-        :returns: A valid **DOCTYPE** Header string
-        :return type: str
+    def get_doctype(self):
+        """Get the configured or default mamba doctype (html by default)
         """
 
-        dtype = doctype.split('-')[0]
-        dtd = doctype.split('-')[1]
-        if dtype in self._doc_types:
-            if dtd in self._doc_types[dtype]:
-                return self._doc_types[dtype][dtd]
-
-        return ''
-
-    def set_doc_type(self, doctype, val):
-        """Sets the doctype
-
-        :param doctype: the doctype key to set
-        :type doctype: str
-        :param val: the value to set
-        :type val: str
-        """
-
-        dtype = doctype.split('-')[0]
-        dtd = doctype.split('-')[1]
-        self._doc_types[dtype] = {dtd: val}
+        return self.doctype
 
     def get_language_content(self):
         """Returns the Headers language"""

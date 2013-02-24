@@ -49,6 +49,9 @@ class MambaTest(unittest.TestCase):
 
     def test_dummy_controller_instance_provide_icontroller(self):
         dcontroller = dummy.DummyController()
+        self.addCleanup(dcontroller._styles_manager.notifier.loseConnection)
+        self.addCleanup(dcontroller._scripts_manager.notifier.loseConnection)
+
         self.assertTrue(interfaces.IController.providedBy(dcontroller))
 
     def test_dummy_controller_is_a_plugin(self):

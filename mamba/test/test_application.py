@@ -1,12 +1,13 @@
 
 # Copyright (c) 2012 - Oscar Campos <oscar.campos@member.fsf.org>
-# Ses LICENSE for more details
+# See LICENSE for more details
 
 """Tests for mamba.application.app
 """
 
 from twisted.trial import unittest
 
+from mamba.core import GNU_LINUX
 from mamba.application import app, controller, appstyles
 
 
@@ -16,13 +17,13 @@ class ApplicationTests(unittest.TestCase):
 
     def setUp(self):
         self.app = app.Mamba()
-        self.addCleanup(
-            self.app.managers.get('controller').notifier.loseConnection)
-        self.addCleanup(
-            self.app.managers.get('scripts').notifier.loseConnection)
-        self.addCleanup(
-            self.app.managers.get('styles').notifier.loseConnection)
-        self.addCleanup(self.app.managers.get('model').notifier.loseConnection)
+        if GNU_LINUX:
+            self.addCleanup(
+                self.app.managers.get('controller').notifier.loseConnection
+            )
+            self.addCleanup(
+                self.app.managers.get('model').notifier.loseConnection
+            )
 
     def test_constructor_overwrite_options(self):
         name1 = self.app.name
@@ -31,13 +32,13 @@ class ApplicationTests(unittest.TestCase):
             name = 'Test'
 
         app_tmp = app.Mamba(Dummy())
-        self.addCleanup(
-            app_tmp.managers.get('controller').notifier.loseConnection)
-        self.addCleanup(
-            self.app.managers.get('scripts').notifier.loseConnection)
-        self.addCleanup(
-            self.app.managers.get('styles').notifier.loseConnection)
-        self.addCleanup(self.app.managers.get('model').notifier.loseConnection)
+        if GNU_LINUX:
+            self.addCleanup(
+                app_tmp.managers.get('controller').notifier.loseConnection
+            )
+            self.addCleanup(
+                self.app.managers.get('model').notifier.loseConnection
+            )
 
         self.assertNotEqual(name1, app_tmp.name)
 
@@ -103,7 +104,3 @@ class ApplicationTests(unittest.TestCase):
     def test_controller_manager_is_instanced(self):
         manager = self.app.managers.get('controller')
         self.assertIsInstance(manager, controller.ControllerManager)
-
-    def test_appstyles_manager_is_instanced(self):
-        manager = self.app.managers.get('styles')
-        self.assertIsInstance(manager, appstyles.AppStyles)

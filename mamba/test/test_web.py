@@ -9,6 +9,7 @@ Tests for mamba.web
 import sys
 import tempfile
 from cStringIO import StringIO
+from collections import namedtuple
 
 from twisted.internet import defer
 from twisted.trial import unittest
@@ -19,6 +20,8 @@ from twisted.web.test.test_web import DummyRequest
 from twisted.internet.error import ProcessTerminated
 from doublex import Stub, ProxySpy, Spy, called, assert_that
 
+from mamba.core import resource
+from mamba.core import GNU_LINUX
 from mamba.application import appstyles, controller, scripts
 from mamba.application import route as decoroute
 from mamba.web import stylesheet, page, asyncjson, response, script
@@ -83,7 +86,9 @@ class StylesheetManagerTest(unittest.TestCase):
 
     def setUp(self):
         self.mgr = appstyles.AppStyles()
-        self.addCleanup(self.mgr.notifier.loseConnection)
+
+        if GNU_LINUX:
+            self.addCleanup(self.mgr.notifier.loseConnection)
 
     def tearDown(self):
         self.flushLoggedErrors()
@@ -188,7 +193,9 @@ class ScriptManagerTest(unittest.TestCase):
 
     def setUp(self):
         self.mgr = scripts.Scripts()
-        self.addCleanup(self.mgr.notifier.loseConnection)
+
+        if GNU_LINUX:
+            self.addCleanup(self.mgr.notifier.loseConnection)
 
     def tearDown(self):
         self.flushLoggedErrors()
@@ -255,6 +262,11 @@ class AsyncJSONTest(unittest.TestCase):
 
 class PageTest(unittest.TestCase):
 
+    def setUp(self):
+        self.root = page.Page(self.get_commons())
+        self.addCleanup(self.root._styles_manager.notifier.loseConnection)
+        self.addCleanup(self.root._scripts_manager.notifier.loseConnection)
+
     def tearDown(self):
         self.flushLoggedErrors()
 
@@ -276,86 +288,106 @@ class PageTest(unittest.TestCase):
                 scripts.get_scripts().returns({})
 
             app.managers = {
-                'styles': styles,
                 'controller': controllers,
-                'scripts': scripts
             }
 
         return app
 
     def test_page_get_child_return_itself_if_postpath_is_index(self):
 
-        root = page.Page(self.get_commons())
         self.assertIdentical(
-            root,
-            root.getChild('index', DummyRequest(['']))
+            self.root,
+            self.root.getChild('index', DummyRequest(['']))
         )
 
-    def test_page_get_child_return_itself_if_postpath_is_app(self):
+    def test_page_get_child_return_itself_if_postpath_is_valid_template(self):
 
-        root = page.Page(self.get_commons())
         self.assertIdentical(
-            root,
-            root.getChild('app', DummyRequest(['']))
+            self.root,
+            self.root.getChild('test', DummyRequest(['']))
         )
 
     def test_page_get_child_return_itself_if_postpath_is_missing(self):
 
-        root = page.Page(self.get_commons())
         self.assertIdentical(
-            root,
-            root.getChild('', DummyRequest(['']))
+            self.root,
+            self.root.getChild('', DummyRequest(['']))
         )
 
     def test_page_get_child_returns_registered_childs(self):
 
-        root = page.Page(self.get_commons())
         child = DummyController()
-        root.putChild('dummy', child)
+        self.addCleanup(child._styles_manager.notifier.loseConnection)
+        self.addCleanup(child._scripts_manager.notifier.loseConnection)
+
+        self.root.putChild('dummy', child)
 
         self.assertIdentical(
             child,
-            root.getChildWithDefault('dummy', DummyRequest(['']))
+            self.root.getChildWithDefault('dummy', DummyRequest(['']))
         )
 
-    def test_page_add_meta(self):
+    def test_render_get_a_rendered_template(self):
 
-        root = page.Page(self.get_commons())
-        root.add_meta('Content-type: "plain/html"')
-
+        request = DummyRequest([''])
+        request.prepath = ['test']
         self.assertEqual(
-            root._options['meta'],
-            ['Content-type: "plain/html"']
+            self.root.render_GET(request),
+            '<!DOCTYPE html>\n'
+            '<html lang="en">\n'
+            '<head>\n'
+            '    <title></title>\n'
+            '</head>\n'
+            '<body>\n'
+            '    \n'
+            '</body>\n'
+            '</html>'
+        )
+
+    def test_concrete_template_hidden_controller(self):
+
+        child = DummyController()
+        self.addCleanup(child._styles_manager.notifier.loseConnection)
+        self.addCleanup(child._scripts_manager.notifier.loseConnection)
+
+        self.root.putChild('test', child)
+
+        self.assertIdentical(
+            self.root,
+            self.root.getChild('test', DummyRequest(['']))
         )
 
     def test_page_add_script(self):
 
-        root = page.Page(self.get_commons())
         style = stylesheet.Stylesheet(
             '../mamba/test/dummy_app/application/view/stylesheets/dummy.less'
         )
-        root.add_script(style)
+        self.root.add_script(style)
 
-        self.assertEqual(root._scripts[0], style)
         self.assertEqual(
-            root.getChildWithDefault(
+            self.root.getChildWithDefault(
                 style.prefix, DummyRequest([''])).basename(),
             style.name
         )
 
     def test_page_register_controllers(self):
 
-        root = page.Page(self.get_commons())
         mgr = controller.ControllerManager()
-        self.addCleanup(mgr.notifier.loseConnection)
+        if GNU_LINUX:
+            self.addCleanup(mgr.notifier.loseConnection)
+
         sys.path.append('../mamba/test/dummy_app')
         mgr.load('../mamba/test/dummy_app/application/controller/dummy.py')
+        for c in mgr.get_controllers().values():
+            object = c['object']
+            self.addCleanup(object._styles_manager.notifier.loseConnection)
+            self.addCleanup(object._scripts_manager.notifier.loseConnection)
 
-        root._controllers_manager = mgr
-        root.register_controllers()
+        self.root._controllers_manager = mgr
+        self.root.register_controllers()
 
         self.assertIdentical(
-            root.getChildWithDefault('dummy', DummyRequest([''])),
+            self.root.getChildWithDefault('dummy', DummyRequest([''])),
             mgr.lookup('dummy')['object']
         )
 

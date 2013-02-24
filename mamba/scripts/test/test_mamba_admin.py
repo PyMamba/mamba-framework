@@ -1,6 +1,6 @@
 
 # Copyright (c) 2012 - 2013 Oscar Campos <oscar.campos@member.fsf.org>
-# Ses LICENSE for more details
+# See LICENSE for more details
 
 """
 Tests for mamba.scripts.mamba_admin and subcommands

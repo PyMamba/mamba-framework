@@ -13,12 +13,16 @@
 import re
 from os.path import normpath
 
-from zope.interface import implements
-from twisted.internet import inotify
-from twisted.python._inotify import INotifyError
+from mamba.core import GNU_LINUX
+
+if GNU_LINUX:
+    from zope.interface import implements
+    from twisted.internet import inotify
+    from twisted.python._inotify import INotifyError
+    from mamba.core.interfaces import INotifier
+
 from twisted.python import filepath
 
-from mamba.core.interfaces import INotifier
 from mamba.utils import filevariables
 
 
@@ -90,22 +94,24 @@ class ScriptManager(object):
     """
     Manager for Scripts
     """
-    implements(INotifier)
+    if GNU_LINUX:
+        implements(INotifier)
 
     def __init__(self):
         self._scripts = {}
 
-        # Create and setup Linux iNotify mechanism
-        self.notifier = inotify.INotify()
-        self.notifier.startReading()
-        try:
-            self.notifier.watch(
-                filepath.FilePath(self._scripts_store),
-                callbacks=[self._notify]
-            )
-            self._watching = True
-        except INotifyError:
-            self._watching = False
+        if GNU_LINUX:
+            # Create and setup Linux iNotify mechanism
+            self.notifier = inotify.INotify()
+            self.notifier.startReading()
+            try:
+                self.notifier.watch(
+                    filepath.FilePath(self._scripts_store),
+                    callbacks=[self._notify]
+                )
+                self._watching = True
+            except INotifyError:
+                self._watching = False
 
     @property
     def scripts(self):
@@ -147,6 +153,9 @@ class ScriptManager(object):
 
     def _notify(self, wd, file_path, mask):
         """Notifies the changes on scripts file_path """
+
+        if not GNU_LINUX:
+            return
 
         print "event %s on %s" % (
             ', '.join(inotify.humanReadableMask(mask)), filepath

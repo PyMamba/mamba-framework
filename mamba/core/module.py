@@ -15,11 +15,16 @@ import re
 from collections import OrderedDict
 
 from twisted.python import filepath
-from zope.interface import implements
-from twisted.internet import inotify
-from twisted.python._inotify import INotifyError
 
-from mamba.core.interfaces import INotifier
+from mamba.core import GNU_LINUX
+
+if GNU_LINUX:
+    from zope.interface import implements
+    from twisted.internet import inotify
+    from twisted.python._inotify import INotifyError
+
+    from mamba.core.interfaces import INotifier
+
 from mamba.plugin import ExtensionPoint
 from mamba.utils import filevariables
 
@@ -35,7 +40,8 @@ class ModuleManager(object):
     :class:`twisted.internet.inotify.INotify` object in my
     :attr:`self._module_store` in order to perform auto reloads
     """
-    implements(INotifier)
+    if GNU_LINUX:
+        implements(INotifier)
 
     def __init__(self):
         # Initialize the ExtensionLoader parent object
@@ -44,17 +50,18 @@ class ModuleManager(object):
         self._modules = OrderedDict()
         self._extension = '.py'
 
-        # Create and setup the Linux iNotify mechanism
-        self.notifier = inotify.INotify()
-        self.notifier.startReading()
-        try:
-            self.notifier.watch(
-                filepath.FilePath(self._module_store),
-                callbacks=[self._notify]
-            )
-            self._watching = True
-        except INotifyError:
-            self._watching = False
+        if GNU_LINUX:
+            # Create and setup the Linux iNotify mechanism
+            self.notifier = inotify.INotify()
+            self.notifier.startReading()
+            try:
+                self.notifier.watch(
+                    filepath.FilePath(self._module_store),
+                    callbacks=[self._notify]
+                )
+                self._watching = True
+            except INotifyError:
+                self._watching = False
 
         # Start the loading process
         self.setup()
@@ -161,6 +168,9 @@ class ModuleManager(object):
         """
         Notifies the changes on resources file_path
         """
+
+        if not GNU_LINUX:
+            return
 
         if mask is inotify.IN_MODIFY:
             if not self.is_valid_file(file_path):

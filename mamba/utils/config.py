@@ -11,6 +11,7 @@
 
 """
 
+import os
 import json
 
 from twisted.python import filepath, log
@@ -194,7 +195,14 @@ class Application(BaseConfig):
             "name": "Mamba Application",
             "description": "Mamba application description",
             "version": 1.0
-            "port": 8080
+            "port": 8080,
+            "doctype": "html",
+            "content_type": "text/html",
+            "description": "My cool application",
+            "language": "en",
+            "description": "This is my cool application",
+            "favicon": "favicon.ico",
+            "platform_debug": false
         }
 
     :param config_file: the JSON file to load
@@ -203,12 +211,23 @@ class Application(BaseConfig):
 
     def __init__(self, config_file=''):
         super(Application, self).__init__()
+
+        self.language = os.environ.get('LANG', 'en_EN').split('_')[0]
+
         self.load(config_file)
 
     def _defaults(self):
         """Set dedault data to config
         """
-        pass
+
+        self.log_file = None
+        self.name = None
+        self.port = None
+        self.doctype = 'html'
+        self.content_type = 'text/html'
+        self.description = None
+        self.favicon = 'favicon.ico'
+        self.platform_debug = False
 
 
 __all__ = ['Database', 'Application']

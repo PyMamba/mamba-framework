@@ -1,6 +1,6 @@
 
 # Copyright (c) 2012 - Oscar Campos <oscar.campos@member.fsf.org>
-# Ses LICENSE for more details
+# See LICENSE for more details
 
 """
 Tests for mamba.application.model
@@ -22,8 +22,8 @@ from storm.locals import Int, Unicode, Reference, Enum, List
 
 from mamba import Database
 from mamba.utils import config
-from mamba.core import interfaces
 from mamba import Model, ModelManager
+from mamba.core import interfaces, GNU_LINUX
 from mamba.enterprise.mysql import MySQLMissingPrimaryKey, MySQL
 from mamba.enterprise.sqlite import SQLiteMissingPrimaryKey, SQLite
 from mamba.enterprise.postgres import PostgreSQLMissingPrimaryKey, PostgreSQL
@@ -393,7 +393,8 @@ class ModelManagerTest(unittest.TestCase):
 
     def setUp(self):
         self.mgr = ModelManager()
-        self.addCleanup(self.mgr.notifier.loseConnection)
+        if GNU_LINUX:
+            self.addCleanup(self.mgr.notifier.loseConnection)
         try:
             threadpool = DummyThreadPool()
             self.database = Database(threadpool)
@@ -419,6 +420,8 @@ class ModelManagerTest(unittest.TestCase):
         self.mgr.load('../mamba/test/dummy_app/application/model/dummy.py')
 
     def test_inotifier_provided_by_controller_manager(self):
+        if not GNU_LINUX:
+            raise unittest.SkipTest('File monitoring only available on Linux')
         self.assertTrue(interfaces.INotifier.providedBy(self.mgr))
 
     def test_get_models_is_ordered_dict(self):

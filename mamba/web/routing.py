@@ -313,7 +313,7 @@ class Router(object):
         log.err('Deferred failed: {error}'.format(error=error))
 
         return response.InternalServerError(
-            'ERROR 500: Internal server error {}'.format(error)
+            'ERROR 500: Internal server error {}\n{}'.format(error, result)
         )
 
     def _prepare_response(self, result, request):

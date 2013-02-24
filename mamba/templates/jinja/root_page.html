@@ -8,7 +8,7 @@
     <meta name="mamba-content" content="{{ header.mamba_content }}" />
     <link rel="shortcut icon" href="{{ header.media }}" />{% for meta in header.metas %}
     {{ meta }}{% endfor %}{% for style in header.styles %}
-    <link rel="stylesheet" type="text/css" href="{{ style }}" media="screen" />{% endfor %}
+    <link rel="stylesheet" type="text/css" href="{{ style.data }}" media="screen" />{% endfor %}
     <title>{{ header.title }}</title>{% endblock %}
 </head>
 <body>

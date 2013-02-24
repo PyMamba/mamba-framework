@@ -12,11 +12,12 @@
 
 import os
 
-from twisted.python import versions, log, filepath
+from twisted.python import versions, filepath
 
 from mamba.utils import borg
+from mamba.http import headers
 from mamba import _version as _mamba_version
-from mamba.application import controller, scripts, appstyles, model
+from mamba.application import controller, model
 
 
 _app_ver = versions.Version('Application', 0, 1, 0)
@@ -55,7 +56,7 @@ class Mamba(borg.Borg):
         """Mamba constructor"""
 
         super(Mamba, self).__init__()
-        self._install_paths = dict()
+
         self._mamba_ver = _mamba_version.version.short()
         self._ver = _app_ver.short()
         self._port = 1936
@@ -65,29 +66,52 @@ class Mamba(borg.Borg):
         self.name = 'Mamba Webservice v%s' % _mamba_version.version.short()
         self.description = (
             'Mamba %s is a Web applications framework that works '
-            'over Twisted using JavaScript libraries as GUI enhancement '
+            'over Twisted using Jinja2 as GUI enhancement '
             'Mamba has been developed by Oscar Campos '
             '<oscar.campos@member.fsf.org>' % _mamba_version.version.short()
         )
-        self.file = 'my_mamba_app.tac'
-        self.js_dir = 'js'
+
         self.language = os.environ.get('LANG', 'en_EN').split('_')[0]
         self.lessjs = False
+
+        self._parse_options(options)
+
+        self._header = headers.Headers()
+        self._header.language = self.language
+        self._header.description = self.description
+
         self.managers = {
             'controller': controller.ControllerManager(),
-            'scripts': scripts.Scripts(),
-            'styles': appstyles.AppStyles(),
             'model': model.ModelManager()
         }
 
-        if options:
+        # self._prepare_render_keys()
+
+    def _prepare_render_keys(self):
+        self.render_keys = {
+            'doctype': self._header.get_doctype(),
+            'header': {
+                'title': self.name,
+                'content_type': self._header.content_type,
+                'generator_content': self._header.get_generator_content(),
+                'description_content': self._header.get_description_content(),
+                'language_content': self._header.get_language_content(),
+                'mamba_content': self._header.get_mamba_content(),
+                'media': self._header.get_favicon_content('assets'),
+                'styles': self.managers['styles'].get_styles().values(),
+                'scripts': self.managers['scripts'].get_scripts().values()
+            }
+        }
+
+    def _parse_options(self, options):
+        if options is not None:
             for key in dir(options):
                 if not key.startswith('__'):
                     if key == 'port':
                         setattr(self, '_port', getattr(options, key))
                     elif key == 'version':
                         setattr(self, '_ver', getattr(options, key))
-                    elif key == 'logfile':
+                    elif key == 'log_file':
                         setattr(self, '_log_file', getattr(options, key))
                     else:
                         setattr(self, key, getattr(options, key))

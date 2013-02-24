@@ -1,6 +1,6 @@
 
 # Copyright (c) 2012 - Oscar Campos <oscar.campos@member.fsf.org>
-# Ses LICENSE for more details
+# See LICENSE for more details
 
 """
 Tests for mamba.enterprise.database
@@ -12,6 +12,7 @@ from twisted.python.threadpool import ThreadPool
 from doublex import Spy, assert_that, called, ANY_ARG
 
 from mamba.utils import config
+from mamba.core import GNU_LINUX
 from mamba.enterprise import Database
 from mamba.application.model import ModelManager
 from mamba.enterprise.database import AdapterFactory
@@ -32,7 +33,8 @@ class DatabaseTest(unittest.TestCase):
         import sys
         sys.path.append('../mamba/test/dummy_app')
         mgr = ModelManager()
-        self.addCleanup(mgr.notifier.loseConnection)
+        if GNU_LINUX:
+            self.addCleanup(mgr.notifier.loseConnection)
 
         from mamba import Model
         from mamba.test.test_model import DummyThreadPool, DatabaseModuleError
