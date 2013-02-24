@@ -51,8 +51,10 @@ class ControllerTest(unittest.TestCase):
     def setUp(self):
         self.resource = Spy(resource.Resource)
         self.c = controller.Controller()
-        self.addCleanup(self.c._styles_manager.notifier.loseConnection)
-        self.addCleanup(self.c._scripts_manager.notifier.loseConnection)
+
+        if GNU_LINUX:
+            self.addCleanup(self.c._styles_manager.notifier.loseConnection)
+            self.addCleanup(self.c._scripts_manager.notifier.loseConnection)
 
     def get_request(self):
 
@@ -96,8 +98,9 @@ class ControllerTest(unittest.TestCase):
     def test_controller_render_delegates_on_routing(self):
 
         c = DummyController()
-        self.addCleanup(c._styles_manager.notifier.loseConnection)
-        self.addCleanup(c._scripts_manager.notifier.loseConnection)
+        if GNU_LINUX:
+            self.addCleanup(c._styles_manager.notifier.loseConnection)
+            self.addCleanup(c._scripts_manager.notifier.loseConnection)
 
         router = ProxySpy(Router())
         c._router = router
@@ -142,6 +145,8 @@ class ControllerManagerTest(unittest.TestCase):
             self.addCleanup(self.mgr.notifier.loseConnection)
 
     def add_cleanups(self):
+        if not GNU_LINUX:
+            return
         for c in self.mgr.get_controllers().values():
             object = c['object']
             self.addCleanup(object._styles_manager.notifier.loseConnection)

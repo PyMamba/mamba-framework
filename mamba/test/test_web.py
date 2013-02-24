@@ -264,8 +264,9 @@ class PageTest(unittest.TestCase):
 
     def setUp(self):
         self.root = page.Page(self.get_commons())
-        self.addCleanup(self.root._styles_manager.notifier.loseConnection)
-        self.addCleanup(self.root._scripts_manager.notifier.loseConnection)
+        if GNU_LINUX:
+            self.addCleanup(self.root._styles_manager.notifier.loseConnection)
+            self.addCleanup(self.root._scripts_manager.notifier.loseConnection)
 
     def tearDown(self):
         self.flushLoggedErrors()
@@ -317,8 +318,9 @@ class PageTest(unittest.TestCase):
     def test_page_get_child_returns_registered_childs(self):
 
         child = DummyController()
-        self.addCleanup(child._styles_manager.notifier.loseConnection)
-        self.addCleanup(child._scripts_manager.notifier.loseConnection)
+        if GNU_LINUX:
+            self.addCleanup(child._styles_manager.notifier.loseConnection)
+            self.addCleanup(child._scripts_manager.notifier.loseConnection)
 
         self.root.putChild('dummy', child)
 
@@ -347,8 +349,9 @@ class PageTest(unittest.TestCase):
     def test_concrete_template_hidden_controller(self):
 
         child = DummyController()
-        self.addCleanup(child._styles_manager.notifier.loseConnection)
-        self.addCleanup(child._scripts_manager.notifier.loseConnection)
+        if GNU_LINUX:
+            self.addCleanup(child._styles_manager.notifier.loseConnection)
+            self.addCleanup(child._scripts_manager.notifier.loseConnection)
 
         self.root.putChild('test', child)
 
@@ -378,10 +381,14 @@ class PageTest(unittest.TestCase):
 
         sys.path.append('../mamba/test/dummy_app')
         mgr.load('../mamba/test/dummy_app/application/controller/dummy.py')
-        for c in mgr.get_controllers().values():
-            object = c['object']
-            self.addCleanup(object._styles_manager.notifier.loseConnection)
-            self.addCleanup(object._scripts_manager.notifier.loseConnection)
+
+        if GNU_LINUX:
+            for c in mgr.get_controllers().values():
+                object = c['object']
+                self.addCleanup(object._styles_manager.notifier.loseConnection)
+                self.addCleanup(
+                    object._scripts_manager.notifier.loseConnection
+                )
 
         self.root._controllers_manager = mgr
         self.root.register_controllers()

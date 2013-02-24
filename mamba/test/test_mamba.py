@@ -10,9 +10,9 @@ from twisted.trial import unittest
 from twisted.web import resource
 
 from mamba import __version__
-from mamba.core import interfaces
 from mamba.plugin import ExtensionPoint
 from mamba.application import controller
+from mamba.core import interfaces, GNU_LINUX
 from twisted.internet.error import ProcessTerminated
 from mamba.test.dummy_app.application.controller import dummy
 
@@ -49,8 +49,13 @@ class MambaTest(unittest.TestCase):
 
     def test_dummy_controller_instance_provide_icontroller(self):
         dcontroller = dummy.DummyController()
-        self.addCleanup(dcontroller._styles_manager.notifier.loseConnection)
-        self.addCleanup(dcontroller._scripts_manager.notifier.loseConnection)
+        if GNU_LINUX:
+            self.addCleanup(
+                dcontroller._styles_manager.notifier.loseConnection
+            )
+            self.addCleanup(
+                dcontroller._scripts_manager.notifier.loseConnection
+            )
 
         self.assertTrue(interfaces.IController.providedBy(dcontroller))
 
