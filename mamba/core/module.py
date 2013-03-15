@@ -25,8 +25,8 @@ if GNU_LINUX:
 
     from mamba.core.interfaces import INotifier
 
-from mamba.plugin import ExtensionPoint
 from mamba.utils import filevariables
+from mamba.core.interfaces import IController
 
 
 class ModuleError(Exception):
@@ -105,7 +105,7 @@ class ModuleManager(object):
         except AttributeError:
             for member in dir(temp_module):
                 tmp_member = getattr(temp_module, member)
-                if type(tmp_member) is ExtensionPoint:
+                if IController.implementedBy(tmp_member):
                     temp_object = tmp_member()
                     break
 
