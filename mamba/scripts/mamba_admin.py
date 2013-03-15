@@ -4,6 +4,7 @@
 
 from __future__ import print_function
 
+import os
 import sys
 import glob
 import signal
@@ -13,15 +14,16 @@ from twisted import copyright
 from twisted.python import usage, filepath
 from storm import version as storm_version
 
-from mamba.core import BSD
+from mamba.utils import config
 from mamba import version, license
+from mamba.core import BSD, GNU_LINUX
 from mamba import copyright as mamba_copyright
 from mamba.utils.output import darkgreen, darkred
 
 from _sql import SqlOptions, Sql
+from _model import ModelOptions, Model
 from _project import ApplicationOptions, Application
 from _controller import ControllerOptions, Controller
-from _model import ModelOptions, Model
 
 
 class StartOptions(usage.Options):
@@ -110,10 +112,27 @@ def handle_start_command(options):
     """I handle the start command
     """
 
+    if GNU_LINUX or BSD:
+        app = config.Application('config/application.json')
+        if app.port <= 1024:
+            if os.getuid() != 0:
+                print(
+                    '[{e}]: This application is configured to use a reserved '
+                    'port (a port under 1025) only root can open a port from '
+                    'this range root access is needed to start this '
+                    'application using the {port} port.\n\nTry something '
+                    'like: sudo mamba-admin start\n\nYou can also change the '
+                    'configuration for this application editing '
+                    '\'config/application.json\''.format(
+                        e=darkred('ERROR'), port=app.port
+                    )
+                )
+                sys.exit(-1)
+
     args = ['twistd']
     try:
         app_name = glob.glob(
-            'twisted/plugins/*.py')[0].split('/')[-1].split('_')[0]
+            'twisted/plugins/*.py')[0].split('/')[-1].rstrip('_plugin.py')
     except IndexError:
         print(
             'error: twisted directory can\'t be found. You should be in '
