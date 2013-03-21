@@ -26,7 +26,7 @@ if GNU_LINUX:
     from mamba.core.interfaces import INotifier
 
 from mamba.utils import filevariables
-from mamba.core.interfaces import IController
+from mamba.plugin import ExtensionPoint
 
 
 class ModuleError(Exception):
@@ -90,7 +90,7 @@ class ModuleManager(object):
 
         module_name = filepath.splitext(filepath.basename(filename))[0]
         module_path = '{}.{}'.format(
-            self._module_store.replace('/', '.'),
+            self._modulize_store(),
             module_name
         )
 
@@ -105,9 +105,13 @@ class ModuleManager(object):
         except AttributeError:
             for member in dir(temp_module):
                 tmp_member = getattr(temp_module, member)
-                if IController.implementedBy(tmp_member):
-                    temp_object = tmp_member()
-                    break
+
+                if type(tmp_member) is ExtensionPoint:
+                    # make sure we are not instantiating incorrect objects
+                    mname = tmp_member.__module__
+                    if mname.rsplit('.', 1)[0] == self._modulize_store():
+                        temp_object = tmp_member()
+                        break
 
         temp_object.loaded = True
 
@@ -197,6 +201,9 @@ class ModuleManager(object):
                 return True
 
         return False
+
+    def _modulize_store(self):
+        return self._module_store.replace('/', '.')
 
 
 __all__ = ['ModuleError', 'ModuleManager']
