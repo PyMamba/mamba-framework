@@ -155,8 +155,6 @@ class Model(object):
         """Write the model to a file in the file system
         """
 
-        print('pene')
-        print(self.options.subOptions.opts.keys())
         model_file = filepath.FilePath(
             'application/model/{}.py'.format(
                 self.options.subOptions.opts['filename'])

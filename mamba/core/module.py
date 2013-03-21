@@ -67,8 +67,7 @@ class ModuleManager(object):
         self.setup()
 
     def setup(self):
-        """
-        Setup the loader and load the Mamba plugins
+        """Setup the loader and load the Mamba plugins
         """
 
         try:
@@ -81,8 +80,7 @@ class ModuleManager(object):
             pass
 
     def load(self, filename):
-        """
-        Loads a Mamba module
+        """Loads a Mamba module
 
         :param filename: the module filname
         :type filename: str
@@ -97,19 +95,19 @@ class ModuleManager(object):
         if module_name in self._modules:
             self.reload(module_name)
 
-        objs = [module_name]
+        objs = [module_name.capitalize()]
         temp_module = __import__(module_path, globals(), locals(), objs)
         # instance the object
         try:
             temp_object = getattr(temp_module, objs[0])()
         except AttributeError:
+            print temp_module
             for member in dir(temp_module):
                 tmp_member = getattr(temp_module, member)
 
                 if type(tmp_member) is ExtensionPoint:
                     # make sure we are not instantiating incorrect objects
-                    mname = tmp_member.__module__
-                    if mname.rsplit('.', 1)[0] == self._modulize_store():
+                    if tmp_member.__module__ == temp_module.__name__:
                         temp_object = tmp_member()
                         break
 
@@ -124,8 +122,7 @@ class ModuleManager(object):
         })
 
     def reload(self, module):
-        """
-        Reload a controller module
+        """Reload a controller module
 
         :param module: the module to reload
         :type module: str
@@ -143,8 +140,7 @@ class ModuleManager(object):
             temp_object.get('module'), object_name)()
 
     def lookup(self, module):
-        """
-        Find and return a controller from the pool
+        """Find and return a controller from the pool
 
         :param module: the module to lookup
         :type module: str
@@ -153,15 +149,13 @@ class ModuleManager(object):
         return self._modules.get(module, dict())
 
     def length(self):
-        """
-        Returns the controller pool length
+        """Returns the controller pool length
         """
 
         return len(self._modules)
 
     def is_valid_file(self, file_path):
-        """
-        Must be implemented by subclasses
+        """Must be implemented by subclasses
 
         :param file_path: the filepath to check
         :type file_path: :class: `twisted.python.filepath.FilePath`
@@ -169,8 +163,7 @@ class ModuleManager(object):
         raise NotImplementedError("Not implemented yet!")
 
     def _notify(self, ignore, file_path, mask):
-        """
-        Notifies the changes on resources file_path
+        """Notifies the changes on resources file_path
         """
 
         if not GNU_LINUX:
@@ -190,8 +183,7 @@ class ModuleManager(object):
                     self.load(file_path)
 
     def _valid_file(self, file_path, file_type):
-        """
-        Check if a file is a valid Mamba file
+        """Check if a file is a valid Mamba file
         """
 
         basename = filepath.basename(file_path)
@@ -203,6 +195,9 @@ class ModuleManager(object):
         return False
 
     def _modulize_store(self):
+        """Return a modularized version of the module store path
+        """
+
         return self._module_store.replace('/', '.')
 
 

@@ -14,12 +14,41 @@
 from os.path import normpath
 
 from storm.uri import URI
+from storm.properties import PropertyPublisherMeta
 from storm.twisted.transact import Transactor, transact
 
 from mamba import plugin
 from mamba.utils import config
 from mamba.core import interfaces, module
 from mamba.enterprise.database import Database, AdapterFactory
+
+
+class MambaStorm(PropertyPublisherMeta, plugin.ExtensionPoint):
+    """Metaclass for solve conflicts when using Storm base classes
+
+    If you need to inherit your models from :class:`storm.base.Storm`
+    class in order to use references before the referenced object had
+    been created in the local scope, you need to set your class
+    __metaclass__ as model.MambaStorm to prevent metaclasses inheritance
+    problems. For example::
+
+        class Foo(model.Model, model.ModelProvider, Storm):
+
+            __metaclass__ = model.MambaStorm
+
+    warning::
+
+        Mamba support for database dump and SQL Schema generation through
+        Storm classes is possible because a monkeypatching and hack of
+        regular Storm behaviour, if you are nos using Storm base classes
+        for your Reference's and ReferenceSet's you may experience weird
+        behaviours like not all the object columns being displayed in your
+        generated schema.
+
+        You should use :class:`mamba.application.model.MambaStorm` metaclass
+        and :class:`storm.base.Storm` classes in order to fix it
+    """
+    pass
 
 
 class ModelError(Exception):
