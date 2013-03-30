@@ -101,7 +101,6 @@ class ModuleManager(object):
         try:
             temp_object = getattr(temp_module, objs[0])()
         except AttributeError:
-            print temp_module
             for member in dir(temp_module):
                 tmp_member = getattr(temp_module, member)
 

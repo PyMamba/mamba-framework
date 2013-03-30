@@ -75,7 +75,7 @@ class PostgreSQL(CommonSQL):
                 raise RuntimeError(
                     'You are trying to use PostgreSQL with PyPy. Regular '
                     'psycopg2 module don\'t work with PyPy, you may install '
-                    'psycoph2ct in order to can use psycopg2 with PyPy'
+                    'psycopg2ct in order to can use psycopg2 with PyPy'
                 )
 
         self.model = model

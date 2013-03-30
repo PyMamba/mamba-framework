@@ -129,7 +129,7 @@ class Database(BaseConfig):
     :type config_file: str
     """
 
-    def __init__(self, config_file=''):
+    def __init__(self, config_file='config/database.json'):
         super(Database, self).__init__()
         self.load(config_file)
 
