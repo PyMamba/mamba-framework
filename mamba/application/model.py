@@ -61,7 +61,14 @@ class InvalidModelSchema(ModelError):
     """
 
 
-class Model(object):
+class ModelProvider:
+    """Mount point for plugins which refer to Models for our applications
+    """
+
+    __metaclass__ = plugin.ExtensionPoint
+
+
+class Model(ModelProvider):
     """
     All the models in the application should inherit from this class.
 
@@ -209,13 +216,6 @@ class Model(object):
             )
 
         return adapter
-
-
-class ModelProvider:
-    """Mount point for plugins which refer to Models for our applications
-    """
-
-    __metaclass__ = plugin.ExtensionPoint
 
 
 class ModelManager(module.ModuleManager):
