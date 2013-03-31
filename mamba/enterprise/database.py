@@ -39,12 +39,16 @@ class Database(object):
     """
 
     monkey_patched = False
+    pool = ThreadPool(
+        config.Database().min_threads,
+        config.Database().max_threads,
+        'DatabasePool'
+    )
 
     def __init__(self, pool=None):
-        if pool is None:
-            pool = ThreadPool(name='DatabasePool')
+        if pool is not None:
+            self.pool = pool
 
-        self.pool = pool
         self.started = False
 
         provideUtility(global_zstorm, IZStorm)
@@ -71,7 +75,6 @@ class Database(object):
         if self.started:
             return
 
-        self.pool.start()
         self.started = True
 
     def stop(self):
@@ -81,7 +84,6 @@ class Database(object):
         if not self.started:
             return
 
-        self.pool.stop()
         self.started = False
 
     def adjust_poolsize(self, min_threads=None, max_threads=None):
@@ -146,7 +148,7 @@ class Database(object):
         if full is False:
             sql.append('')
             sql += [
-                model.get('object').dump_table()
+                model.get('object').dump_table() + '\n'
                 for model in model_manager.get_models().values()
             ]
         else:
