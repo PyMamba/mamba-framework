@@ -45,7 +45,7 @@ class ControllerProvider:
     __metaclass__ = plugin.ExtensionPoint
 
 
-class Controller(resource.Resource):
+class Controller(resource.Resource, ControllerProvider):
     """
     Mamba Controller Class define a web accesible resource and its actions.
 
