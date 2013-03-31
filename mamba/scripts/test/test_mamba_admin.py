@@ -60,7 +60,7 @@ class MambaAdminApplicationTest(unittest.TestCase):
         self.assertEqual(self.config['port'], 1936)
 
     def test_override_port(self):
-        self.config.parseOptions(['-p', '8080', 'test'])
+        self.config.parseOptions(['--port', '8080', 'test'])
         self.assertEqual(self.config['port'], 8080)
 
     def test_default_version(self):
@@ -68,7 +68,7 @@ class MambaAdminApplicationTest(unittest.TestCase):
         self.assertEqual(self.config['app-version'], '1.0')
 
     def test_override_version(self):
-        self.config.parseOptions(['-v', '0.0.1', 'test'])
+        self.config.parseOptions(['--app-version', '0.0.1', 'test'])
         self.assertEqual(self.config['app-version'], '0.0.1')
 
     def test_default_file(self):
@@ -80,7 +80,7 @@ class MambaAdminApplicationTest(unittest.TestCase):
         self.assertEqual(self.config['description'], 'A new Mamba application')
 
     def test_override_description(self):
-        self.config.parseOptions(['-d', 'Test Desc', 'test'])
+        self.config.parseOptions(['--description', 'Test Desc', 'test'])
         self.assertEqual(self.config['description'], 'Test Desc')
 
     def test_noquestion_is_not_set_by_default(self):
@@ -96,11 +96,11 @@ class MambaAdminApplicationTest(unittest.TestCase):
         self.assertEqual(self.config['logfile'], None)
 
     def test_override_logfile(self):
-        self.config.parseOptions(['-l', 'test.log', 'test'])
+        self.config.parseOptions(['--logfile', 'test.log', 'test'])
         self.assertEqual(self.config['logfile'], 'test.log')
 
     def test_log_extension_for_logfile_by_default(self):
-        self.config.parseOptions(['-l', 'test', 'test'])
+        self.config.parseOptions(['--logfile', 'test', 'test'])
         self.assertEqual(self.config['logfile'], 'test.log')
 
     def test_name_with_spaces_replace_to_underscores(self):
@@ -648,7 +648,7 @@ class MambaAdminModelTest(unittest.TestCase):
         capture = StringIO()
         sys.stdout = capture
 
-        self.config.parseOptions(['-e', 'no@valid', 'test_model', 'test'])
+        self.config.parseOptions(['--email', 'no@valid', 'test_model', 'test'])
         self.assertEqual(
             capture.getvalue(),
             'error: the given email address no@valid is not a valid RFC2822 '

@@ -35,15 +35,15 @@ class ApplicationOptions(usage.Options):
     ]
 
     optParameters = [
-        ['description', 'd', 'A new Mamba application',
+        ['description', None, 'A new Mamba application',
             'mamba application description', str],
-        ['app-version', 'v', '1.0', 'mamba application version', str],
-        ['logfile', 'l', None,
+        ['app-version', None, '1.0', 'mamba application version', str],
+        ['logfile', None, None,
             'log file (mamba already logs to twistd.log file in the root of '
             'the application directory. If you set a value to this parameter, '
             'mamba will log all the activity as daily rotations to that file '
             'as well)'],
-        ['port', 'p', 1936, 'mamba application listening port', int]
+        ['port', None, 1936, 'mamba application listening port', int]
     ]
 
     def opt_version(self):

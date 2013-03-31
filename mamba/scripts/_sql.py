@@ -40,17 +40,17 @@ class SqlConfigOptions(usage.Options):
 
     optFlags = [
         ['autoadjust-pool', 'p', 'Auto adjust the database thread pool size?'],
-        ['create-if-not-exists', None,
+        ['create-if-not-exists', 'c',
             'If present, when mamba try to create a new table adds an '
             '`IF EXISTS` clause to the SQL query'],
-        ['drop-table', None, 'If present, mamba will drop any table (if '
+        ['drop-table', 'd', 'If present, mamba will drop any table (if '
             'exists) before to create it. Note this option is not compatible '
             'with `create-if-not-exists'],
-        ['drop-if-exists', None,
+        ['drop-if-exists', 'e',
             'If present, mamba will add an `IF EXISTS` clause to any intent '
             'to DROP a table'],
-        ['non-restrict', None, 'If present, mamba will NOT use restrict drop'],
-        ['cascade', None, 'If present, mamba will use CASCADE in drops'],
+        ['non-restrict', 'r', 'If present, mamba will NOT use restrict drop'],
+        ['cascade', 'a', 'If present, mamba will use CASCADE in drops'],
         ['noquestions', 'n',
             'When this option is set, mamba will NOT ask anything to the user '
             'that means it will delete any previous database configuration '

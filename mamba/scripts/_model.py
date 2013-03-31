@@ -46,10 +46,10 @@ class ModelOptions(usage.Options):
     ]
 
     optParameters = [
-        ['description', 'd', None, 'Model\'s description'],
-        ['author', 'a', None, 'Model\'s author'],
-        ['email', 'e', None, 'Author\'s email'],
-        ['classname', 'c', None,
+        ['description', None, None, 'Model\'s description'],
+        ['author', None, None, 'Model\'s author'],
+        ['email', None, None, 'Author\'s email'],
+        ['classname', None, None,
             'Set this parameter if you want that your new model use a specific'
             ' class name'],
         ['platforms', None, None,
