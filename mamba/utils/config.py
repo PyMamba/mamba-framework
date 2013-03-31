@@ -136,8 +136,8 @@ class Database(BaseConfig):
     def _defaults(self):
         """Set default data to config"""
         self.uri = 'sqlite:'
-        self.min_threads = 0
-        self.max_threads = 10
+        self.min_threads = 5
+        self.max_threads = 20
         self.auto_adjust_pool_size = False
         self.create_table_behaviours = {
             'create_if_not_exists': True,
