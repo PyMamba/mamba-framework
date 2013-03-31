@@ -92,40 +92,15 @@ class DatabaseTest(unittest.TestCase):
         self.assertFalse(self.database.started)
         self.database.start()
 
-        assert_that(self.database.pool.start, called().times(1))
-        self.assertTrue(self.database.started)
-
-    def test_database_start_returns_if_is_already_started(self):
-
-        self.assertFalse(self.database.started)
-
-        self.database.start()
-        self.database.start()
-
-        assert_that(self.database.pool.start, called().times(1))
         self.assertTrue(self.database.started)
 
     def test_database_stop(self):
 
         self.assertFalse(self.database.started)
         self.database.start()
-        assert_that(self.database.pool.start, called().times(1))
         self.assertTrue(self.database.started)
 
         self.database.stop()
-        assert_that(self.database.pool.stop, called().times(1))
-        self.assertFalse(self.database.started)
-
-    def test_database_stop_returns_if_is_already_stopped(self):
-
-        self.assertFalse(self.database.started)
-        self.database.start()
-        assert_that(self.database.pool.start, called().times(1))
-        self.assertTrue(self.database.started)
-
-        self.database.stop()
-        self.database.stop()
-        assert_that(self.database.pool.stop, called().times(1))
         self.assertFalse(self.database.started)
 
     def test_database_adjust_size(self):

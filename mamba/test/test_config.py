@@ -29,8 +29,8 @@ class DatabaseTest(unittest.TestCase):
     def test_database_fallback_on_no_existent_file(self):
         self.assertFalse(config.Database().loaded)
         self.assertEqual(config.Database().uri, 'sqlite:')
-        self.assertEqual(config.Database().min_threads, 0)
-        self.assertEqual(config.Database().max_threads, 10)
+        self.assertEqual(config.Database().min_threads, 5)
+        self.assertEqual(config.Database().max_threads, 20)
 
     def test_database_fallback_if_previous_loaded_was_ok(self):
         bad_file = tempfile.NamedTemporaryFile(delete=False)
@@ -41,8 +41,8 @@ class DatabaseTest(unittest.TestCase):
         config.Database(bad_file.name)
         self.assertFalse(config.Database().loaded)
         self.assertEqual(config.Database().uri, 'sqlite:')
-        self.assertEqual(config.Database().min_threads, 0)
-        self.assertEqual(config.Database().max_threads, 10)
+        self.assertEqual(config.Database().min_threads, 5)
+        self.assertEqual(config.Database().max_threads, 20)
 
         filepath.FilePath(bad_file.name).remove()
 
