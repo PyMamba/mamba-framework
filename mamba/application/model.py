@@ -113,7 +113,7 @@ class Model(ModelProvider):
         """Create a new register in the database
         """
 
-        store = self.database.store(self)
+        store = self.database.store()
         store.add(self)
         store.commit()
 
@@ -127,7 +127,7 @@ class Model(ModelProvider):
         :type id: int
         """
 
-        store = self.database.store(self)
+        store = self.database.store()
         data = store.get(self.__class__, id)
         data.transactor = self.transactor
 
@@ -138,7 +138,7 @@ class Model(ModelProvider):
         """Update a register in the database
         """
 
-        store = self.database.store(self)
+        store = self.database.store()
         store.commit()
 
     @transact
@@ -146,7 +146,7 @@ class Model(ModelProvider):
         """Delete a register from the database
         """
 
-        store = self.database.store(self)
+        store = self.database.store()
         store.remove(self)
 
     @transact
@@ -154,7 +154,7 @@ class Model(ModelProvider):
         """Create the table for this model in the underlying database system
         """
 
-        store = self.database.store(self)
+        store = self.database.store()
         store.execute(self.dump_table())
 
     @transact
@@ -163,7 +163,7 @@ class Model(ModelProvider):
         """
 
         adapter = self.get_adapter()
-        store = self.database.store(self)
+        store = self.database.store()
         store.execute(adapter.drop_table())
 
     def dump_table(self):

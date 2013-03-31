@@ -14,10 +14,11 @@
 import datetime
 
 from storm import properties
-from storm.database import URI
+from storm.store import Store
 from storm.expr import Undef, Column
 from storm.zope.interfaces import IZStorm
 from storm.zope.zstorm import global_zstorm
+from storm.database import URI, create_database
 from twisted.python.monkey import MonkeyPatcher
 from twisted.python.threadpool import ThreadPool
 from zope.component import provideUtility, getUtility
@@ -45,15 +46,22 @@ class Database(object):
         'DatabasePool'
     )
 
-    def __init__(self, pool=None):
+    def __init__(self, pool=None, testing=False):
         if pool is not None:
             self.pool = pool
 
         self.started = False
+        self.__testing = testing
 
-        provideUtility(global_zstorm, IZStorm)
-        self.zstorm = getUtility(IZStorm)
-        self.zstorm.set_default_uri('main', config.Database().uri)
+        # we only use ZStorm zope container in tests because has been
+        # impossible for us to make ZStorm working nice with daemonized
+        # twisted ThreadPools
+        if self.__testing is True:
+            provideUtility(global_zstorm, IZStorm)
+            self.zstorm = getUtility(IZStorm)
+            self.zstorm.set_default_uri('mamba', config.Database().uri)
+        else:
+            self._database = None
 
         # register components
         SQLite.register()
@@ -74,6 +82,11 @@ class Database(object):
 
         if self.started:
             return
+
+        if self.__testing is True:
+            self.pool.start()
+        else:
+            self._database = create_database(config.Database().uri)
 
         self.started = True
 
@@ -98,19 +111,18 @@ class Database(object):
 
         self.pool.adjustPoolsize(min_threads, max_threads)
 
-    def store(self, model=None):
+    def store(self):
         """
         Returns a Store per-thread through :class:`storm.zope.zstorm.ZStorm`
-
-        :param model: the registered per-model store, if None main store is
-                      returned
-        :type model: :class:`~mamba.application.model.Model`
         """
 
-        if model is None or model.uri is None:
-            return self.zstorm.get('main')
+        if not self.started:
+            self.start()
 
-        return self.zstorm.get(model.__class__.__name__, model.uri)
+        if self.__testing is True:
+            return self.zstorm.get('mamba')
+
+        return Store(self._database)
 
     def dump(self, model_manager, full=False):
         """

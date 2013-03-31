@@ -85,7 +85,7 @@ class ModelTest(unittest.TestCase):
 
         try:
             threadpool = DummyThreadPool()
-            self.database = Database(threadpool)
+            self.database = Database(threadpool, True)
             Model.database = self.database
 
             store = self.database.store()
@@ -197,7 +197,7 @@ class ModelTest(unittest.TestCase):
 
         yield dummy.create_table()
 
-        store = dummy.database.store(dummy)
+        store = dummy.database.store()
 
         self.assertEqual(
             store.execute('''
@@ -214,7 +214,7 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelTwo()
 
         yield dummy.create_table()
-        store = dummy.database.store(dummy)
+        store = dummy.database.store()
 
         data = store.execute('''
             SELECT name
@@ -397,7 +397,7 @@ class ModelManagerTest(unittest.TestCase):
             self.addCleanup(self.mgr.notifier.loseConnection)
         try:
             threadpool = DummyThreadPool()
-            self.database = Database(threadpool)
+            self.database = Database(threadpool, True)
             Model.database = self.database
 
             store = self.database.store()

@@ -7,9 +7,9 @@ Tests for mamba.enterprise.database
 """
 
 from storm.locals import Store
+from doublex import Spy, ANY_ARG
 from twisted.trial import unittest
 from twisted.python.threadpool import ThreadPool
-from doublex import Spy, assert_that, called, ANY_ARG
 
 from mamba.utils import config
 from mamba.core import GNU_LINUX
@@ -24,7 +24,7 @@ class DatabaseTest(unittest.TestCase):
         config.Database().load(
             '../mamba/test/application/config/database.json'
         )
-        self.database = Database(self.get_pool())
+        self.database = Database(self.get_pool(), True)
 
     def tearDown(self):
         self.database.pool.stop()
@@ -40,7 +40,7 @@ class DatabaseTest(unittest.TestCase):
         from mamba.test.test_model import DummyThreadPool, DatabaseModuleError
         try:
             threadpool = DummyThreadPool()
-            database = Database(threadpool)
+            database = Database(threadpool, True)
             Model.database = database
 
             store = database.store()
@@ -70,12 +70,12 @@ class DatabaseTest(unittest.TestCase):
 
     def test_database_initial_name_is_database_pool(self):
 
-        database = Database()
+        database = Database(testing=True)
         self.assertEqual(database.pool.name, 'DatabasePool')
 
     def test_databse_initial_pool_size_is_five_and_twenty_five(self):
 
-        database = Database()
+        database = Database(testing=True)
         self.assertEqual(database.pool.min, 5)
         self.assertEqual(database.pool.max, 20)
 
