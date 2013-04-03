@@ -157,6 +157,13 @@ class Database(object):
             '--'
         ]
 
+        if self.backend == 'mysql':
+            sql += [
+                '-- Disable foreign key checks for table creation',
+                '--',
+                'SET FOREIGN_KEY_CHECKS = 0;'
+            ]
+
         if full is False:
             sql.append('')
             sql += [
@@ -178,6 +185,14 @@ class Database(object):
                 ))
                 sql.append('--\n')
                 sql.append(model_object.dump_data())
+
+        if self.backend == 'mysql':
+            sql += [
+                '--',
+                '-- Enable foreign key checks',
+                '--',
+                'SET FOREIGN_KEY_CHECKS = 1;'
+            ]
 
         return '\n'.join(sql)
 
