@@ -99,6 +99,24 @@ class MySQL(CommonSQL):
         Get all the :class:`storm.references.Reference` and create foreign
         keys for the SQL creation script
 
+        If we are using references we should define our classes in a
+        correct way. If we have a model that have a relation of many
+        to one, we should define a Many-to-one Storm relationship in
+        that object but we must create a one-to-many relation in the
+        related model. That means if for example we have a `Customer`
+        model and an `Adress` model and we need to relate them as
+        one Customer may have several addresses (in a real application
+        address may have a relation many-to-many with customer) we
+        should define a relation with `Reference` from Address to
+        Customer using a property like `Address.customer_id` and a
+        `ReferenceSet` from `Customer` to `Address` like:
+
+            Customer.addresses = ReferenceSet(Customer.id, Address.id)
+
+        In the case of many-to-many relationships, mamba create the
+        relation tables by itself so you dont need to take care of
+        yourself.
+
         .. warning:
 
             If no InnoDB is used as engine in MySQL then this is skipped.
