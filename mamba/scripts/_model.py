@@ -119,7 +119,7 @@ class Model(object):
 
     def __init__(self, options):
         self.options = options
-        self.model_properties = 'id = Int(primary=True, ungined=True)\n'
+        self.model_properties = 'id = Int(primary=True, unsigned=True)\n'
 
         self.process()
 
