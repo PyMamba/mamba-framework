@@ -34,6 +34,11 @@ class MySQLMissingPrimaryKey(MySQLError):
     """
 
 
+class MySQLNotEnumColumn(MySQLError):
+    """Fired when parse_enum is called with a column that is not an Enum
+    """
+
+
 class TinyInt(properties.Int):
     """
     This class is a Storm extension of the MySQL numeric type used to store
@@ -210,6 +215,23 @@ class MySQL(CommonSQL):
         )
         return column_type
 
+    def parse_enum(self, column):
+        """
+        """
+
+        if column.variable_class is not variables.EnumVariable:
+            raise MySQLNotEnumColumn(
+                'Column {} is not an Enum column'.format(column)
+            )
+
+        data = column._variable_kwargs.get('get_map', {})
+        return '`{}` enum({})'.format(
+            column._detect_attr_name(self.model.__class__),
+            ', '.join("'{}'".format(
+                data[i]) for i in range(1, len(data) + 1)
+            )
+        )
+
     def detect_primary_key(self):
         """
         Detect the primary key for the model and return it back with the
@@ -250,7 +272,10 @@ class MySQL(CommonSQL):
 
         for i in range(len(self.model._storm_columns.keys())):
             column = self.model._storm_columns.keys()[i]
-            query += '  {},\n'.format(self.parse_column(column))
+            if column.variable_class is not variables.EnumVariable:
+                query += '  {},\n'.format(self.parse_column(column))
+            else:
+                query += '  {},\n'.format(self.parse_enum(column))
 
         query += '  {}\n'.format(self.detect_primary_key())
         query += '{}'.format(
