@@ -101,7 +101,7 @@ class MySQL(CommonSQL):
 
         If we are using references we should define our classes in a
         correct way. If we have a model that have a relation of many
-        to one, we should define a Many-to-one Storm relationship in
+        to one, we should define a many-to-one Storm relationship in
         that object but we must create a one-to-many relation in the
         related model. That means if for example we have a `Customer`
         model and an `Adress` model and we need to relate them as
