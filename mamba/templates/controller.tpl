@@ -15,10 +15,10 @@ from zope.interface import implements
 from mamba.web.response import Ok
 from mamba.core import interfaces
 from mamba.application import route
-from mamba.application.controller import Controller, ControllerProvider
+from mamba.application import controller
 
 
-class ${controller_class}(Controller, ControllerProvider):
+class ${controller_class}(controller.Controller):
     """
     ${synopsis}
     """
