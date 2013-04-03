@@ -208,7 +208,7 @@ class Model(ModelProvider):
         except TypeError as error:
             raise InvalidModelSchema(
                 'Invalid Model Schema {}, aborting table dumping for '
-                'model {}. Error:'.format(
+                'model {}. Error: {}'.format(
                     uri.scheme,
                     self.__class__.__name__,
                     error
