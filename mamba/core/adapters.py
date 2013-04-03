@@ -60,3 +60,9 @@ class MambaSQLAdapter:
         """
 
         return self.original.insert_data()
+
+    def parse_references(self):
+        """Return the SQL syntax to create foreign keys for PostgreSQL
+        """
+
+        return self.original.parse_references()

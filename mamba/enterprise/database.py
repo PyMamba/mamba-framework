@@ -134,6 +134,7 @@ class Database(object):
         :type full: bool
         """
 
+        references = []
         sql = [
             '--',
             '-- Mamba SQL dump {}'.format(version.short()),
@@ -166,10 +167,11 @@ class Database(object):
 
         if full is False:
             sql.append('')
-            sql += [
-                model.get('object').dump_table() + '\n'
-                for model in model_manager.get_models().values()
-            ]
+            for model in model_manager.get_models().values():
+                if self.backend == 'postgres':
+                    references.append(model.get('object').dump_references())
+
+                sql += [model.get('object').dump_table() + '\n']
         else:
             for model in model_manager.get_models().values():
                 model_object = model.get('object')
@@ -186,6 +188,9 @@ class Database(object):
                 sql.append('--\n')
                 sql.append(model_object.dump_data())
 
+                if self.backend == 'postgres':
+                    references.append(model_object.dump_references())
+
         if self.backend == 'mysql':
             sql += [
                 '--',
@@ -193,6 +198,9 @@ class Database(object):
                 '--',
                 'SET FOREIGN_KEY_CHECKS = 1;'
             ]
+
+        for reference in references:
+            sql.append(reference)
 
         return '\n'.join(sql)
 

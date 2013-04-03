@@ -122,9 +122,11 @@ class PostgreSQL(CommonSQL):
                 remote_table = relation.remote_cls.__storm_table__
 
                 query = (
+                    'ALTER TABLE {table} ADD '
                     'CONSTRAINT {remote_table}_ind FOREIGN KEY ({localkey}) '
                     'REFERENCES {remote_table}({id}) '
-                    'ON UPDATE {on_update} ON DELETE {on_delete}'.format(
+                    'ON UPDATE {on_update} ON DELETE {on_delete};\n'.format(
+                        table=self.model.__storm_table__,
                         remote_table=remote_table,
                         localkey=keys.get('local').name,
                         id=keys.get('remote').name,
@@ -266,12 +268,7 @@ class PostgreSQL(CommonSQL):
                 enums.append(self.parse_enum(column))
                 query += '  {},\n'.format(self.parse_column(column))
 
-        query += '  {}\n'.format(self.detect_primary_key())
-        query += '{}'.format(
-            ', {}\n);'.format(
-            self.parse_references()) if self.parse_references()
-            else '\n);\n'
-        )
+        query += '  {}\n);\n'.format(self.detect_primary_key())
         query = ''.join(enums) + query
 
         if (config.Database().create_table_behaviours.get('drop_table')

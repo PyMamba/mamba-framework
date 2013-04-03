@@ -184,6 +184,13 @@ class Model(ModelProvider):
         adapter = self.get_adapter()
         return adapter.insert_data()
 
+    def dump_references(self):
+        """Dump SQL references (used by PostgreSQL)
+        """
+
+        adapter = self.get_adapter()
+        return adapter.parse_references()
+
     def get_uri(self):
         """Return an URI instance using the uri config for this model
         """
