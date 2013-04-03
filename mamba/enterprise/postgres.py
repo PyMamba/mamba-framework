@@ -208,7 +208,7 @@ class PostgreSQL(CommonSQL):
             )
 
         data = column._variable_kwargs.get('get_map', {})
-        return 'CREATE TYPE {} AS ENUM {};'.format(
+        return 'CREATE TYPE {} AS ENUM {};\n'.format(
             'enum_{}'.format(column._detect_attr_name(self.model.__class__)),
             '({})'.format(
                 ', '.join("'{}'".format(
