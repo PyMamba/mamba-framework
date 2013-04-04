@@ -578,9 +578,8 @@ class ControllerScriptTest(unittest.TestCase):
             'from mamba.web.response import Ok\n'
             'from mamba.core import interfaces\n'
             'from mamba.application import route\n'
-            'from mamba.application.controller import '
-            'Controller, ControllerProvider\n\n\n'
-            'class TestController(Controller, ControllerProvider):\n'
+            'from mamba.application import controller\n\n\n'
+            'class TestController(controller.Controller):\n'
             '    """\n'
             '    None\n'
             '    """\n\n'
@@ -710,12 +709,12 @@ class ModelScriptTest(unittest.TestCase):
             '"""\n\n'
             'from storm.locals import *\n\n'
             'from mamba.application import model\n\n\n'
-            'class TestModel(model.Model, model.ModelProvider):\n'
+            'class TestModel(model.Model):\n'
             '    """\n'
             '    None\n'
             '    """\n\n'
             '    __storm_table__ = \'test\'\n\n'
-            '    id = Int(primary=True, ungined=True)\n\n\n'
+            '    id = Int(primary=True, unsigned=True)\n\n\n'
         )
 
     def test_write_file(self):

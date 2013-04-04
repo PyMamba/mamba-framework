@@ -20,8 +20,8 @@ from storm.references import Reference
 
 from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL
-from mamba.enterprise.common import CommonSQL
 from mamba.core.adapters import MambaSQLAdapter
+from mamba.enterprise.common import CommonSQL, NativeEnumVariable
 
 
 class PostgreSQLError(Exception):
@@ -181,6 +181,8 @@ class PostgreSQL(CommonSQL):
         elif column.variable_class is variables.ListVariable:
             column_type = self._parse_list(column)
         elif column.variable_class is variables.EnumVariable:
+            column_type = 'integer'
+        elif column.variable_class is NativeEnumVariable:
             column_type = 'enum_'
             column_type += column._detect_attr_name(self.model.__class__)
         else:
@@ -204,12 +206,13 @@ class PostgreSQL(CommonSQL):
         :type column: :class:`storm.properties`
         """
 
-        if column.variable_class is not variables.EnumVariable:
+        if column.variable_class is not NativeEnumVariable:
             raise PostgreSQLNotEnumColumn(
                 'Column {} is not an Enum column'.format(column)
             )
 
-        data = column._variable_kwargs.get('get_map', {})
+        data = column._variable_kwargs.get('_reverse_map', {})
+        print data
         return 'CREATE TYPE {} AS ENUM {};\n'.format(
             'enum_{}'.format(column._detect_attr_name(self.model.__class__)),
             '({})'.format(
@@ -262,7 +265,7 @@ class PostgreSQL(CommonSQL):
         ))
         for i in range(len(self.model._storm_columns.keys())):
             column = self.model._storm_columns.keys()[i]
-            if column.variable_class is not variables.EnumVariable:
+            if column.variable_class is not NativeEnumVariable:
                 query += '  {},\n'.format(self.parse_column(column))
             else:
                 enums.append(self.parse_enum(column))

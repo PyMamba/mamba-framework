@@ -24,6 +24,7 @@ from mamba import Database
 from mamba.utils import config
 from mamba import Model, ModelManager
 from mamba.core import interfaces, GNU_LINUX
+from mamba.enterprise.common import NativeEnum
 from mamba.enterprise.mysql import MySQLMissingPrimaryKey, MySQL
 from mamba.enterprise.sqlite import SQLiteMissingPrimaryKey, SQLite
 from mamba.enterprise.postgres import PostgreSQLMissingPrimaryKey, PostgreSQL
@@ -178,6 +179,15 @@ class ModelTest(unittest.TestCase):
 
         dummy = DummyModelEnum()
         script = dummy.dump_table()
+
+        self.assertTrue('mood integer' in script)
+
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_and_native_enum(self):
+        dummy = DummyModelNativeEnum()
+        script = dummy.dump_table()
+
+        print script
 
         self.assertTrue("CREATE TYPE enum_mood AS ENUM" in script)
         self.assertTrue("('sad', 'ok', 'happy')" in script)
@@ -363,7 +373,7 @@ class ModelTest(unittest.TestCase):
     def test_postgres_reference_generates_foreign_keys(self):
 
         adapter = self.get_adapter(reference=True)
-        script = adapter.create_table()
+        script = adapter.parse_references()
 
         self.assertTrue(
             'CONSTRAINT dummy_two_ind FOREIGN KEY (remote_id)' in script
@@ -380,7 +390,7 @@ class ModelTest(unittest.TestCase):
         DummyModelThree.__on_update__ = 'CASCADE'
 
         adapter = self.get_adapter(reference=True)
-        script = adapter.create_table()
+        script = adapter.parse_references()
 
         self.assertTrue('ON UPDATE CASCADE ON DELETE CASCADE' in script)
         del DummyModelThree.__on_delete__
@@ -506,6 +516,14 @@ class DummyModelEnum(Model):
     __storm_table__ = 'dummy_enum'
     id = Int(primary=True)
     mood = Enum(map={'sad': 1, 'ok': 2, 'happy': 3})
+
+
+class DummyModelNativeEnum(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_enum'
+    id = Int(primary=True)
+    mood = NativeEnum(map={'sad': 1, 'ok': 2, 'happy': 3})
 
 
 class DummyModelArray(Model):

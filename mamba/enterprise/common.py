@@ -11,50 +11,69 @@
 
 """
 
-from storm import properties
 from storm.expr import Undef
+from storm import variables, properties
 from storm.locals import create_database, Store
 
 from mamba.utils import config
 
 
-class SmallInt(properties.Int):
+class NativeEnumVariable(variables.Variable):
+    __slots__ = ("_map", "_reverse_map")
+
+    def __init__(self, _map, *args, **kwargs):
+        self._map = _map
+        self._reverse_map = dict((value, key) for key, value in _map.items())
+        variables.Variable.__init__(self, *args, **kwargs)
+
+    def parse_set(self, value, from_db):
+        if from_db:
+            return value
+
+        try:
+            return self._map[value]
+        except KeyError:
+            try:
+                return self._reverse_map[value]
+            except KeyError:
+                raise ValueError("Invalid native enum value: %s" % repr(value))
+
+    def parse_get(self, value, to_db):
+        if to_db:
+            return value
+
+        try:
+            return self._get_map[value]
+        except KeyError:
+            try:
+                return self._reverse_map[value]
+            except KeyError:
+                raise ValueError("Invalid enum value: %s" % repr(value))
+
+
+class NativeEnum(properties.SimpleProperty):
     """
-    This class is a Storm extension of the MySQL and PostgreSQL numeric
-    type used to store values in two bytes.
+    Enumeration property, allowing the use of native enum types in MySQL
+    and PostgreSQL.
 
-    Storm only uses the Int property type to store all kind of numeric data.
-    This is a correct behaviour because Storm is a schemaless ORM but we
-    need to know which exact weight we are going to use for a field because
-    we generate the database using the model.
+    For instance::
+
+        class Class(Storm):
+            prop = Enum(map={"one": 1, "two": 2})
+
+        obj.prop = "one"
+        assert obj.prop == "one"
+
+        obj.prop = 1 # Raises error.
     """
-    pass
 
+    variable_class = NativeEnumVariable
 
-class BigInt(properties.Int):
-    """
-    This class is a Storm extension of the MySQL and PostgreSQL numeric
-    type used to store values in four bytes.
+    def __init__(self, name=None, primary=False, **kwargs):
+        _map = dict(kwargs.pop('map'))
+        kwargs['_map'] = _map
 
-    Storm only uses the Int property type to store all kind of numeric data.
-    This is a correct behaviour because Storm is a schemaless ORM but we
-    need to know which exact weight we are going to use for a field because
-    we generate the database using the model.
-    """
-    pass
-
-
-class DoublePrecission(properties.Float):
-    """
-    This class is a Storm extension of the MySQL and PostgreSQL floating type
-    used to store approximate values in eigth bytes.
-
-    Storm only uses the Int property type to store all kind of numeric data.
-    This is a correct behaviour because Storm is a schemaless ORM but we
-    need to know which exact weight we are going to use for a field because
-    we generate the database using the model.
-    """
-    pass
+        properties.SimpleProperty.__init__(self, name, primary, **kwargs)
 
 
 class CommonSQL:

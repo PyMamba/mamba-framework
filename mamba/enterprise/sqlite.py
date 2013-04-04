@@ -16,8 +16,8 @@ from twisted.python import components
 
 from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL
-from mamba.enterprise.common import CommonSQL
 from mamba.core.adapters import MambaSQLAdapter
+from mamba.enterprise.common import CommonSQL, NativeEnumVariable
 
 
 class SQLiteError(Exception):
@@ -67,7 +67,9 @@ class SQLite(CommonSQL):
                 or column.variable_class is variables.ListVariable):
             column_type = 'VARCHAR'
         elif (column.variable_class is variables.IntVariable
-                or column.variable_class is variables.BoolVariable):
+                or column.variable_class is variables.BoolVariable
+                or column.variable_class is variables.EnumVariable
+                or column.variable_class is variables.NativeEnumVariable):
             column_type = 'INTEGER'
         elif column.variable_class is variables.FloatVariable:
             column_type = 'REAL'

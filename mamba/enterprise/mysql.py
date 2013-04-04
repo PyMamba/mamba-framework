@@ -13,15 +13,15 @@
 
 import inspect
 
+from storm import variables
 from storm.expr import Undef
 from twisted.python import components
 from storm.references import Reference
-from storm import variables, properties
 
 from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL
-from mamba.enterprise.common import CommonSQL
 from mamba.core.adapters import MambaSQLAdapter
+from mamba.enterprise.common import CommonSQL, NativeEnumVariable
 
 
 class MySQLError(Exception):
@@ -37,32 +37,6 @@ class MySQLMissingPrimaryKey(MySQLError):
 class MySQLNotEnumColumn(MySQLError):
     """Fired when parse_enum is called with a column that is not an Enum
     """
-
-
-class TinyInt(properties.Int):
-    """
-    This class is a Storm extension of the MySQL numeric type used to store
-    values in one byte.
-
-    Storm only uses the Int property type to store all kind of numeric data.
-    This is a correct behaviour because Storm is a schemaless ORM but we
-    need to know which exact weight we are going to use for a field because
-    we generate the database using the model.
-    """
-    pass
-
-
-class MediumInt(properties.Int):
-    """
-    This class is a Storm extension of the MySQL numeric type used to store
-    values in three bytes.
-
-    Storm only uses the Int property type to store all kind of numeric data.
-    This is a correct behaviour because Storm is a schemaless ORM but we
-    need to know which exact weight we are going to use for a field because
-    we generate the database using the model.
-    """
-    pass
 
 
 class MySQL(CommonSQL):
@@ -203,6 +177,8 @@ class MySQL(CommonSQL):
         elif column.variable_class is variables.TimeDeltaVariable:
             column_type = 'text'
         elif column.variable_class is variables.EnumVariable:
+            column_type = 'integer'
+        elif column.variable_class is NativeEnumVariable:
             column_type = 'enum'
         else:
             column_type = 'text'  # fallback to text (tears are comming)
@@ -219,12 +195,12 @@ class MySQL(CommonSQL):
         """
         """
 
-        if column.variable_class is not variables.EnumVariable:
+        if column.variable_class is not variables.RealEnumVariable:
             raise MySQLNotEnumColumn(
                 'Column {} is not an Enum column'.format(column)
             )
 
-        data = column._variable_kwargs.get('set_map', {})
+        data = column._variable_kwargs.get('get_map', {})
 
         return '`{}` enum({})'.format(
             column._detect_attr_name(self.model.__class__),
