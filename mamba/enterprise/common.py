@@ -43,7 +43,7 @@ class NativeEnumVariable(variables.Variable):
             return value
 
         try:
-            return self._get_map[value]
+            return self._map[value]
         except KeyError:
             try:
                 return self._reverse_map[value]
