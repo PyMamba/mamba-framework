@@ -121,7 +121,7 @@ class Model(ModelProvider):
     def read(self, id):
         """
         Read a register from the database. The give key (usually ID) should
-        be a primery key.
+        be a primary key.
 
         :param id: the ID to get from the database
         :type id: int
