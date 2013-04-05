@@ -69,7 +69,7 @@ class SQLite(CommonSQL):
         elif (column.variable_class is variables.IntVariable
                 or column.variable_class is variables.BoolVariable
                 or column.variable_class is variables.EnumVariable
-                or column.variable_class is variables.NativeEnumVariable):
+                or column.variable_class is NativeEnumVariable):
             column_type = 'INTEGER'
         elif column.variable_class is variables.FloatVariable:
             column_type = 'REAL'
