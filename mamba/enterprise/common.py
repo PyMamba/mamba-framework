@@ -21,9 +21,9 @@ from mamba.utils import config
 class NativeEnumVariable(variables.Variable):
     __slots__ = ("_map", "_reverse_map")
 
-    def __init__(self, _map, *args, **kwargs):
+    def __init__(self, _map, _reverse_map, *args, **kwargs):
         self._map = _map
-        self._reverse_map = dict((value, key) for key, value in _map.items())
+        self._reverse_map = _reverse_map
         variables.Variable.__init__(self, *args, **kwargs)
 
     def parse_set(self, value, from_db):
@@ -71,7 +71,9 @@ class NativeEnum(properties.SimpleProperty):
 
     def __init__(self, name=None, primary=False, **kwargs):
         _map = dict(kwargs.pop('map'))
+        reverse_map = dict((value, key) for key, value in _map.items())
         kwargs['_map'] = _map
+        kwargs['_reverse_map'] = reverse_map
 
         properties.SimpleProperty.__init__(self, name, primary, **kwargs)
 

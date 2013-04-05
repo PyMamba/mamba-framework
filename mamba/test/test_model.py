@@ -187,8 +187,6 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelNativeEnum()
         script = dummy.dump_table()
 
-        print script
-
         self.assertTrue("CREATE TYPE enum_mood AS ENUM" in script)
         self.assertTrue("('sad', 'ok', 'happy')" in script)
         self.assertTrue("mood enum_mood" in script)

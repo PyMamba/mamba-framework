@@ -195,12 +195,12 @@ class MySQL(CommonSQL):
         """
         """
 
-        if column.variable_class is not variables.RealEnumVariable:
+        if column.variable_class is not NativeEnumVariable:
             raise MySQLNotEnumColumn(
                 'Column {} is not an Enum column'.format(column)
             )
 
-        data = column._variable_kwargs.get('get_map', {})
+        data = column._variable_kwargs.get('_reverse_map', {})
 
         return '`{}` enum({})'.format(
             column._detect_attr_name(self.model.__class__),
@@ -249,7 +249,7 @@ class MySQL(CommonSQL):
 
         for i in range(len(self.model._storm_columns.keys())):
             column = self.model._storm_columns.keys()[i]
-            if column.variable_class is not variables.EnumVariable:
+            if column.variable_class is not NativeEnumVariable:
                 query += '  {},\n'.format(self.parse_column(column))
             else:
                 query += '  {},\n'.format(self.parse_enum(column))
