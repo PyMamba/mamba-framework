@@ -18,8 +18,9 @@ from mamba.web import Page
 
 
 def MambaApplicationFactory(settings):
-    # load the configuration
-    application = service.Application(settings.name)
+    # create the application multi service
+    application = service.MultiService()
+    application.setName(settings.name)
 
     # register settings through Mamba Borg
     app = Mamba(settings)
