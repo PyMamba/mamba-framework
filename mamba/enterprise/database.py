@@ -145,9 +145,11 @@ class Database(object):
         app = config.Application('config/application.json')
         try:
             sql += [
-                '-- Application: {}'.format(app.name),
+                '-- Application: {}'.format(app.name.decode('utf-8')),
                 '-- Application Version: {}'.format(app.version),
-                '-- Application Description: {}'.format(app.description)
+                '-- Application Description: {}'.format(
+                    app.description.encode('utf-8')
+                )
             ]
         except AttributeError:
             pass
