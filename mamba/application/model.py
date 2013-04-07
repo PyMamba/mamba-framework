@@ -129,7 +129,9 @@ class Model(ModelProvider):
 
         store = self.database.store()
         data = store.get(self.__class__, id)
-        data.transactor = self.transactor
+
+        if data is not None:
+            data.transactor = self.transactor
 
         return data
 
