@@ -142,3 +142,12 @@ class IMambaSQL(Interface):
     def insert_data(self):
         """Return the SQL syntax string to insert data that populate a table
         """
+
+
+class ISession(Interface):
+    """
+    Mamba Session interface.
+    I'm just a Session interface used to store objects in Twisted Sessions
+    """
+
+    session = Attribute('A Mamba Session object')
