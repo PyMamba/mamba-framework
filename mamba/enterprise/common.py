@@ -181,6 +181,6 @@ class CommonSQL:
         variable = property_column.variable_factory()
 
         if variable._value is not Undef:
-            return ' {}'.format(variable._value)
+            return ' default {}'.format(variable._value)
 
         return ''

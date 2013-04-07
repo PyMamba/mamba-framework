@@ -243,7 +243,7 @@ class MySQL(CommonSQL):
         query = 'CREATE TABLE {} (\n'.format((
             'IF NOT EXISTS `{}`'.format(self.model.__storm_table__) if (
             config.Database().create_table_behaviours.get(
-                'create_if_not_exists'))
+                'create_table_if_not_exists'))
             else '`' + self.model.__storm_table__ + '`'
         ))
 
@@ -309,3 +309,28 @@ class MySQL(CommonSQL):
             ' UNSIGNED' if unsigned else '',
             ' AUTO_INCREMENT' if auto_increment else ''
         )
+
+    def _default(self, column):
+        """
+        Get the default argument for a column (if any)
+
+        :param column: the Storm properties column to parse
+        :type column: :class:`storm.properties.Property`
+        """
+
+        property_column = column._get_column(self.model.__class__)
+        variable = property_column.variable_factory()
+
+        if type(variable._value) is bool:
+            variable._value = int(variable._value)
+
+        if (column.variable_class is variables.DateTimeVariable
+                or column.variable_class is variables.TimeVariable
+                or column.variable_class is variables.DateVariable):
+            if variable._value is not Undef:
+                variable._value = "'" + str(variable._value) + "'"
+
+        if variable._value is not Undef:
+            return ' default {}'.format(variable._value)
+
+        return ''
