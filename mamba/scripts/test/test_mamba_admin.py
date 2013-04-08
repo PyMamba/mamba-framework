@@ -511,7 +511,7 @@ class MambaAdminControllerTest(unittest.TestCase):
         capture = StringIO()
         sys.stdout = capture
 
-        self.config.parseOptions(['-e', 'no@valid', 'test_controller'])
+        self.config.parseOptions(['--email', 'no@valid', 'test_controller'])
         self.assertEqual(
             capture.getvalue(),
             'error: the given email address no@valid is not a valid RFC2822 '

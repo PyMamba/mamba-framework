@@ -46,11 +46,11 @@ class ControllerOptions(usage.Options):
     ]
 
     optParameters = [
-        ['description', 'd', None, 'Controller\'s description'],
-        ['author', 'a', None, 'Controller\'s author'],
-        ['email', 'e', None, 'Author\'s email'],
-        ['path', 'p', None, 'Controller\'s register path (if any)'],
-        ['classname', 'c', None,
+        ['description', None, None, 'Controller\'s description'],
+        ['author', None, None, 'Controller\'s author'],
+        ['email', None, None, 'Author\'s email'],
+        ['path', None, None, 'Controller\'s register path (if any)'],
+        ['classname', None, None,
             'Set this parameter if you want that your new controller use a '
             'specific class name'],
         ['platforms', None, None,
