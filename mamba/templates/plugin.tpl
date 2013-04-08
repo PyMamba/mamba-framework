@@ -7,6 +7,7 @@ from twisted.application.service import IServiceMaker
 
 from mamba.utils import config
 from mamba.enterprise import database
+from mamba.core.session import Session
 from mamba.core.services.threadpool import ThreadPoolService
 from ${application} import MambaApplicationFactory
 
@@ -31,6 +32,8 @@ class MambaServiceMaker(object):
         """
 
         factory, application = MambaApplicationFactory(settings)
+        factory.sessionFactory = Session
+
         httpserver = internet.TCPServer(int(options['port']), factory)
         httpserver.setName('{} Application'.format(settings.name))
         application.addService(httpserver)
