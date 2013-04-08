@@ -151,6 +151,7 @@ class Model(object):
         print('\n')
         print(self._process_template())
 
+    @commons.decorate_output
     def _write_model(self):
         """Write the model to a file in the file system
         """
