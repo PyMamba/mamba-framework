@@ -45,7 +45,7 @@ def common_config(
                     "max_threads": 20,
                     "auto_adjust_pool_size": false,
                     "create_table_behaviours": {
-                        "create_if_not_exists": %s,
+                        "create_table_if_not_exists": %s,
                         "drop_table": false
                     },
                     "drop_table_behaviours": {
