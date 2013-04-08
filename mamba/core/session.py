@@ -11,7 +11,7 @@
 
 """
 
-from zope.interfaces import implements
+from zope.interface import implements
 from twisted.python.components import registerAdapter
 from twisted.web.server import Session as TwistedSession
 
