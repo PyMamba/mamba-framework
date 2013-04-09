@@ -104,7 +104,8 @@ class ModuleManager(object):
             for member in dir(temp_module):
                 tmp_member = getattr(temp_module, member)
 
-                if type(tmp_member) is ExtensionPoint:
+                if (type(tmp_member) is ExtensionPoint
+                        or type(tmp_member).__name__ == 'MambaStorm'):
                     # make sure we are not instantiating incorrect objects
                     if tmp_member.__module__ == temp_module.__name__:
                         temp_object = tmp_member()
