@@ -133,8 +133,6 @@ class Resource(TwistedResource):
         """Renders the index page or other templates of templates directory
         """
 
-        print 'PREPATH: {}'.format(request.prepath)
-
         if not request.prepath[0].endswith('.html'):
             request.prepath[0] += '.html'
 
