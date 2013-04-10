@@ -86,6 +86,9 @@ class ModuleManager(object):
         :type filename: str
         """
 
+        if type(filename) is not str:
+            filename = filename.path
+
         module_name = filepath.splitext(filepath.basename(filename))[0]
         module_path = '{}.{}'.format(
             self._modulize_store(),
@@ -93,7 +96,7 @@ class ModuleManager(object):
         )
 
         if module_name in self._modules:
-            self.reload(module_name)
+            return
 
         objs = [module_name.capitalize()]
         temp_module = __import__(module_path, globals(), locals(), objs)
