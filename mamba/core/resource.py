@@ -13,15 +13,12 @@
 
 from twisted.web import static
 from twisted.python import log, filepath
-from twisted.python.logfile import DailyLogFile
 from twisted.web.resource import Resource as TwistedResource
 
 from mamba.http import headers
 from mamba.core import templating
 from mamba.utils.config import Application
 from mamba.application import scripts, appstyles
-
-logging_started = False
 
 
 class Resource(TwistedResource):
@@ -31,7 +28,6 @@ class Resource(TwistedResource):
     """
 
     def __init__(self, template_paths=None, cache_size=50):
-        global logging_started
         TwistedResource.__init__(self)
 
         self._templates = {}
@@ -51,11 +47,6 @@ class Resource(TwistedResource):
                 self.template_paths + list(template_paths)
 
         self.config = Application()
-
-        # register log file if any and only if is nto already registered
-        if self.config.log_file is not None and not logging_started:
-            log.startLogging(DailyLogFile.fromFullPath(self.config.log_file))
-            logging_started = True
 
         # set resources managers
         self._styles_manager = appstyles.AppStyles()
@@ -165,13 +156,6 @@ class Resource(TwistedResource):
         """
 
         for name, style in self._styles_manager.get_styles().iteritems():
-            log.msg(
-                'Inserting mamberized {} stylesheet into the main HTML page '
-                'with path {} and prefix {}'.format(
-                    name, style.path, style.prefix
-                )
-            )
-
             self.containers['styles'].putChild(name, static.File(style.path))
 
     def insert_scripts(self):
@@ -179,11 +163,4 @@ class Resource(TwistedResource):
         """
 
         for name, script in self._scripts_manager.get_scripts().iteritems():
-            log.msg(
-                'Inserting mamberized {} script into the main HTML page with '
-                'path {} and prefix {}'.format(
-                    name, script.path, script.prefix
-                )
-            )
-
             self.containers['scripts'].putChild(name, static.File(script.path))

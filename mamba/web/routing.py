@@ -22,7 +22,7 @@ from twisted.internet import defer
 from twisted.web.http import parse_qs
 
 from mamba.web import response
-from mamba.utils import output
+from mamba.utils import output, config
 from mamba.utils.converter import Converter
 from mamba.web.url_sanitizer import UrlSanitizer
 from mamba.core.decorators import unlimited_cache
@@ -271,8 +271,10 @@ class Router(object):
 
         controller_name = controller.__class__.__name__
 
-        bold = output.bold
-        log.msg(bold('Registering route:') + ' {route}'.format(route=route))
+        if getattr(config.Application(), 'debug', False):
+            bold = output.bold
+            log.msg(
+                bold('Registering route:') + ' {route}'.format(route=route))
 
         self.routes[route.method][route.url][controller_name] = route
 

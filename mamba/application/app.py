@@ -11,8 +11,10 @@
 """
 
 import os
+import gc
 
-from twisted.python import versions, filepath
+from twisted.python.logfile import DailyLogFile
+from twisted.python import versions, filepath, log
 
 from mamba.utils import borg
 from mamba.http import headers
@@ -57,6 +59,7 @@ class Mamba(borg.Borg):
 
         super(Mamba, self).__init__()
 
+        self.already_logging = False
         self._mamba_ver = _mamba_version.version.short()
         self._ver = _app_ver.short()
         self._port = 1936
@@ -75,6 +78,14 @@ class Mamba(borg.Borg):
         self.lessjs = False
 
         self._parse_options(options)
+
+        # register log file if any
+        if self.log_file is not None:
+            self.already_logging = True
+            log.startLogging(DailyLogFile.fromFullPath(self.log_file))
+
+        if getattr(options, 'debug', False):
+            gc.set_debug(gc.DEBUG_STATS | gc.DEBUG_INSTANCES)
 
         self._header = headers.Headers()
         self._header.language = self.language
