@@ -179,10 +179,6 @@ class StylesheetManager(object):
         if not GNU_LINUX:
             return
 
-        print "event %s on %s" % (
-            ', '.join(inotify.humanReadableMask(mask)), filepath
-        )
-
         if mask is inotify.IN_MODIFY:
             style = filepath.splitext(file_path.basename())[0]
             if style in self._stylesheets:
