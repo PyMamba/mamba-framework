@@ -11,6 +11,7 @@
 
 """
 
+import gc
 import re
 import traceback
 from collections import OrderedDict
@@ -159,6 +160,7 @@ class ModuleManager(object):
         finally:
             object_name = object.__class__.__name__
             del self._modules[module]['object']
+            gc.collect()
             temp_object = getattr(tmp_module, object_name)()
             temp_object.loaded = True
             self._modules[module]['object'] = temp_object
