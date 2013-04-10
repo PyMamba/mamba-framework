@@ -21,6 +21,8 @@ from mamba.core import templating
 from mamba.utils.config import Application
 from mamba.application import scripts, appstyles
 
+logging_started = False
+
 
 class Resource(TwistedResource):
     """
@@ -29,6 +31,7 @@ class Resource(TwistedResource):
     """
 
     def __init__(self, template_paths=None, cache_size=50):
+        global logging_started
         TwistedResource.__init__(self)
 
         self._templates = {}
@@ -49,9 +52,10 @@ class Resource(TwistedResource):
 
         self.config = Application()
 
-        # register log file if any
-        if self.config.log_file is not None:
+        # register log file if any and only if is nto already registered
+        if self.config.log_file is not None and not logging_started:
             log.startLogging(DailyLogFile.fromFullPath(self.config.log_file))
+            logging_started = True
 
         # set resources managers
         self._styles_manager = appstyles.AppStyles()
