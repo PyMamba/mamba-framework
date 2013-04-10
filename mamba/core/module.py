@@ -12,6 +12,7 @@
 """
 
 import re
+import traceback
 from collections import OrderedDict
 
 from twisted.python import filepath, log, rebuild
@@ -145,13 +146,22 @@ class ModuleManager(object):
             )
         )
 
-        # reload(tmp_module)
-        rebuild.rebuild(tmp_module, False)
-        object_name = object.__class__.__name__
-        del self._modules[module]['object']
-        temp_object = getattr(tmp_module, object_name)()
-        temp_object.loaded = True
-        self._modules[module]['object'] = temp_object
+        try:
+            rebuild.rebuild(tmp_module, False)
+        except Exception as error:
+            log.msg(
+                '{}: {}\n{}'.format(
+                    output.brown('Error reloading module'),
+                    error,
+                    traceback.format_exc()[:-1]
+                )
+            )
+        finally:
+            object_name = object.__class__.__name__
+            del self._modules[module]['object']
+            temp_object = getattr(tmp_module, object_name)()
+            temp_object.loaded = True
+            self._modules[module]['object'] = temp_object
 
     def lookup(self, module):
         """Find and return a controller from the pool
