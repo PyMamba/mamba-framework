@@ -13,6 +13,7 @@ from collections import OrderedDict
 
 from twisted.internet import defer
 from twisted.trial import unittest
+from twisted.python import filepath
 from twisted.web import resource, server
 from twisted.web.http_headers import Headers
 from twisted.web.test.test_web import DummyRequest
@@ -178,6 +179,13 @@ class ControllerManagerTest(unittest.TestCase):
 
     def test_is_valid_file_works_on_invalid(self):
         self.assertFalse(self.mgr.is_valid_file('./test.log'))
+
+    def test_is_valid_file_works_with_filepath(self):
+        import os
+        currdir = os.getcwd()
+        os.chdir('../mamba/test/dummy_app/')
+        self.assertTrue(self.mgr.is_valid_file(filepath.FilePath('dummy.py')))
+        os.chdir(currdir)
 
     def test_is_loading_modules_works(self):
         self.load_manager()
