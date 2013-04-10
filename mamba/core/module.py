@@ -14,7 +14,7 @@
 import re
 from collections import OrderedDict
 
-from twisted.python import filepath
+from twisted.python import filepath, log, rebuild
 
 from mamba.core import GNU_LINUX
 
@@ -25,8 +25,8 @@ if GNU_LINUX:
 
     from mamba.core.interfaces import INotifier
 
-from mamba.utils import filevariables
 from mamba.plugin import ExtensionPoint
+from mamba.utils import filevariables, output
 
 
 class ModuleError(Exception):
@@ -128,16 +128,27 @@ class ModuleManager(object):
         :type module: str
         """
 
-        temp_object = self.lookup(module)
-        if not temp_object or not temp_object.get('object').loaded:
+        module_store = self.lookup(module)
+        object = module_store.get('object')
+        tmp_module = module_store.get('module')
+        if object is None or object.loaded is False:
             raise ModuleError(
                 'Tried to reload %s that is not yet loaded' % module)
 
-        reload(temp_object.get('module'))
-        object_name = temp_object.get('object').__class__.__name__
+        log.msg(
+            '{}: {} {}'.format(
+                output.green('Reloading module'),
+                object.__class__.__name__, object
+            )
+        )
+
+        # reload(tmp_module)
+        rebuild.rebuild(tmp_module, False)
+        object_name = object.__class__.__name__
         del self._modules[module]['object']
-        self._modules[module]['object'] = getattr(
-            temp_object.get('module'), object_name)()
+        temp_object = getattr(tmp_module, object_name)()
+        temp_object.loaded = True
+        self._modules[module]['object'] = temp_object
 
     def lookup(self, module):
         """Find and return a controller from the pool
@@ -169,7 +180,7 @@ class ModuleManager(object):
         if not GNU_LINUX:
             return
 
-        if mask is inotify.IN_MODIFY:
+        if mask == inotify.IN_MODIFY:
             if not self.is_valid_file(file_path):
                 return
 
@@ -177,7 +188,7 @@ class ModuleManager(object):
             if module in self._modules:
                 self.reload(module)
 
-        if mask is inotify.IN_CREATE:
+        if mask == inotify.IN_CREATE:
             if file_path.exists():
                 if self.is_valid_file(file_path):
                     self.load(file_path)

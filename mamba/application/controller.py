@@ -246,6 +246,14 @@ class ControllerManager(module.ModuleManager):
         :type file_path: str
         """
 
+        if type(file_path) is not str:
+            return self._valid_file(
+                normpath('{}/{}'.format(
+                    self._module_store, file_path.basename())
+                ),
+                'mamba-controller'
+            )
+
         return self._valid_file(
             normpath('{}/{}'.format(self._module_store, file_path)),
             'mamba-controller'
