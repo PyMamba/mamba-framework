@@ -12,7 +12,7 @@
 """
 
 from twisted.web import static
-from twisted.python import log, filepath
+from twisted.python import filepath
 from twisted.web.resource import Resource as TwistedResource
 
 from mamba.http import headers
