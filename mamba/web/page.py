@@ -36,7 +36,7 @@ class Page(resource.Resource):
         self._scripts = []
 
         # register log file if any
-        if app.already_logging is False:
+        if app.already_logging is False and app.log_file is not None:
             log.startLogging(DailyLogFile.fromFullPath(app.log_file))
 
         # set managers
