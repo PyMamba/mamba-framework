@@ -7,7 +7,8 @@ Tests for mamba.application.app and mamba.scripts.mamba
 """
 
 from twisted.trial import unittest
-from twisted.web import resource
+from twisted.web import resource, server
+from twisted.web.test.test_web import DummyChannel
 from twisted.internet.error import ProcessTerminated
 
 from mamba import __version__
@@ -73,6 +74,31 @@ class MambaTest(unittest.TestCase):
 
         from twisted.web.http import Request
         self.assertEqual(Request.getClientIP.__name__, 'getClientIPPatch')
+
+    def test_get_client_ip_with_x_forwarded(self):
+        d = DummyChannel()
+        request = server.Request(d, False)
+        request.gotLength(0)
+        request.requestHeaders.setRawHeaders(b"x-forwarded-for",
+                                             [b"80.80.80.80"])
+        request.requestReceived(b'GET', b'/foo%2Fbar', b'HTTP/1.0')
+        self.assertEqual(request.getClientIP(), '80.80.80.80')
+
+    def test_get_client_proxy_ip_with_x_forwarded(self):
+        d = DummyChannel()
+        request = server.Request(d, False)
+        request.gotLength(0)
+        request.requestHeaders.setRawHeaders(b"x-forwarded-for",
+                                             [b"80.80.80.80"])
+        request.requestReceived(b'GET', b'/foo%2Fbar', b'HTTP/1.0')
+        self.assertEqual(request.getClientProxyIP(), '192.168.1.1')
+
+    def test_get_client_ip_without_x_forwarded(self):
+        d = DummyChannel()
+        request = server.Request(d, False)
+        request.gotLength(0)
+        request.requestReceived(b'GET', b'/foo%2Fbar', b'HTTP/1.0')
+        self.assertEqual(request.getClientIP(), '192.168.1.1')
 
 
 if __name__ == '__main__':

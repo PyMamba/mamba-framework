@@ -141,6 +141,10 @@ class Mamba(borg.Borg):
         """
 
         if not self.monkey_patched:
+            # add new method
+            setattr(http.Request, 'getClientProxyIP', getClientProxyIP)
+
+            # patch getClientIP
             monkey_patcher = MonkeyPatcher(
                 (http.Request, 'getClientIP', getClientIPPatch)
             )
@@ -207,21 +211,30 @@ def getClientIPPatch(self):
     Return the IP address of the client who submitted this request. If
     there are headers for X-Forwarded-For, they are returned as well.
 
+    If you need to get the value of Request.client.host you can use the
+    new patched method Request.getClientProxyIP() on Request objects.
+
     :returns: the client IP address(es)
     """
     x_forwarded_for = self.getHeader('x-forwarded-for')
 
-    if isinstance(self.client, address.IPv4Address):
-        return '%s%s' % (
-            self.client.host,
-            ' (' + x_forwarded_for + ') ' if x_forwarded_for is not None
-            else ''
-        )
-    else:
-        if x_forwarded_for is not None:
-            return x_forwarded_for
+    if x_forwarded_for is not None:
+        return x_forwarded_for.split(', ')[0]
 
-        return None
+    return self.getClientProxyIP()
+
+
+def getClientProxyIP(self):
+    """
+    Return the IP address of the client/proxy who submitted the request.
+
+    :returns: the client/proxy IP address or None
+    """
+
+    if isinstance(self.client, address.IPv4Address):
+        return self.client.host
+
+    return None
 
 
 __all__ = ['Mamba', 'ApplicationError']
