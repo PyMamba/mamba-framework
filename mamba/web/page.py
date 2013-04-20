@@ -1,5 +1,5 @@
 # -*- test-case-name: mamba.test.test_web -*-
-# Copyright (c) 2012 Oscar Campos <oscar.campos@member.fsf.org>
+# Copyright (c) 2012 - 2013 Oscar Campos <oscar.campos@member.fsf.org>
 # See LICENSE for more details
 
 """
