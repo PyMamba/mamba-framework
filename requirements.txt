@@ -7,6 +7,7 @@ jinja2 >= 2.4
 
 # Testing utils
 doublex >= 1.5.1
+PyHamcrest
 
 # Documentation
 sphinx >= 1.1.3
