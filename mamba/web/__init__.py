@@ -16,6 +16,7 @@ from stylesheet import (
     Stylesheet, StylesheetError, InvalidFile, InvalidFileExtension,
     FileDontExists
 )
+from websocket import WebSocketError, WebSocketProtocol, WebSocketFactory
 
 
 __all__ = [
@@ -24,5 +25,6 @@ __all__ = [
     'Response', 'NotFound', 'NotImplemented', 'Ok', 'InternalServerError',
     'BadRequest', 'Conflict', 'AlreadyExists',
     'Stylesheet', 'StylesheetError', 'InvalidFile', 'InvalidFileExtension',
-    'FileDontExists'
+    'FileDontExists',
+    'WebSocketError', 'WebSocketProtocol', 'WebSocketFactory'
 ]
