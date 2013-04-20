@@ -8,12 +8,12 @@ Tests for mamba.application.app and mamba.scripts.mamba
 
 from twisted.trial import unittest
 from twisted.web import resource
+from twisted.internet.error import ProcessTerminated
 
 from mamba import __version__
 from mamba.plugin import ExtensionPoint
-from mamba.application import controller
 from mamba.core import interfaces, GNU_LINUX
-from twisted.internet.error import ProcessTerminated
+from mamba.application import controller, app
 from mamba.test.dummy_app.application.controller import dummy
 
 
@@ -62,6 +62,17 @@ class MambaTest(unittest.TestCase):
     def test_dummy_controller_is_a_plugin(self):
         self.assertTrue(
             dummy.DummyController in controller.ControllerProvider.plugins)
+
+    def test_get_client_ip_is_monkey_patched(self):
+        mamba = app.Mamba()
+        if GNU_LINUX:
+            self.addCleanup(
+                mamba.managers['controller'].notifier.loseConnection
+            )
+            self.addCleanup(mamba.managers['model'].notifier.loseConnection)
+
+        from twisted.web.http import Request
+        self.assertEqual(Request.getClientIP.__name__, 'getClientIPPatch')
 
 
 if __name__ == '__main__':

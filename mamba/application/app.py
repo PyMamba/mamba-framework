@@ -13,7 +13,10 @@
 import os
 import gc
 
+from twisted.web import http
+from twisted.internet import address
 from twisted.python.logfile import DailyLogFile
+from twisted.python.monkey import MonkeyPatcher
 from twisted.python import versions, filepath, log
 
 from mamba.utils import borg
@@ -59,6 +62,7 @@ class Mamba(borg.Borg):
 
         super(Mamba, self).__init__()
 
+        self.monkey_patched = False
         self.already_logging = False
         self._mamba_ver = _mamba_version.version.short()
         self._ver = _app_ver.short()
@@ -78,6 +82,9 @@ class Mamba(borg.Borg):
         self.lessjs = False
 
         self._parse_options(options)
+
+        # monkey patch twisted
+        self._monkey_patch()
 
         # register log file if any
         if self.log_file is not None:
@@ -126,6 +133,19 @@ class Mamba(borg.Borg):
                         setattr(self, '_log_file', getattr(options, key))
                     else:
                         setattr(self, key, getattr(options, key))
+
+    def _monkey_patch(self):
+        """
+        Monkeypatch some parts of the twisted library that are waiting
+        for bugfix inclussion in the trunk
+        """
+
+        if not self.monkey_patched:
+            monkey_patcher = MonkeyPatcher(
+                (http.Request, 'getClientIP', getClientIPPatch)
+            )
+            monkey_patcher.patch()
+            self.monkey_patched = True
 
     @property
     def port(self):
@@ -180,6 +200,28 @@ class Mamba(borg.Borg):
     @ver.setter
     def ver(self, value):
         raise ApplicationError("'ver' is readonly")
+
+
+def getClientIPPatch(self):
+    """
+    Return the IP address of the client who submitted this request. If
+    there are headers for X-Forwarded-For, they are returned as well.
+
+    :returns: the client IP address(es)
+    """
+    x_forwarded_for = self.getHeader('x-forwarded-for')
+
+    if isinstance(self.client, address.IPv4Address):
+        return '%s%s' % (
+            self.client.host,
+            ' (' + x_forwarded_for + ') ' if x_forwarded_for is not None
+            else ''
+        )
+    else:
+        if x_forwarded_for is not None:
+            return x_forwarded_for
+
+        return None
 
 
 __all__ = ['Mamba', 'ApplicationError']
