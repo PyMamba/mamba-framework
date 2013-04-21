@@ -33,6 +33,7 @@ class Borg(object):
 
     Used as::
 
+        >>> from managers import LockerManager
         >>> manager1 = LockerManager()
         >>> manager1.name = 'Locker One'
         >>> manager2 = LockerManager()
