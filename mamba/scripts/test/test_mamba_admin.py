@@ -567,12 +567,12 @@ class ControllerScriptTest(unittest.TestCase):
             '\n\n'
             '# -*- encoding: utf-8 -*-\n'
             '# -*- mamba-file-type: mamba-controller -*-\n'
-            '# Copyright (c) 2013 - damnwidget <damnwidget@localhost>\n\n'
+            '# Copyright (c) 2013 - {author} <{author}@localhost>\n\n'
             '"""\n'
             '.. controller:: TestController\n'
             '    :platform: Linux\n'
             '    :synopsis: None\n\n'
-            '.. controllerauthor:: damnwidget <damnwidget@localhost>\n'
+            '.. controllerauthor:: {author} <{author}@localhost>\n'
             '"""\n\n'
             'from zope.interface import implements\n\n'
             'from mamba.web.response import Ok\n'
@@ -594,7 +594,8 @@ class ControllerScriptTest(unittest.TestCase):
             '        super(TestController, self).__init__()\n\n'
             '    @route(\'/\')\n'
             '    def root(self, request, **kwargs):\n'
-            '        return Ok(\'I am the TestController, hello world!\')\n\n'
+            '        return Ok(\'I am the TestController, hello world!\')'
+            '\n\n'.format(author=getpass.getuser())
         )
 
     def test_write_file(self):
@@ -699,13 +700,13 @@ class ModelScriptTest(unittest.TestCase):
             '\n\n'
             '# -*- encoding: utf-8 -*-\n'
             '# -*- mamba-file-type: mamba-model -*-\n'
-            '# Copyright (c) 2013 - damnwidget <damnwidget@localhost>\n\n'
+            '# Copyright (c) 2013 - {author} <{author}@localhost>\n\n'
             '"""'
             '\n'
             '.. model:: TestModel\n'
             '    :plarform: Linux\n'
             '    :synopsis: None\n\n'
-            '.. modelauthor:: damnwidget <damnwidget@localhost>\n'
+            '.. modelauthor:: {author} <{author}@localhost>\n'
             '"""\n\n'
             'from storm.locals import *\n\n'
             'from mamba.application import model\n\n\n'
@@ -714,7 +715,9 @@ class ModelScriptTest(unittest.TestCase):
             '    None\n'
             '    """\n\n'
             '    __storm_table__ = \'test\'\n\n'
-            '    id = Int(primary=True, unsigned=True)\n\n\n'
+            '    id = Int(primary=True, unsigned=True)\n\n\n'.format(
+                author=getpass.getuser()
+            )
         )
 
     def test_write_file(self):
