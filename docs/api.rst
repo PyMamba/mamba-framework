@@ -78,7 +78,7 @@ Interfaces that are part of the Mamba Core, you are supossed to never use those 
     :type name: str
     :param desc: Controller's description
     :type desc: str
-    :param loaded: True if the controller has been loaded, otherwise
+    :param loaded: true if the controller has been loaded, otherwise
                    returns False
     :type loaded: bool
 
@@ -142,6 +142,8 @@ Converter
 
 config.Database
 ...............
+
+This class is used to load configuration files in JSON format from the file system. If no config is provided a basic configuration based on SQLite is automatically created for us.
 
 .. autoclass:: mamba.utils.config.Database
     :members:
@@ -239,14 +241,46 @@ Enterprise
 
 This is the package that give you access to Database layers. You can use traditional Open Source SQL solutions as `PostgreSQL <http://www.postgresql.org/>`_ PostgreSQL, `MySQL <http://www.mysql.com/>`_ or `SQLite <http://www.sqlite.org/>`_ as well as No-SQL Open Source solutions as `MongoDB <http://www.mongodb.org/>`_ (work in progress).
 
-The SQL database access is through `Storm <http://storm.canonical.com>`_
+The SQL database access is performed through `Storm <http://storm.canonical.com>`_ with some monkey patching to make possible database creation from the Pthon defined model.
+
+Mamba is supossed to work fine with Storm since revision 223 of the bazaar repository in Storm-0.12 but we only tested it with version 0.19.
 
 SQL through Storm
 .................
 
-.. autoclass:: mamba.enterprise.database.Database
+.. autoclass:: mamba.Database
     :members:
 
+.. autoclass:: mamba.Model
+    :members:
+
+Specific SQL Backends and Adaptors (used internally by Mamba)
+.............................................................
+
+It's probable that you never use those ones by yourself
+
+
+.. autoclass:: mamba.enterprise.sqlite.SQLite
+    :members:
+    :inherited-members:
+
+.. autoclass:: mamba.enterprise.mysql.MySQL
+    :members:
+    :inherited-members:
+
+.. autoclass:: mamba.enterprise.postgres.PostgreSQL
+    :members:
+    :inherited-members:
+
+.. autoclass:: mamba.enterprise.database.AdapterFactory
+    :members:
+
+
+Monkey Patches
+..............
+
+.. autoclass:: mamba.enterprise.database.PropertyColumnMambaPatch
+    :members:
 
 
 Extension Point
