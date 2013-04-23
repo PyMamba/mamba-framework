@@ -119,4 +119,4 @@ License
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-Read [LICENSE](https://raw.github.com/DamnWidget/mamba/master/LICENSE) file to read the full license
+Have a look on [LICENSE](https://raw.github.com/DamnWidget/mamba/master/LICENSE) file to read the full license
