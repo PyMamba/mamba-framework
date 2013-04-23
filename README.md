@@ -99,7 +99,7 @@ You can also refer to the [Mamba Web Site](http://www.pymamba.com) where you can
 
 Additional Notes
 ================
-Mamba is under heavy development at this moment and tehre is no `stable release`. All the API's (internal or not) may (and should) 
+Mamba is under heavy development at this moment and there is no `stable release`. All the API's (internal or not) may (and should) 
 change without any previous warning until we release a first stable release.
 
 =======
