@@ -35,7 +35,7 @@ There are other requirements in order to run the test suite or build the documen
 Build Status
 ============
 
-Mamba uses [buildbot](http://buildbot.net/ "BuildBot") as CI solution, at the moment we provide build tests the following systems and Python implementations:
+Mamba uses [buildbot](http://buildbot.net/ "BuildBot") as CI solution, at the moment we provide build tests for the following systems and Python implementations:
 
 Known platforms where Mamba runs
 --------------------------------
