@@ -10,7 +10,6 @@
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 """
 
-import json
 import logging
 import collections
 

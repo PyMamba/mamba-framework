@@ -6,7 +6,7 @@ Mamba is a high-lvel Web Applications framework based on Twisted, Storm and Jinj
 <table>
   <tr>
     <td align="center"><strong>Author:</strong></td><td>Oscar Campos &lt;<a href="mailto:oscar.campos@member.fsf.org">oscar.campos@member.fsf.org</a>&gt;</td>
-  </tr>  
+  </tr>
 </table>
 
 Minimum Dependencies
@@ -17,12 +17,12 @@ Minimum Dependencies
   </tr>
   <tr>
     <td>Python</td><td>2.7.x</td><td><a href="http://python.org" targte="_blank">http://python.org</a></td>
-  </tr> 
+  </tr>
   <tr>
     <td>Twisted</td><td>>= 10.2.0</td><td><a href="http://www.twistedmatrix.com" target="_blank">http://www.twistedmatrix.com</a></td>
   </tr>
   <tr>
-    <td>Storm</td><td>>= 0.19</td><td><a href="http://storm.cacnocial.com" target="_blank">http://storm.canonical.com</a></td>
+    <td>Storm</td><td>>= 0.19</td><td><a href="http://storm.canonical.com" target="_blank">http://storm.canonical.com</a></td>
   </tr>
   <tr>
     <td>Jinja2</td><td>>= 2.4</td><td><a href="http://jinja.pocoo.org/docs/#" target="_blank">http://jinja.pocoo.org/docs/</a></td>
@@ -59,33 +59,33 @@ this was not tested and we have no `buildbot slaves` under those operating syste
     <td align="center">
       <strong>CPython</strong>
     </td>
-    <td align="center">      
-        <img align="center" src="http://buildbot.pymamba.com/png?builder=Ubuntu-12.04-python2.7.3&size=large" />      
+    <td align="center">
+        <img align="center" src="http://buildbot.pymamba.com/png?builder=Ubuntu-12.04-python2.7.3&size=large" />
     </td>
     <td align="center">
-        <img align="center" src="http://buildbot.pymamba.com/png?builder=Gentoo-x86_64_python2.7&size=large" />      
+        <img align="center" src="http://buildbot.pymamba.com/png?builder=Gentoo-x86_64_python2.7&size=large" />
     </td>
-    <td align="center">      
-        <img align="center" src="http://buildbot.pymamba.com/png?builder=FreeBSD-9.1_amd64_python2.7&size=large" />      
+    <td align="center">
+        <img align="center" src="http://buildbot.pymamba.com/png?builder=FreeBSD-9.1_amd64_python2.7&size=large" />
     </td>
   </tr>
   <tr>
     <td align="center">
       <strong>PyPy</strong>
     </td>
-    <td align="center">      
-        <img src="http://buildbot.pymamba.com/png?builder=Ubuntu-12.04-pypy&size=large" />      
-    </td>
-    <td align="center">      
-        <img align="Center" src="http://buildbot.pymamba.com/png?builder=Gentoo-x86_64_pypy&size=large" />      
+    <td align="center">
+        <img src="http://buildbot.pymamba.com/png?builder=Ubuntu-12.04-pypy&size=large" />
     </td>
     <td align="center">
-        <img align="Center" src="http://buildbot.pymamba.com/png?builder=FreeBSD-9.1_amd64_pypy&size=large" />      
+        <img align="Center" src="http://buildbot.pymamba.com/png?builder=Gentoo-x86_64_pypy&size=large" />
+    </td>
+    <td align="center">
+        <img align="Center" src="http://buildbot.pymamba.com/png?builder=FreeBSD-9.1_amd64_pypy&size=large" />
     </td>
   </tr>
   <tr>
     <td align="center"><strong>NOTES</strong></td>
-    <td colspan="3">All the platforms listed here are supported by Mamba. We are looking for volunteers 
+    <td colspan="3">All the platforms listed here are supported by Mamba. We are looking for volunteers
     that want to contribute with a buildbot slave for all the 'unknown' listed platforms here and new operating systems.
   </tr>
 </table>
@@ -94,12 +94,12 @@ If you want to know more about the mamba's buildbot you can check our [BuildBot 
 
 Project Documentation
 =====================
-All the project documentation can be built using `Sphinx` and `make html` in the docs directory. 
+All the project documentation can be built using `Sphinx` and `make html` in the docs directory.
 You can also refer to the [Mamba Web Site](http://www.pymamba.com) where you can find all the project documentation.
 
 Additional Notes
 ================
-Mamba is under heavy development at this moment and there is no `stable release`. All the API's (internal or not) may (and should) 
+Mamba is under heavy development at this moment and there is no `stable release`. All the API's (internal or not) may (and should)
 change without any previous warning until we release a first stable release.
 
 =======

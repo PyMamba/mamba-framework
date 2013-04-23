@@ -16,3 +16,5 @@ import sys
 sys.path.append('.')
 
 from mamba.utils import config
+
+__all__ = ['config']

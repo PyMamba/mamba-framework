@@ -8,7 +8,7 @@
 from twisted.trial import unittest
 
 from mamba.core import GNU_LINUX
-from mamba.application import app, controller, appstyles
+from mamba.application import app, controller
 
 
 class ApplicationTests(unittest.TestCase):

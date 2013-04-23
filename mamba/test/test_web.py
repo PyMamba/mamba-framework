@@ -9,7 +9,6 @@ Tests for mamba.web
 import sys
 import tempfile
 from cStringIO import StringIO
-from collections import namedtuple
 
 from twisted.internet import defer
 from twisted.trial import unittest
@@ -20,7 +19,6 @@ from twisted.web.test.test_web import DummyRequest
 from twisted.internet.error import ProcessTerminated
 from doublex import Stub, ProxySpy, Spy, called, assert_that
 
-from mamba.core import resource
 from mamba.core import GNU_LINUX
 from mamba.application import appstyles, controller, scripts
 from mamba.application import route as decoroute
