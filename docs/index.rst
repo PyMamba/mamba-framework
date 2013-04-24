@@ -11,6 +11,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   getting_started
+   what_mamba_is
+   tutorial
+   developers
    api
 
 
