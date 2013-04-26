@@ -21,6 +21,7 @@ from mamba import copyright as mamba_copyright
 from mamba.utils.output import darkgreen, darkred
 
 from _sql import SqlOptions, Sql
+from _view import ViewOptions, View
 from _model import ModelOptions, Model
 from _project import ApplicationOptions, Application
 from _controller import ControllerOptions, Controller
@@ -46,7 +47,7 @@ class Options(usage.Options):
         ['sql', None, SqlOptions, 'Manipulate SQL database'],
         ['controller', None, ControllerOptions, 'Generate new controller'],
         ['model', None, ModelOptions, 'Generate new model'],
-        ['view', None, usage.Options, 'Generate new view'],
+        ['view', None, ViewOptions, 'Generate new view'],
         # TODO: some day mamba will add entities and a good integrated test
         # suite... I hope
         # ['entity', None, None, 'Generate a new entity'],
@@ -215,16 +216,7 @@ def run():
         Model(options)
 
     if options.subCommand == 'view':
-        print(
-            'Mamba does not provide a view system by itself but you can use\n'
-            'whatever you need for your views. You can for example use a\n'
-            'JavaScript frontend library as LungoJS, jQuery, Dojo or Sencha.\n'
-            'You can also use Twisted templating system, Jinja or even\n'
-            'Django if you feel the need to use it.\n\n'
-            'Mamba is a full backend system for the moment.\n'
-            'For examples about how to use different types of frontend libs\n'
-            'visit http://www.pymmaba.com\n'
-        )
+        View(options)
 
 
 if __name__ == '__main__':

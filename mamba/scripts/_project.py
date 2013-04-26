@@ -144,8 +144,10 @@ class Application(object):
         self._write_services()
         # write config file
         self._write_config()
-        # writing favicon file
+        # write favicon file
         self._write_favicon()
+        # write layout.html
+        self._write_layout_html()
 
     @decorate_output
     def _generate_application_directory(self):
@@ -345,3 +347,15 @@ class Application(object):
         )
         favicon_template = self._load_template_from_mamba('favicon.ico')
         favicon_file.open('wb').write(favicon_template.template)
+
+    @decorate_output
+    def _write_layout_html(self):
+        """Write the layout.html Jinja2 default template
+        """
+
+        print('Writting layout.html template file...'.ljust(73), end='')
+        layout_file = filepath.FilePath(
+            '{}/application/view/templates/layout.html'.format(self.app_dir)
+        )
+        layout_template = self._load_template_from_mamba('layout.tpl')
+        layout_file.open('wb').write(layout_template.template)

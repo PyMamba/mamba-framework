@@ -12,8 +12,10 @@
 """
 
 from __future__ import print_function
+import re
 import sys
 import imp
+import getpass
 import functools
 
 from twisted.python import filepath
@@ -197,3 +199,31 @@ def decorate_output(func):
             raise
 
     return wrapper
+
+
+def post_options(self):
+    """Post options processing
+    """
+
+    # http://www.rfc-editor.org/rfc/rfc2822.txt
+    RFC2822 = re.compile(
+        r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*"
+        "+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9]"
+        ")?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
+    )
+
+    if self['author'] is None:
+        self['author'] = getpass.getuser()
+
+    if self['email'] is not None:
+        if RFC2822.match(self['email']) is None:
+            print(
+                'error: the given email address {} is not a valid RFC2822 '
+                'email address, '
+                'check http://www.rfc-editor.org/rfc/rfc2822.txt for '
+                'very extended details'.format(self['email'])
+            )
+            sys.exit(-1)
+    else:
+        # just set an invalid RFC2822 email address (thats what irony mean)
+        self['email'] = '{}@localhost'.format(self['author'])

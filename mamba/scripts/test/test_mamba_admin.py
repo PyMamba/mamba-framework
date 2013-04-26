@@ -9,6 +9,7 @@ Tests for mamba.scripts.mamba_admin and subcommands
 import os
 import sys
 import getpass
+import datetime
 from cStringIO import StringIO
 
 from twisted.internet import utils, defer
@@ -17,6 +18,7 @@ from twisted.python import usage, filepath
 
 from mamba.scripts import mamba_admin, commons
 from mamba.scripts._project import Application
+from mamba.scripts._view import ViewOptions, View
 from mamba.scripts._model import ModelOptions, Model
 from mamba.scripts._controller import ControllerOptions, Controller
 from mamba.scripts._sql import (
@@ -142,6 +144,9 @@ class ApplicationTest(unittest.TestCase):
         self.assertTrue(filepath.exists('test/application/view'))
         self.assertTrue(filepath.exists('test/application/view/templates'))
         self.assertTrue(filepath.exists('test/application/view/stylesheets'))
+        self.assertTrue(
+            filepath.exists('test/application/view/templates/layout.html')
+        )
 
 
 class MambaAdminSqlConfigureTest(unittest.TestCase):
@@ -567,7 +572,7 @@ class ControllerScriptTest(unittest.TestCase):
             '\n\n'
             '# -*- encoding: utf-8 -*-\n'
             '# -*- mamba-file-type: mamba-controller -*-\n'
-            '# Copyright (c) 2013 - {author} <{author}@localhost>\n\n'
+            '# Copyright (c) {year} - {author} <{author}@localhost>\n\n'
             '"""\n'
             '.. controller:: TestController\n'
             '    :platform: Linux\n'
@@ -595,7 +600,8 @@ class ControllerScriptTest(unittest.TestCase):
             '    @route(\'/\')\n'
             '    def root(self, request, **kwargs):\n'
             '        return Ok(\'I am the TestController, hello world!\')'
-            '\n\n'.format(author=getpass.getuser())
+            '\n\n'.format(
+                year=datetime.datetime.now().year, author=getpass.getuser())
         )
 
     def test_write_file(self):
@@ -700,7 +706,7 @@ class ModelScriptTest(unittest.TestCase):
             '\n\n'
             '# -*- encoding: utf-8 -*-\n'
             '# -*- mamba-file-type: mamba-model -*-\n'
-            '# Copyright (c) 2013 - {author} <{author}@localhost>\n\n'
+            '# Copyright (c) {year} - {author} <{author}@localhost>\n\n'
             '"""'
             '\n'
             '.. model:: TestModel\n'
@@ -716,7 +722,7 @@ class ModelScriptTest(unittest.TestCase):
             '    """\n\n'
             '    __storm_table__ = \'test\'\n\n'
             '    id = Int(primary=True, unsigned=True)\n\n\n'.format(
-                author=getpass.getuser()
+                author=getpass.getuser(), year=datetime.datetime.now().year
             )
         )
 
@@ -735,6 +741,129 @@ class ModelScriptTest(unittest.TestCase):
 
         self.assertTrue(model_file.exists())
         model_file.remove()
+
+        os.chdir(currdir)
+
+
+class MambaAdminViewTest(unittest.TestCase):
+
+    def setUp(self):
+        self.config = ViewOptions()
+
+    def test_wrong_number_of_args(self):
+        self.assertRaises(
+            usage.UsageError, self.config.parseOptions, ['0', '1', '2']
+        )
+
+    def test_name_camelize(self):
+        self.config.parseOptions(['test_view', 'test'])
+        self.assertEqual(self.config['name'], 'TestView')
+
+    def test_filename_lowerize_and_normalize(self):
+        self.config.parseOptions(['Tes/t_view$', 'test'])
+        self.assertEqual(self.config['filename'], 'test_view')
+        self.assertEqual(self.config['name'], 'TestView')
+
+    def test_email_validation(self):
+
+        def fake_exit(value):
+            pass
+
+        exit = sys.exit
+        sys.exit = fake_exit
+
+        stdout = sys.stdout
+        capture = StringIO()
+        sys.stdout = capture
+
+        self.config.parseOptions(['--email', 'no@valid', 'test_model', 'test'])
+        self.assertEqual(
+            capture.getvalue(),
+            'error: the given email address no@valid is not a valid RFC2822 '
+            'email address, check http://www.rfc-editor.org/rfc/rfc2822.txt '
+            'for very extended details\n'
+        )
+
+        sys.stdout = stdout
+        sys.exit = exit
+
+    def test_default_email(self):
+        self.config.parseOptions(['test_model', 'test'])
+        self.assertEqual(
+            self.config['email'],
+            '{}@localhost'.format(getpass.getuser())
+        )
+
+    def test_default_synopsis_is_none(self):
+        self.config.parseOptions(['test_model', 'test'])
+        self.assertEqual(self.config['description'], None)
+
+
+class ViewScriptTest(unittest.TestCase):
+
+    def setUp(self):
+        self.config = mamba_admin.Options()
+        self.stdout = sys.stdout
+        self.capture = StringIO()
+        sys.stdout = self.capture
+
+    def tearDown(self):
+        sys.stdout = self.stdout
+
+    def test_use_outside_application_directory_fails(self):
+        _test_use_outside_application_directory_fails(self)
+
+    def test_dump(self):
+        View.process = lambda _: 0
+
+        self.config.parseOptions(['view', '--dump', 'test_model'])
+        view = View(self.config)
+        view._dump_view()
+        self.assertTrue(
+            '    <!--\n'
+            '        Copyright (c) {year} - {author} <{author}@localhost>\n\n'
+            '        view: TestModel\n'
+            '            synopsis: None\n\n'
+            '        viewauthor: {author} <{author}@localhost>\n'
+            '    -->\n\n'
+            '    <h2>It works!</h2>\n\n'.format(
+                author=getpass.getuser(), year=datetime.datetime.now().year
+            ) in self.capture.getvalue()
+        )
+
+    def test_write_file(self):
+        View.process = lambda _: 0
+
+        currdir = os.getcwd()
+        os.chdir('../mamba/test/dummy_app/')
+
+        self.config.parseOptions(['view', 'test_view'])
+        view = View(self.config)
+        view._write_view()
+        view_file = filepath.FilePath(
+            'application/view/templates/test_view.html'
+        )
+
+        self.assertTrue(view_file.exists())
+        view_file.remove()
+
+        os.chdir(currdir)
+
+    def test_write_file_with_controller(self):
+        View.process = lambda _: 0
+
+        currdir = os.getcwd()
+        os.chdir('../mamba/test/dummy_app/')
+
+        self.config.parseOptions(['view', 'test_view', 'dummy'])
+        view = View(self.config)
+        view._write_view()
+        view_file = filepath.FilePath(
+            'application/view/Dummy/test_view.html'
+        )
+
+        self.assertTrue(view_file.exists())
+        view_file.remove()
 
         os.chdir(currdir)
 
