@@ -46,13 +46,16 @@ this was not tested and we have no `buildbot slaves` under those operating syste
   <tr>
     <td></td>
     <td align="center">
-      <strong>Ubuntu GNU/Linux 12.04 x86_64</strong>
+      <strong>Ubuntu 12.04</strong>
     </td>
     <td align="center">
-      <strong>Gentoo GNU/Linux x86_64</strong>
+      <strong>Ubuntu 10.04</strong>
     </td>
     <td align="center">
-      <strong>FreeBSD 9.1 amd64</strong>
+      <strong>Gentoo</strong>
+    </td>
+    <td align="center">
+      <strong>FreeBSD 9.1</strong>
     </td>
   </tr>
   <tr>
@@ -61,6 +64,9 @@ this was not tested and we have no `buildbot slaves` under those operating syste
     </td>
     <td align="center">
         <img align="center" src="http://buildbot.pymamba.com/png?builder=Ubuntu-12.04-python2.7.3&size=large" />
+    </td>
+    <td align="center">
+        <img align="center" src="http://buildbot.pymamba.com/png?builder=Ubuntu-10.04-CPython2.7.4&size=large" />
     </td>
     <td align="center">
         <img align="center" src="http://buildbot.pymamba.com/png?builder=Gentoo-x86_64_python2.7&size=large" />
@@ -77,6 +83,9 @@ this was not tested and we have no `buildbot slaves` under those operating syste
         <img src="http://buildbot.pymamba.com/png?builder=Ubuntu-12.04-pypy&size=large" />
     </td>
     <td align="center">
+        <img src="http://buildbot.pymamba.com/png?builder=Ubuntu-10.04-pypy1.9&size=large" />
+    </td>
+    <td align="center">
         <img align="Center" src="http://buildbot.pymamba.com/png?builder=Gentoo-x86_64_pypy&size=large" />
     </td>
     <td align="center">
@@ -85,7 +94,7 @@ this was not tested and we have no `buildbot slaves` under those operating syste
   </tr>
   <tr>
     <td align="center"><strong>NOTES</strong></td>
-    <td colspan="3">All the platforms listed here are supported by Mamba. We are looking for volunteers
+    <td colspan="4">All the platforms listed here are supported by Mamba. We are looking for volunteers
     that want to contribute with a buildbot slave for all the 'unknown' listed platforms here and new operating systems.
   </tr>
 </table>
