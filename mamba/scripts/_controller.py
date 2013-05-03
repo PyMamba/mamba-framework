@@ -14,13 +14,15 @@ from twisted.python import usage, filepath
 
 from mamba import copyright
 from mamba.scripts import commons
+from mamba._version import versions
 from mamba.utils.camelcase import CamelCase
 
-__version__ = '0.1.0'
+# This is an auto-generated property. Do not edit it.
+version = versions.Version('controller', 0, 1, 0)
 
 
 def show_version():
-    print('Mamba Controller Tools v{}'.format(__version__))
+    print('Mamba Controller Tools v{}'.format(version.short()))
     print(format(copyright.copyright))
 
 

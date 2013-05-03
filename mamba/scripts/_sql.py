@@ -12,16 +12,18 @@ from twisted.python import usage
 
 from mamba import copyright
 from mamba.scripts import commons
+from mamba._version import versions
 from mamba.enterprise import database
 from mamba.test.test_model import DummyThreadPool
 from mamba.utils.output import darkred, darkgreen
 from mamba.application.model import ModelManager, Model
 
-__version__ = '0.1.0'
+# This is an auto-generated property. Do not edit it.
+version = versions.Version('sql', 0, 1, 0)
 
 
 def show_version():
-    print('Mamba Sql Tools v{}'.format(__version__))
+    print('Mamba Sql Tools v{}'.format(version.short()))
     print('{}'.format(copyright.copyright))
 
 

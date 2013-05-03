@@ -12,12 +12,14 @@ from string import Template
 from twisted.python import usage, filepath
 
 from mamba import copyright
+from mamba._version import versions
 from commons import Interaction, decorate_output
 from mamba.utils.output import (
     blue, brown, darkred, resetColor as reset
 )
 
-__version__ = '0.1.0'
+# This is an auto-generated property. Do not edit it.
+version = versions.Version('configurator', 0, 1, 0)
 
 
 class ApplicationOptions(usage.Options):
@@ -49,7 +51,7 @@ class ApplicationOptions(usage.Options):
     def opt_version(self):
         """Print version information and exist
         """
-        print('Mamba Application Configurator v{}'.format(__version__))
+        print('Mamba Application Configurator v{}'.format(version.short()))
         print('{}'.format(copyright.copyright))
 
     def parseArgs(self, name):
