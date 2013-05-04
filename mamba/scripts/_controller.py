@@ -18,7 +18,7 @@ from mamba._version import versions
 from mamba.utils.camelcase import CamelCase
 
 # This is an auto-generated property. Do not edit it.
-version = versions.Version('controller', 0, 1, 7)
+version = versions.Version('controller', 0, 1, 8)
 
 
 def show_version():

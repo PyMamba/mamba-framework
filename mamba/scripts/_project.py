@@ -19,7 +19,7 @@ from mamba.utils.output import (
 )
 
 # This is an auto-generated property. Do not edit it.
-version = versions.Version('configurator', 0, 1, 9)
+version = versions.Version('configurator', 0, 1, 10)
 
 
 class ApplicationOptions(usage.Options):

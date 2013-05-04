@@ -18,7 +18,7 @@ from mamba._version import versions
 from mamba.utils.camelcase import CamelCase
 
 # This is an auto-generated property. Do not edit it.
-version = versions.Version('model', 0, 2, 1)
+version = versions.Version('model', 0, 2, 2)
 
 
 def show_version():
