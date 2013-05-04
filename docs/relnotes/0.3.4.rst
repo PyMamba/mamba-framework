@@ -76,4 +76,4 @@ Details
 If you need a more detailed description of the changes made in this release you
 can use git itself using::
 
-    git log 0.3.3 0.3.4
+    git log 0.3.3..0.3.4
