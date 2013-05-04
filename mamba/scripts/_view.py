@@ -18,7 +18,7 @@ from mamba.utils.camelcase import CamelCase
 from mamba.scripts._sql import mamba_services_not_found
 
 # This is an auto-generated property. Do not edit it.
-version = versions.Version('view', 0, 1, 0)
+version = versions.Version('view', 0, 1, 2)
 
 
 def show_version():
@@ -146,9 +146,10 @@ class View(object):
         """Prepare the template to write/dump
         """
 
+        sep = filepath.os.sep  # windows needs '\\' as separator
         view_template = Template(
             filepath.FilePath('{}/templates/view.tpl'.format(
-                '/'.join(filepath.dirname(__file__).split('/')[:-1])
+                '/'.join(filepath.dirname(__file__).split(sep)[:-1])
             )).open('r').read()
         )
 

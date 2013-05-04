@@ -17,11 +17,11 @@ from mamba import version
 
 long_description = '''
 This is a new release of Mamba the web applications framework for Twisted. Read
-the `changelog <https://github.com/mamba/mamba/tree/{}/docs/changelog.rst>`_ to
-know more about this specific Mamba release.
+the `changelog <https://github.com/DamnWidget/mamba/docs/relnotes/{}.rst>`_
+to know more about this specific Mamba release.
 
 If you like to live at the edge, you can also install the in-development
-version <https://github.com/mamba/mamba.git>
+version <https://github.com/DamnWidget/mamba.git>
 
 For more information visit the `Mamba website <http://www.pymmaba.com>`_
 '''.format(version.short())

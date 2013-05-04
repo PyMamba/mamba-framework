@@ -135,7 +135,7 @@ class FabricDeployer(deployer.DeployerProvider):
 
         # abort if no commands found
         if not state.commands:
-            log.err('No commands or AutoDeployer class found ...aborting')
+            log.err('No commands found ...aborting')
         else:
             for name in state.commands:
                 execute(name)

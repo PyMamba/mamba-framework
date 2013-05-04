@@ -18,7 +18,7 @@ from mamba._version import versions
 from mamba.utils.camelcase import CamelCase
 
 # This is an auto-generated property. Do not edit it.
-version = versions.Version('controller', 0, 1, 0)
+version = versions.Version('controller', 0, 1, 7)
 
 
 def show_version():
@@ -180,9 +180,10 @@ class Controller(object):
         """Prepare the template to write/dump
         """
 
+        sep = filepath.os.sep  # windows needs '\\' as separator
         controller_template = Template(
             filepath.FilePath('{}/templates/controller.tpl'.format(
-                '/'.join(filepath.dirname(__file__).split('/')[:-1])
+                '/'.join(filepath.dirname(__file__).split(sep)[:-1])
             )).open('r').read()
         )
 

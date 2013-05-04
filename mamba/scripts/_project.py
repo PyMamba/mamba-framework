@@ -19,7 +19,7 @@ from mamba.utils.output import (
 )
 
 # This is an auto-generated property. Do not edit it.
-version = versions.Version('configurator', 0, 1, 0)
+version = versions.Version('configurator', 0, 1, 9)
 
 
 class ApplicationOptions(usage.Options):
@@ -108,7 +108,7 @@ class Application(object):
                 'Welcome to the mamba application generator v{}\n'
                 'You are going to genearate a new Mamba application on {} '
                 'with the following options:\n'.format(
-                    __version__,
+                    version.short(),
                     filepath.abspath(filepath.os.getcwd())
                 )
             )
@@ -253,9 +253,11 @@ class Application(object):
         :type template: str
         """
 
+        # windows need '\\' as path separator
+        sep = filepath.os.sep
         return Template(
             filepath.FilePath('{}/templates/{}'.format(
-                '/'.join(filepath.dirname(__file__).split('/')[:-1]),
+                '/'.join(filepath.dirname(__file__).split(sep)[:-1]),
                 template if template.endswith('.tpl') else '{}.tpl'.format(
                     template
                 )

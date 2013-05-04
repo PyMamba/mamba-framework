@@ -19,7 +19,7 @@ from mamba.utils.output import darkred, darkgreen
 from mamba.application.model import ModelManager, Model
 
 # This is an auto-generated property. Do not edit it.
-version = versions.Version('sql', 0, 1, 0)
+version = versions.Version('sql', 0, 3, 8)
 
 
 def show_version():
