@@ -103,7 +103,7 @@ this was not tested and we have no `buildbot slaves` under those operating syste
   </tr>
   <tr>
     <td align="center"><strong>NOTES</strong></td>
-    <td colspan="4">All the platforms listed here are supported by Mamba. We are looking for volunteers
+    <td colspan="5">All the platforms listed here are supported by Mamba. We are looking for volunteers
     that want to contribute with a buildbot slave for all the 'unknown' listed platforms here and new operating systems.
   </tr>
 </table>
