@@ -23,11 +23,11 @@ to know more about this specific Mamba release.
 If you like to live at the edge, you can also install the in-development
 version <https://github.com/DamnWidget/mamba.git>
 
-For more information visit the `Mamba website <http://www.pymmaba.com>`_
+For more information visit the `Mamba website <http://www.pymamba.com>`_
 '''.format(version.short())
 
 setup(
-    name=version.package.capitalize(),
+    name='mamba-framework',
     version=version.short(),
     description=('Mamba is a high-level RAD Web Applications framework '
                  'based on Twisted Web that uses Storm ORM as database '
@@ -63,14 +63,12 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Development Status :: 3 - Alpha',
-        'Environment :: Console',
-        'Environmnet :: Web Environment',
         'Framework :: Twisted',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Operating System :: POSIX :: Linux',
         'Topic :: Internet :: WWW/HTTP :: WSGI',
-        'Topic :: Internet :: WWW/HTTP :: WSGI :: Application'
+        'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Server',
         'Topic :: Software Development',
         'Topic :: Software Development :: Libraries',
