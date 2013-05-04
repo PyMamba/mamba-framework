@@ -33,7 +33,9 @@ class MambaTest(unittest.TestCase):
         self.assertGreaterEqual(len(__version__.split('.')), 2)
 
     def test_version_is_correct(self):
-        self.assertEqual(__version__, '0.1.0')
+        import imp
+        version = imp.load_source('version', '../mamba/_version.py')
+        self.assertEqual(__version__, version.version.short())
 
     def test_controller_provider(self):
         self.assertEqual(

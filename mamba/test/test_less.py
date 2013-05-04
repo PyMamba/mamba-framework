@@ -17,6 +17,7 @@ from twisted.web.test.test_web import DummyRequest
 
 from mamba.utils import less
 
+
 less_file = (
     '#functions {\n'
     '  @var: 10;\n'
@@ -93,6 +94,8 @@ class LessCompilerTests(unittest.TestCase):
             result = yield utils.getProcessOutput('lessc', [''], os.environ)
         except utils._UnexpectedErrorOutput:
             raise unittest.SkipTest('lessc is not available')
+        except Exception as error:
+            raise unittest.SkipTest(error)
 
         lc = less.LessCompiler(self.file.name)
         result = yield lc.compile()
@@ -111,6 +114,8 @@ class LessCompilerTests(unittest.TestCase):
             self.assertEqual(retval, result)
         except utils._UnexpectedErrorOutput:
             raise unittest.SkipTest('lessc is not available')
+        except Exception as error:
+            raise unittest.SkipTest(error)
 
     @defer.inlineCallbacks
     def test_less_compile_fallbacks(self):
@@ -176,10 +181,10 @@ class LessResourceTest(unittest.TestCase):
         if isinstance(result, str):
             request.write(result)
             request.finish()
-            return self.succeed(request)
+            return defer.succeed(request)
         elif result is server.NOT_DONE_YET:
             if request.finished:
-                return self.succeed(request)
+                return defer.succeed(request)
             else:
                 return request.notifyFinish().addCallback(lambda _: request)
         else:

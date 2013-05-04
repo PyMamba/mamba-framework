@@ -8,6 +8,7 @@ Tests for mamba.web
 
 import sys
 import tempfile
+from os import sep
 from cStringIO import StringIO
 
 from twisted.internet import defer
@@ -65,7 +66,7 @@ class StylesheetTest(unittest.TestCase):
         self.assertRaises(
             stylesheet.InvalidFile,
             stylesheet.Stylesheet,
-            '/tmp/test.css'
+            tmpdir + sep + 'test.css'
         )
 
         fp.remove()
@@ -172,7 +173,7 @@ class ScriptTest(unittest.TestCase):
         self.assertRaises(
             script.InvalidFile,
             script.Script,
-            '/tmp/test.js'
+            tmpdir + sep + 'test.js'
         )
 
         fp.remove()

@@ -92,7 +92,7 @@ class Template(object):
         self.search_paths = [
             'application/view/templates',
             '{}/templates/jinja'.format(
-                os.path.dirname(__file__).rsplit('/', 1)[0]
+                os.path.dirname(__file__).rsplit(os.sep, 1)[0]
             )
         ]
         if controller is not None:

@@ -8,9 +8,9 @@ Mamba less compiler
 
 import os
 
+from twisted.internet import utils
 from twisted.python import filepath
 from twisted.web import resource, server
-from twisted.internet import utils
 
 
 class LessResource(resource.Resource):
@@ -28,18 +28,30 @@ class LessResource(resource.Resource):
 
         self.less_compiler = LessCompiler(request.postpath[0], self.less_exec)
 
+        # windows can't handle with non existrnt commands in CreateProcess
+        # and raises an exception so we have to hack this here to support
+        # fallback on windows platform
+        # NOTE: I don't know why but if you use maybeDeferred here, Windows
+        # implementations get stuck here forever until it fails with an
+        # exception from CreateProcess. Win is not my main platform so I
+        # decided to patch this to make it work but we really need a win
+        # developer that care to port mamba to windows properly
+
         d = self.less_compiler.compile()
 
-        def cb_sendback(resp):
-            """
-            Write result from callback
-            """
-            request.write(bytes(resp))
-            request.finish()
+        if type(d) is unicode:
+            return bytes(d)
+        else:
+            def cb_sendback(resp):
+                """
+                Write result from callback
+                """
+                request.write(bytes(resp))
+                request.finish()
 
-        d.addCallback(cb_sendback)
+            d.addCallback(cb_sendback)
 
-        return server.NOT_DONE_YET
+            return server.NOT_DONE_YET
 
 
 class LessCompiler(object):
@@ -58,10 +70,15 @@ class LessCompiler(object):
         Compile a LESS script
         """
 
-        d = utils.getProcessOutput(self.exe, [self.stylesheet], os.environ)
-        d.addCallbacks(self._get_compiled, self._get_script)
-
-        return d
+        # windows can't handle with non existent commands in CreateProcess
+        # and raise an exception so we have to hack this here to support
+        # fallback on windows platforms
+        try:
+            d = utils.getProcessOutput(self.exe, [self.stylesheet], os.environ)
+            d.addCallbacks(self._get_compiled, self._get_script)
+            return d
+        except Exception:
+            return self._get_script(self.stylesheet)
 
     def _get_compiled(self, resp):
         """

@@ -2,6 +2,9 @@
 # Copyright (c) 2012 - 2013 Oscar Campos <oscar.campos@member.fsf.org>
 # See LICENSE for more details
 
+import tempfile
+from os import sep
+
 from twisted.trial import unittest
 from twisted.python import filepath
 from doublex.matchers import called
@@ -30,7 +33,8 @@ class FabricDeployerTest(unittest.TestCase):
         self.fabric = FabricDeployer()
 
     def tearDown(self):
-        f = filepath.FilePath('/tmp/fabric_deployer_test.dc')
+        tmpdir = tempfile.gettempdir()
+        f = filepath.FilePath(tmpdir + sep + 'fabric_deployer_test.dc')
         if f.exists():
             f.remove()
 
@@ -51,11 +55,12 @@ class FabricDeployerTest(unittest.TestCase):
             FabricConfigFileDontExists, self.fabric.deploy, 'fail')
 
     def test_fabric_deploy_raises_on_invalid_config_file(self):
+        tmpdir = tempfile.gettempdir()
         self.__prepare_file(False)
         self.assertRaises(
             FabricNotValidConfigFile,
             self.fabric.deploy,
-            '/tmp/fabric_deployer_test.dc'
+            tmpdir + sep + 'fabric_deployer_test.dc'
         )
 
     def test_fabric_deploy_works(self):
@@ -69,7 +74,9 @@ class FabricDeployerTest(unittest.TestCase):
             'stderr': False, 'aborts': False
         })
 
-        assert_that(fab.deploy('/tmp/fabric_deployer_test.dc'), is_(None))
+        tmpdir = tempfile.gettempdir()
+        assert_that(
+            fab.deploy(tmpdir + sep + 'fabric_deployer_test.dc'), is_(None))
         assert_that(fab.deploy, called().times(1))
 
     def __prepare_file(self, valid):
@@ -79,11 +86,14 @@ class FabricDeployerTest(unittest.TestCase):
         if binary.exists():
             binary.remove()
         del binary
+
+        tmpdir = tempfile.gettempdir()
         content = '''{}
 from fabric.api import local
 
+
 def host_type():
-    local('uname -s')
+    local('whoami')
         '''.format('# -*- mamba-deployer: fabric -*-' if valid is True else '')
-        with open('/tmp/fabric_deployer_test.dc', 'w') as fd:
+        with open(tmpdir + sep + 'fabric_deployer_test.dc', 'w') as fd:
             fd.write(content)

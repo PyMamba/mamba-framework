@@ -30,12 +30,13 @@ class Resource(TwistedResource):
     def __init__(self, template_paths=None, cache_size=50):
         TwistedResource.__init__(self)
 
+        sep = filepath.os.sep
         self._templates = {}
         self.cache_size = cache_size
         self.template_paths = [
             'application/view/templates',
             '{}/templates/jinja'.format(
-                filepath.os.path.dirname(__file__).rsplit('/', 1)[0]
+                filepath.os.path.dirname(__file__).rsplit(sep, 1)[0]
             )
         ]
         if template_paths is not None:
