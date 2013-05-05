@@ -55,6 +55,9 @@ this was not tested and we have no `buildbot slaves` under those operating syste
       <strong>Gentoo</strong>
     </td>
     <td align="center">
+      <strong>Gentoo 2013</strong>
+    </td>
+    <td align="center">
       <strong>FreeBSD 9.1</strong>
     </td>
     <td align="center">
@@ -74,6 +77,9 @@ this was not tested and we have no `buildbot slaves` under those operating syste
     <td align="center">
         <img align="center" src="http://buildbot.pymamba.com/png?builder=Gentoo-x86_64_python2.7&size=large" />
     </td>
+    <td align="center">
+        <img align="center" src="http://buildbot.pymamba.com/png?builder=Gentoo-2013-Python2.7&size=large" />
+    </td>    
     <td align="center">
         <img align="center" src="http://buildbot.pymamba.com/png?builder=FreeBSD-9.1_amd64_python2.7&size=large" />
     </td>
@@ -95,6 +101,9 @@ this was not tested and we have no `buildbot slaves` under those operating syste
         <img align="Center" src="http://buildbot.pymamba.com/png?builder=Gentoo-x86_64_pypy&size=large" />
     </td>
     <td align="center">
+        <img align="center" src="http://buildbot.pymamba.com/png?builder=Gentoo-2013-PyPy2.0&size=large" />
+    </td>
+    <td align="center">
         <img align="Center" src="http://buildbot.pymamba.com/png?builder=FreeBSD-9.1_amd64_pypy&size=large" />
     </td>
     <td align="center">
@@ -103,7 +112,7 @@ this was not tested and we have no `buildbot slaves` under those operating syste
   </tr>
   <tr>
     <td align="center"><strong>NOTES</strong></td>
-    <td colspan="5">All the platforms listed here are supported by Mamba. We are looking for volunteers
+    <td colspan="6">All the platforms listed here are supported by Mamba. We are looking for volunteers
     that want to contribute with a buildbot slave for all the 'unknown' listed platforms here and new operating systems.
   </tr>
 </table>
