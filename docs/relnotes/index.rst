@@ -29,4 +29,4 @@ Details
 If you need a more detailed description of the changes made in this release you
 can use git itself using::
 
-   git log ${current_version} ${version}
+   git log ${current_version}..${version}

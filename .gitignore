@@ -47,3 +47,11 @@ docs/_build/
 dropin.cache
 *.pid
 *.log
+
+# Sphinx Theme and config for release site
+docs/_themes/
+docs/conf.py
+
+# Fabric Stuff
+deploy/
+mamba/test/dummy_app/db/dummy.db
