@@ -17,8 +17,8 @@ from mamba import version
 
 long_description = '''
 This is a new release of Mamba the web applications framework for Twisted. Read
-the `changelog <https://github.com/DamnWidget/mamba/docs/relnotes/{}.rst>`_
-to know more about this specific Mamba release.
+the `relnotes <https://github.com/DamnWidget/mamba/blob/master/docs/relnotes/
+{}.rst>`_ to know more about this specific Mamba release.
 
 If you like to live at the edge, you can also install the in-development
 version <https://github.com/DamnWidget/mamba.git>
@@ -63,6 +63,7 @@ setup(
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Development Status :: 3 - Alpha',
+        'Environment :: Web Environment',
         'Framework :: Twisted',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
