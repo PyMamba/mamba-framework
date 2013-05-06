@@ -1,0 +1,40 @@
+Release Notes for Mamba 0.3.5
+==================================
+
+..
+   Any new feature or bugfix should be listed in this file, for trivial fixes
+    or features a bulleted list item is enough but for more sphisticated
+    additions a subsection for their own is required.
+
+Those are the release notes for Mamba 0.3.5 released on May 06, 2013.
+
+Features
+--------
+
+* Added 302 (Found) HTTP response to prebuilt responses.
+
+Bug Fixes
+---------
+
+* Fix for ticket #4. Now mamba-admin view create the Controller templates
+directory if it doesn't exists yet.
+* Solved problem with Storm stores in Model object related with the switch from
+ZStorm to Twisted transactions.
+
+
+Deprecations
+------------
+
+Removals
+--------
+
+Uncompatible Changes
+--------------------
+
+Details
+-------
+
+If you need a more detailed description of the changes made in this release you
+can use git itself using::
+
+   git log 0.3.4..0.3.5

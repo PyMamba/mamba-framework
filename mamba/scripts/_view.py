@@ -18,7 +18,7 @@ from mamba.utils.camelcase import CamelCase
 from mamba.scripts._sql import mamba_services_not_found
 
 # This is an auto-generated property. Do not edit it.
-version = versions.Version('view', 0, 1, 3)
+version = versions.Version('view', 0, 1, 4)
 
 
 def show_version():
