@@ -97,6 +97,7 @@ class Model(ModelProvider):
             self.database.start()
 
         self.transactor = Transactor(self.database.pool)
+        self.store = self.database.store()
 
     @property
     def uri(self):
@@ -113,7 +114,7 @@ class Model(ModelProvider):
         """Create a new register in the database
         """
 
-        store = self.database.store()
+        store = self.store
         store.add(self)
         store.commit()
 
@@ -127,11 +128,11 @@ class Model(ModelProvider):
         :type id: int
         """
 
-        store = self.database.store()
-        data = store.get(self.__class__, id)
+        data = self.store.get(self.__class__, id)
 
         if data is not None:
             data.transactor = self.transactor
+            data.store = self.store
 
         return data
 
@@ -140,15 +141,14 @@ class Model(ModelProvider):
         """Update a register in the database
         """
 
-        store = self.database.store()
-        store.commit()
+        self.store.commit()
 
     @transact
     def delete(self):
         """Delete a register from the database
         """
 
-        store = self.database.store()
+        store = self.store
         store.remove(self)
 
     @transact
