@@ -69,6 +69,27 @@ class Ok(Response):
         super(Ok, self).__init__(http.OK, subject, headers)
 
 
+class Found(Response):
+    """
+    Ok 302 HTTP Response
+
+    :param url: the url where we want to redirect the browser
+    :type url: str
+    """
+
+    implements(IResponse)
+
+    def __init__(self, url):
+        super(Found, self).__init__(
+            http.FOUND,
+            '',
+            {
+                'content-type': 'text/plain; charset=utf-8',
+                'location': url
+            }
+        )
+
+
 class BadRequest(Response):
     """
     BadRequest 400 HTTP Response
