@@ -357,11 +357,15 @@ class RouteDispatcher(object):
     def lookup(self):
         """
         I traverse the URLs at router picking up the ones that match the
-        controller name and then process it to validate which ones maych
+        controller name and then process it to validate which ones match
         by path/arguments to a particular Route
 
         If nothing match just returns None
         """
+
+        # postpath '/' is not allowed when using mamba routing
+        if len(self.request.postpath) and self.request.postpath[0] == '':
+            return None
 
         for controllers in self.router.routes[self.method].values():
             if self.controller in controllers:
