@@ -120,7 +120,7 @@ class View(object):
 
         view_path = 'templates/'
         if self.options.subOptions.opts['controller'] is not None:
-            controller = self.options.subOptions.opts['controller']
+            controller = self.options.subOptions.opts['controller'].lower()
             if filepath.exists(
                     'application/controller/{}.py'.format(controller)):
                 view_path = '{}/'.format(controller.capitalize())
@@ -139,8 +139,15 @@ class View(object):
                     )
                 ) == 'No':
                     return
+
         print('Writing the view...'.ljust(73), end='')
-        view_file.open('w').write(self._process_template())
+        try:
+            view_file.open('w').write(self._process_template())
+        except IOError:
+            # controller directory doesn't exists on view yet
+            filepath.FilePath(
+                'application/view/{}'.format(view_path)).createDirectory()
+            view_file.open('w').write(self._process_template())
 
     def _process_template(self):
         """Prepare the template to write/dump
