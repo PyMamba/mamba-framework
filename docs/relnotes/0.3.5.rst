@@ -16,10 +16,8 @@ Features
 Bug Fixes
 ---------
 
-* Fix for ticket #4. Now mamba-admin view create the Controller templates
-directory if it doesn't exists yet.
-* Solved problem with Storm stores in Model object related with the switch from
-ZStorm to Twisted transactions.
+* Fix for ticket #4. Now mamba-admin view create the Controller templates directory if it doesn't exists yet.
+* Solved problem with Storm stores in Model object related with the switch from ZStorm to Twisted transactions.
 
 
 Deprecations
