@@ -11,6 +11,8 @@ Those are the release notes for Mamba ${version} released on ${release_date}.
 Features
 --------
 
+* Added Unauthorized (401 HTTP) Response to predefined responses
+
 Bug Fixes
 ---------
 

@@ -107,6 +107,17 @@ class BadRequest(Response):
         super(BadRequest, self).__init__(http.BAD_REQUEST, subject, headers)
 
 
+class Unauthorized(Response):
+    """
+    Unauthorized 401 HTTP Response
+    """
+
+    implements(IResponse)
+
+    def __init__(self, subject='Unauthorized', headers={}):
+        super(Unauthorized, self).__init__(http.UNAUTHORIZED, subject, headers)
+
+
 class NotFound(Response):
     """
     Error 404 Not Found HTTP Response
