@@ -53,10 +53,6 @@ class ControllerTest(unittest.TestCase):
         self.resource = Spy(resource.Resource)
         self.c = controller.Controller()
 
-        if GNU_LINUX:
-            self.addCleanup(self.c._styles_manager.notifier.loseConnection)
-            self.addCleanup(self.c._scripts_manager.notifier.loseConnection)
-
     def get_request(self):
 
         with Spy() as request:
@@ -99,9 +95,6 @@ class ControllerTest(unittest.TestCase):
     def test_controller_render_delegates_on_routing(self):
 
         c = DummyController()
-        if GNU_LINUX:
-            self.addCleanup(c._styles_manager.notifier.loseConnection)
-            self.addCleanup(c._scripts_manager.notifier.loseConnection)
 
         router = ProxySpy(Router())
         c._router = router
@@ -150,8 +143,6 @@ class ControllerManagerTest(unittest.TestCase):
             return
         for c in self.mgr.get_controllers().values():
             object = c['object']
-            self.addCleanup(object._styles_manager.notifier.loseConnection)
-            self.addCleanup(object._scripts_manager.notifier.loseConnection)
 
     def load_manager(self):
         sys.path.append('../mamba/test/dummy_app')

@@ -10,7 +10,6 @@ import os
 
 from twisted.trial import unittest
 
-from mamba.core import GNU_LINUX
 from mamba.core.templating import MambaTemplate, Template
 from mamba.test.dummy_app.application.controller.dummy import DummyController
 from mamba.core.templating import TemplateNotFound, NotConfigured
@@ -57,11 +56,6 @@ class TemplateTest(unittest.TestCase):
 
         self.dummy = DummyController()
         self.template = Template(cache_size=0)
-        if GNU_LINUX:
-            self.addCleanup(self.dummy._styles_manager.notifier.loseConnection)
-            self.addCleanup(
-                self.dummy._scripts_manager.notifier.loseConnection
-            )
 
     def tearDown(self):
         os.chdir(self.currdir)

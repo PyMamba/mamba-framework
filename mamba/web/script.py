@@ -94,24 +94,9 @@ class ScriptManager(object):
     """
     Manager for Scripts
     """
-    if GNU_LINUX:
-        implements(INotifier)
 
     def __init__(self):
         self._scripts = {}
-
-        if GNU_LINUX:
-            # Create and setup Linux iNotify mechanism
-            self.notifier = inotify.INotify()
-            self.notifier.startReading()
-            try:
-                self.notifier.watch(
-                    filepath.FilePath(self._scripts_store),
-                    callbacks=[self._notify]
-                )
-                self._watching = True
-            except INotifyError:
-                self._watching = False
 
     @property
     def scripts(self):
@@ -150,25 +135,6 @@ class ScriptManager(object):
         Find and return a script from the pool
         """
         return self._scripts.get(key, None)
-
-    def _notify(self, wd, file_path, mask):
-        """Notifies the changes on scripts file_path """
-
-        if not GNU_LINUX:
-            return
-
-        print "event %s on %s" % (
-            ', '.join(inotify.humanReadableMask(mask)), filepath
-        )
-
-        if mask is inotify.IN_MODIFY:
-            style = filepath.splitext(file_path.basename())[0]
-            if style in self._scripts:
-                self.reload(style)
-
-        if mask is inotify.IN_CREATE:
-            if file_path.exists():
-                self.load(file_path)
 
 
 __all__ = ['ScriptError', 'Script', 'ScriptManager']

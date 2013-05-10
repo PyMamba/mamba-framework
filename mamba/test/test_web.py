@@ -86,9 +86,6 @@ class StylesheetManagerTest(unittest.TestCase):
     def setUp(self):
         self.mgr = appstyles.AppStyles()
 
-        if GNU_LINUX:
-            self.addCleanup(self.mgr.notifier.loseConnection)
-
     def tearDown(self):
         self.flushLoggedErrors()
 
@@ -193,9 +190,6 @@ class ScriptManagerTest(unittest.TestCase):
     def setUp(self):
         self.mgr = scripts.Scripts()
 
-        if GNU_LINUX:
-            self.addCleanup(self.mgr.notifier.loseConnection)
-
     def tearDown(self):
         self.flushLoggedErrors()
 
@@ -225,10 +219,6 @@ class ScriptManagerTest(unittest.TestCase):
             self.mgr.scripts['dummy.js'],
             script.Script
         )
-
-    # def test_reload_just_pass(self):
-    #     self.load_script()
-    #     self.mgr.reload('dummy.js')
 
     def test_lookup_returns_none_on_unknown_scripts(self):
         self.assertEqual(self.mgr.lookup('unknown'), None)
@@ -263,9 +253,6 @@ class PageTest(unittest.TestCase):
 
     def setUp(self):
         self.root = page.Page(self.get_commons())
-        if GNU_LINUX:
-            self.addCleanup(self.root._styles_manager.notifier.loseConnection)
-            self.addCleanup(self.root._scripts_manager.notifier.loseConnection)
 
     def tearDown(self):
         self.flushLoggedErrors()
@@ -317,10 +304,6 @@ class PageTest(unittest.TestCase):
     def test_page_get_child_returns_registered_childs(self):
 
         child = DummyController()
-        if GNU_LINUX:
-            self.addCleanup(child._styles_manager.notifier.loseConnection)
-            self.addCleanup(child._scripts_manager.notifier.loseConnection)
-
         self.root.putChild('dummy', child)
 
         self.assertIdentical(
@@ -348,10 +331,6 @@ class PageTest(unittest.TestCase):
     def test_concrete_template_hidden_controller(self):
 
         child = DummyController()
-        if GNU_LINUX:
-            self.addCleanup(child._styles_manager.notifier.loseConnection)
-            self.addCleanup(child._scripts_manager.notifier.loseConnection)
-
         self.root.putChild('test', child)
 
         self.assertIdentical(
@@ -380,14 +359,6 @@ class PageTest(unittest.TestCase):
 
         sys.path.append('../mamba/test/dummy_app')
         mgr.load('../mamba/test/dummy_app/application/controller/dummy.py')
-
-        if GNU_LINUX:
-            for c in mgr.get_controllers().values():
-                object = c['object']
-                self.addCleanup(object._styles_manager.notifier.loseConnection)
-                self.addCleanup(
-                    object._scripts_manager.notifier.loseConnection
-                )
 
         self.root._controllers_manager = mgr
         self.root.register_controllers()

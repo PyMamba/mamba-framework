@@ -92,24 +92,9 @@ class StylesheetManager(object):
     """
     Manager for Stylesheets
     """
-    if GNU_LINUX:
-        implements(INotifier)
 
     def __init__(self):
         self._stylesheets = {}
-
-        if GNU_LINUX:
-            # Create and setup Linux iNotify mechanism
-            self.notifier = inotify.INotify()
-            self.notifier.startReading()
-            try:
-                self.notifier.watch(
-                    filepath.FilePath(self._styles_store),
-                    callbacks=[self._notify]
-                )
-                self._watching = True
-            except INotifyError:
-                self._watching = False
 
     @property
     def stylesheets(self):
@@ -172,21 +157,6 @@ class StylesheetManager(object):
         Find and return a stylesheet from the pool
         """
         return self._stylesheets.get(key, None)
-
-    def _notify(self, wd, file_path, mask):
-        """Notifies the changes on stylesheets file_path """
-
-        if not GNU_LINUX:
-            return
-
-        if mask is inotify.IN_MODIFY:
-            style = filepath.splitext(file_path.basename())[0]
-            if style in self._stylesheets:
-                self.reload(style)
-
-        if mask is inotify.IN_CREATE:
-            if file_path.exists():
-                self.load(file_path)
 
 
 __all__ = ['StylesheetError', 'Stylesheet', 'StylesheetManager']
