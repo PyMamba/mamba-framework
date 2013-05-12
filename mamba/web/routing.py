@@ -312,7 +312,7 @@ class Router(object):
         Process and sendback an error response
         """
 
-        log.err('Deferred failed: {error}'.format(error=error))
+        log.err('Deferred failed: {error}'.format(error=error.subject))
 
         return response.InternalServerError(
             'ERROR 500: Internal server error {}\n{}'.format(error, result)
