@@ -97,7 +97,6 @@ class Model(ModelProvider):
             self.database.start()
 
         self.transactor = Transactor(self.database.pool)
-        self.store = self.database.store()
 
     @property
     def uri(self):
@@ -109,12 +108,22 @@ class Model(ModelProvider):
 
         return None
 
+    def copy(self, orig):
+        """Copy this object properties and return it
+        """
+
+        for column in self._storm_columns.keys():
+            name = column._detect_attr_name(self.__class__)
+            setattr(self, name, getattr(orig, name))
+
+        return self
+
     @transact
     def create(self):
         """Create a new register in the database
         """
 
-        store = self.store
+        store = self.database.store()
         store.add(self)
         store.commit()
 
@@ -128,11 +137,11 @@ class Model(ModelProvider):
         :type id: int
         """
 
-        data = self.store.get(self.__class__, id)
+        store = self.database.store()
+        data = store.get(self.__class__, id)
 
         if data is not None:
             data.transactor = self.transactor
-            data.store = self.store
 
         return data
 
@@ -141,14 +150,15 @@ class Model(ModelProvider):
         """Update a register in the database
         """
 
-        self.store.commit()
+        store = self.database.store()
+        store.commit()
 
     @transact
     def delete(self):
         """Delete a register from the database
         """
 
-        store = self.store
+        store = self.database.store()
         store.remove(self)
 
     @transact

@@ -14,11 +14,10 @@
 import datetime
 
 from storm import properties
-from storm.store import Store
+from storm.database import URI
 from storm.expr import Undef, Column
 from storm.zope.interfaces import IZStorm
 from storm.zope.zstorm import global_zstorm
-from storm.database import URI, create_database
 from twisted.python.monkey import MonkeyPatcher
 from twisted.python.threadpool import ThreadPool
 from zope.component import provideUtility, getUtility
@@ -45,6 +44,7 @@ class Database(object):
         config.Database().max_threads,
         'DatabasePool'
     )
+    zstorm_configured = False
 
     def __init__(self, pool=None, testing=False):
         if pool is not None:
@@ -53,17 +53,11 @@ class Database(object):
         self.started = False
         self.__testing = testing
 
-        # we only use ZStorm zope container in tests because has been
-        # impossible for us to make ZStorm working nice with daemonized
-        # twisted ThreadPools
-        if self.__testing is True:
+        if not self.zstorm_configured:
             provideUtility(global_zstorm, IZStorm)
-            self.zstorm = getUtility(IZStorm)
-            self.zstorm.set_default_uri('mamba', config.Database().uri)
-        else:
-            self._database = None
+            zstorm = getUtility(IZStorm)
+            zstorm.set_default_uri('mamba', config.Database().uri)
 
-        # register components
         SQLite.register()
         MySQL.register()
         PostgreSQL.register()
@@ -85,8 +79,8 @@ class Database(object):
 
         if self.__testing is True:
             self.pool.start()
-        else:
-            self._database = create_database(config.Database().uri)
+        # else:
+        #     self._database = create_database(config.Database().uri)
 
         self.started = True
 
@@ -119,10 +113,8 @@ class Database(object):
         if not self.started:
             self.start()
 
-        if self.__testing is True:
-            return self.zstorm.get('mamba')
-
-        return Store(self._database)
+        zstorm = getUtility(IZStorm)
+        return zstorm.get('mamba')
 
     def dump(self, model_manager, full=False):
         """
