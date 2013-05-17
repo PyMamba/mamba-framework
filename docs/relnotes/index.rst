@@ -12,6 +12,13 @@ Features
 --------
 
 * Added Unauthorized (401 HTTP) Response to predefined responses
+* Added decimal size and precission using size property for MySQL decimal fields definitions::
+
+    some_field = Decimal(size=(10, 2))  # using a tuple
+    some_field = Decimal(size=[10, 2])  # using a list
+    some_field = Decimal(size=10.2)     # using a float
+    some_field = Decimal(size='10,2')   # using a string
+    some_field = Decimal(size=10)       # using an int (precission is set to 2)
 
 Bug Fixes
 ---------

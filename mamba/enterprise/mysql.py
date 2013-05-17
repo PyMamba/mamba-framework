@@ -153,7 +153,7 @@ class MySQL(CommonSQL):
         elif column.variable_class is variables.BoolVariable:
             column_type = 'tinyint'
         elif column.variable_class is variables.DecimalVariable:
-            column_type = 'decimal'
+            column_type = self._parse_decimal(column)
         elif column.variable_class is variables.FloatVariable:
             column_type = self._parse_float(column)
         elif column.variable_class is variables.UnicodeVariable:
@@ -284,6 +284,44 @@ class MySQL(CommonSQL):
         )
 
         return query
+
+    def _parse_decimal(self, column):
+        """Parse decimal sizes for MySQL, for example:
+
+            decimal(10,2)
+
+        :param column: the Storm properties column to parse
+        :type column: :class:`storm.properties.Decimal`
+        """
+
+        column_name = column.__class__.__name__
+        wrap_column = column._get_column(self.model.__class__)
+        size = wrap_column.size
+
+        if type(size) is tuple or type(size) is list:
+            length = size[0]
+            precission = size[1]
+        elif type(size) is str:
+            size = size.split(',')
+            if len(size) == 1:
+                length = size[0]
+                precission = 2
+            else:
+                length = size[0]
+                precission = size[1]
+        elif type(size) is int:
+            length = size
+            precission = 2
+        elif type(size) is float:
+            size = str(size).split('.')
+            length = size[0]
+            precission = size[1]
+        else:
+            return column_name.lower()
+
+        return '{}{}'.format(
+            column_name.lower(), '({},{})'.format(length, precission)
+        )
 
     def _parse_int(self, column):
         """
