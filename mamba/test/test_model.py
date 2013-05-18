@@ -124,6 +124,15 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(dummy.name, u'Dummy')
 
     @inlineCallbacks
+    def test_model_read_copy(self):
+        dummy = yield DummyModel().read(1)
+        dummy2 = yield DummyModel().read(1, True)
+
+        self.assertEqual(dummy.name, u'Dummy')
+        self.assertEqual(dummy2.name, u'Dummy')
+        self.assertNotEqual(dummy, dummy2)
+
+    @inlineCallbacks
     def test_model_update(self):
         dummy = yield DummyModel().read(1)
         dummy.name = u'Fellas'
@@ -133,6 +142,17 @@ class ModelTest(unittest.TestCase):
         dummy = yield DummyModel().read(1)
         self.assertEqual(dummy.id, 1)
         self.assertEqual(dummy.name, u'Fellas')
+
+    @inlineCallbacks
+    def test_model_update_with_read_copy_behaviour(self):
+        dummy = yield DummyModel().read(1, True)
+        dummy.name = u'Fellas'
+        dummy.update()
+        del(dummy)
+
+        dummy2 = yield DummyModel().read(1, True)
+        self.assertEqual(dummy2.id, 1)
+        self.assertEqual(dummy2.name, u'Fellas')
 
     def test_model_delete(self):
         dummy = yield DummyModel().read(1)
