@@ -138,17 +138,10 @@ class ControllerManagerTest(unittest.TestCase):
         if GNU_LINUX:
             self.addCleanup(self.mgr.notifier.loseConnection)
 
-    def add_cleanups(self):
-        if not GNU_LINUX:
-            return
-        for c in self.mgr.get_controllers().values():
-            object = c['object']
-
     def load_manager(self):
         sys.path.append('../mamba/test/dummy_app')
         self.mgr.load(
             '../mamba/test/dummy_app/application/controller/dummy.py')
-        self.add_cleanups()
 
     def test_inotifier_provided_by_controller_manager(self):
         if not GNU_LINUX:
@@ -194,12 +187,10 @@ class ControllerManagerTest(unittest.TestCase):
 
     def test_reload(self):
         self.load_manager()
-        self.add_cleanups()
 
         dummy = self.mgr.lookup('dummy').get('object')
 
         self.mgr.reload('dummy')
-        self.add_cleanups()
         dummy2 = self.mgr.lookup('dummy').get('object')
 
         self.assertNotEqual(dummy, dummy2)
