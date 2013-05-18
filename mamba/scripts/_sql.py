@@ -422,7 +422,6 @@ class Sql(object):
                     store.execute(operation)
             else:
                 store.execute(capture.getvalue())
-            store.commit()
 
         sys.exit(0)
 
