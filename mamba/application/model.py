@@ -141,6 +141,7 @@ class Model(ModelProvider):
         data = store.get(self.__class__, id)
 
         if data is not None:
+            data = self.copy(data)
             data.transactor = self.transactor
 
         return data
