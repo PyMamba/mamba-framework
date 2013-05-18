@@ -128,7 +128,7 @@ class Model(ModelProvider):
         store.commit()
 
     @transact
-    def read(self, id):
+    def read(self, id, copy=False):
         """
         Read a register from the database. The give key (usually ID) should
         be a primary key.
@@ -141,7 +141,8 @@ class Model(ModelProvider):
         data = store.get(self.__class__, id)
 
         if data is not None:
-            data = self.copy(data)
+            if copy is True:
+                data = self.copy(data)
             data.transactor = self.transactor
 
         return data
