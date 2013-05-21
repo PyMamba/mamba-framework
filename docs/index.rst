@@ -14,6 +14,7 @@ Contents:
    getting_started
    what_mamba_is
    tutorial
+   reusability
    developers
    api
 
