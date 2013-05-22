@@ -101,7 +101,7 @@ class FabricDeployer(deployer.DeployerProvider):
         return self.mode
 
     def load(self, config_file):
-        """Load the workflow rules from a Mmaba .dc Python file
+        """Load the workflow rules from a Mamba .dc Python file
 
         :param config_file: The file where to load the configuration from
         :type config_file: str
