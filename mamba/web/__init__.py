@@ -8,14 +8,16 @@ Subpackage containing the modules that implement web stuff for projects
 
 from page import Page
 from routing import Router, Route, RouteDispatcher
+from script import Script, ScriptManager, ScriptError
 from response import (
     Response, NotFound, NotImplemented, Ok, InternalServerError,
-    BadRequest, Conflict, AlreadyExists
+    BadRequest, Conflict, AlreadyExists, Found, Unauthorized
 )
 from stylesheet import (
     Stylesheet, StylesheetError, InvalidFile, InvalidFileExtension,
     FileDontExists
 )
+
 from websocket import WebSocketError, WebSocketProtocol, WebSocketFactory
 
 
@@ -23,7 +25,8 @@ __all__ = [
     'Page',
     'Router', 'Route', 'RouteDispatcher',
     'Response', 'NotFound', 'NotImplemented', 'Ok', 'InternalServerError',
-    'BadRequest', 'Conflict', 'AlreadyExists',
+    'BadRequest', 'Conflict', 'AlreadyExists', 'Found', 'Unauthorized',
+    'Script', 'ScriptManager', 'ScriptError',
     'Stylesheet', 'StylesheetError', 'InvalidFile', 'InvalidFileExtension',
     'FileDontExists',
     'WebSocketError', 'WebSocketProtocol', 'WebSocketFactory'
