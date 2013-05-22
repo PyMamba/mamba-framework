@@ -31,6 +31,9 @@ __all__ = [
 
 
 class ControllerError(Exception):
+    """Raised on controller errors
+    """
+
     pass
 
 
