@@ -69,10 +69,13 @@ class MambaTemplate(object):
 class Template(object):
     """
     This class loads and render templates from Mamba Applications view and
-    controller directories.
+    controller directories. This class is used internally by mamba you don't
+    have the need to use this class in your code.
 
-    If template argument is not
+    If controller is not None, then we use the controller directory templates
+    instead of global view ones.
 
+    :param env: the Jinja2 environment
     :param controller: mamba controller that uses the templates
     :type controller: :class:`~mamba.application.controller.Controller`
     :param cache_size: size of the Jinja2 templating environment

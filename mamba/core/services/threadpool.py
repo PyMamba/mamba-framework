@@ -15,7 +15,11 @@ from twisted.application import service
 
 
 class ThreadPoolService(service.Service):
-    """Service to be started by twistd
+    """Service to being started by twistd
+
+    This service handles and serve the ThreadPool that is used by Storm
+    when we use the @transact decorator in out queries to use the Twisted
+    integration
     """
 
     def __init__(self, pool):
