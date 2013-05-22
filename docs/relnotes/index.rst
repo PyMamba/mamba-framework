@@ -27,6 +27,7 @@ Bug Fixes
 * Now unhandled errors in Deferreds on routing module are displayed nicely in the logs file
 * Model read method now returns a copy of the Sorm object that can be used in other threads if the optional parameter copy is True (it's False by default)
 * Fixed a bug in create SQL mamba-admin command when used with live (-l) option
+* Fixed a bug related with PyPy and it's lack of **set_debug** method in **gc** object
 
 Deprecations
 ------------
