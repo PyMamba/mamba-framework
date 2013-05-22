@@ -27,12 +27,22 @@ AppStyles
     :members:
     :inherited-members:
 
+Scripts
+.......
+
+.. autoclass:: mamba.application.scripts.Scripts
+    :members:
+    :inherited-members:
 
 Controllers
 ...........
 
+.. autoclass:: mamba.application.controller.ControllerError
+
 .. autoclass:: Controller
     :members:
+
+.. autoclass:: mamba.application.controller.ControllerProvider
 
 .. autoclass:: ControllerManager
     :members:
@@ -42,8 +52,18 @@ Controllers
 Models
 ......
 
+.. autoclass:: mamba.application.model.MambaStorm
+
+.. autoclass:: mamba.application.model.ModelError
+
 .. autoclass:: Model
     :members:
+
+.. autoclass:: mamba.application.model.ModelProvider
+
+.. autoclass:: ModelManager
+    :members:
+    :inherited-members:
 
 
 Mamba Core
@@ -95,6 +115,16 @@ Interfaces that are part of the Mamba Core, you are supossed to never use those 
     :param headers: the HTTP response headers
     :type headers: dict
 
+.. autoclass:: mamba.core.interfaces.IMambaSQL
+    :members:
+
+    :param original: the original underlying SQL backend type
+
+.. autoclass:: mamba.core.interfaces.ISession
+    :members:
+
+    :param session: A mamba session object
+
 
 Decorators
 ..........
@@ -104,6 +134,72 @@ Decorators
 
 .. autofunction:: mamba.core.decorators.cache
 .. autofunction:: mamba.core.decorators.unlimited_cache
+
+
+Core Services
+.............
+
+Core Services used by mamba applications
+
+.. autoclass:: mamba.core.services.threadpool.ThreadPoolService
+    :members:
+
+
+Resource
+........
+
+Mamba Resource object extends Twisted web Resources mainly to integrate the Jinja2 templating system
+
+.. autoclass:: mamba.core.resource.Resource
+    :members:
+
+
+Session
+.......
+
+.. autoclass:: mamba.core.session.MambaSession
+    :members:
+
+.. autoclass:: mamba.core.session.Session
+    :members:
+
+
+Templating
+..........
+
+Mamba integrates the Jinja2 templating system as a core component of the framework.
+
+.. autoclass:: mamba.core.templating.MambaTemplate
+    :members:
+
+.. autoclass:: mamba.core.templating.Template
+    :members:
+
+.. autoclass:: mamba.core.templating.TemplateError
+
+.. autoclass:: mamba.core.templating.NotConfigured
+
+
+Deployment
+----------
+
+Mamba integrates the Fabric deployment library and it's used by Mamba itself to release new versions and deploy the framework to the live mamba web site. Too see an example of usage you can check the `mamba devel`_ package on GitHub.
+
+.. mamba devel: https://github.com/DamnWidget/mamba_devel
+
+.. autoclass:: mamba.deployment.deployer.DeployerImporter
+    :members:
+
+.. autofunction:: mamba.deployment.deployer.deployer_import
+
+.. autoclass:: mamba.deployment.fabric_deployer.FabricDeployer
+    :members:
+
+.. autoclass:: mamba.deployment.fabric_deployer.FabricMissingConfigFile
+
+.. autoclass:: mamba.deployment.fabric_deployer.FabricConfigFileDontExists
+
+.. autoclass:: mamba.deployment.fabric_deployer.FabricNotValidConfigFile
 
 
 Http
@@ -149,6 +245,32 @@ This class is used to load configuration files in JSON format from the file syst
     :members:
     :inherited-members:
 
+config.Application
+..................
+
+As with the previous one, this class is used to load configuration related with the application from files in JSON format in the file system. If no configuration file is provided, a basic configuration is automatically created for us.
+
+.. autoclass:: mamba.utils.config.Application
+    :members:
+    :inherited-members:
+
+Less
+....
+
+.. autoclass:: mamba.utils.less.LessCompiler
+    :members:
+
+.. autoclass:: mamba.utils.less.LessResource
+    :members:
+    :inherited-members:
+
+Output
+......
+
+Output printing functionallity based and partially taken from Gentoo portage system
+
+.. currentmodule:: mamba.utils.output
+
 
 
 Web
@@ -170,6 +292,7 @@ Page
     :members:
     :inherited-members:
 
+
 Response
 ........
 
@@ -179,10 +302,16 @@ Response
 .. autoclass:: mamba.web.Ok
     :members:
 
+.. autoclass:: mamba.web.Found
+    :members:
+
 .. autoclass:: mamba.web.NotFound
     :members:
 
 .. autoclass:: mamba.web.BadRequest
+    :members:
+
+.. autoclass:: mamba.web.Unauthorized
     :members:
 
 .. autoclass:: mamba.web.Conflict
@@ -211,6 +340,28 @@ Routing
     :members:
 
 
+Scripts
+.......
+
+.. autoclass:: mamba.web.Script
+    :members:
+
+.. autoclass:: mamba.web.ScriptManager
+    :members:
+
+.. autoclass:: mamba.web.ScriptError
+    :members:
+
+.. autoclass:: mamba.web.script.InvalidFile
+    :members:
+
+.. autoclass:: mamba.web.script.InvalidFileExtension
+    :members:
+
+.. autoclass:: mamba.web.script.FileDontExists
+    :members:
+
+
 Stylesheets
 ...........
 
@@ -229,11 +380,52 @@ Stylesheets
 .. autoclass:: mamba.web.FileDontExists
     :members:
 
+
 Url Sanitizer
 .............
 
 .. autoclass:: mamba.web.url_sanitizer.UrlSanitizer
     :members:
+
+
+WebSockets
+..........
+
+.. autoclass:: mamba.web.websocket.WebSocketProtocol
+    :members:
+
+.. autoclass:: mamba.web.websocket.WebSocketFactory
+    :members:
+
+.. autoclass:: mamba.web.websocket.HyBi07Frame
+    :members:
+
+.. autoclass:: mamba.web.websocket.HyBi00Frame
+    :members:
+
+.. autoclass:: mamba.web.websocket.InvalidProtocolVersionPreamble
+    :members:
+
+.. autoclass:: mamba.web.websocket.HandshakePreamble
+    :members:
+
+.. autoclass:: mamba.web.websocket.HyBi07HandshakePreamble
+    :members:
+
+.. autoclass:: mamba.web.websocket.HyBi00HandshakePreamble
+    :members:
+
+.. autoclass:: mamba.web.websocket.WebSocketError
+
+.. autoclass:: mamba.web.websocket.NoWebSocketCodec
+
+.. autoclass:: mamba.web.websocket.InvalidProtocolVersion
+
+.. autoclass:: mamba.web.websocket.InvalidCharacterInHyBi00Frame
+
+.. autoclass:: mamba.web.websocket.ReservedFlagsInFrame
+
+.. autoclass:: mamba.web.websocket.UnknownFrameOpcode
 
 
 Enterprise
