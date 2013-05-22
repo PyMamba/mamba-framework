@@ -45,8 +45,8 @@ class MambaStorm(PropertyPublisherMeta, plugin.ExtensionPoint):
         behaviours like not all the object columns being displayed in your
         generated schema.
 
-        You should use :class:`mamba.application.model.MambaStorm` metaclass
-        and :class:`storm.base.Storm` classes in order to fix it
+        You should use mamba.application.model.MambaStorm metaclass
+        and storm.base.Storm classes in order to fix it
     """
     pass
 
