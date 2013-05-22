@@ -191,6 +191,8 @@ class Application(BaseConfig):
     This object loads and parses the Mamba application configuration options
     using a JSON file with the following format:
 
+    .. sourcecode:: javascript
+
         {
             "name": "Mamba Application",
             "description": "Mamba application description",

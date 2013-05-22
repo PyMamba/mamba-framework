@@ -50,11 +50,11 @@ class InvalidProtocolVersion(WebSocketError):
 
 
 class InvalidCharacterInHyBi00Frame(WebSocketError):
-    """Fired when a \xff charecter is found in HyBi-00/Hixie-76 frame buffer
+    """Fired when a xff charecter is found in HyBi-00/Hixie-76 frame buffer
     """
 
 
-class ResevedFlagsInFrame(WebSocketError):
+class ReservedFlagsInFrame(WebSocketError):
     """Fired when any of the three reserved bits of HyBi-07 are set on
     """
 
@@ -162,11 +162,13 @@ class InvalidProtocolVersionPreamble(HandshakePreamble):
 class HyBi00Frame(object):
     """A WebSocket HyBi-00 frame object representation
 
-    Frame type byte <--------------------------------------.
-        |      |                                            |
-        |      `--> (0x00 to 0x7F) --> Data... --> 0xFF -->-+
-        |                                                   |
-        `--> (0x80 to 0xFE) --> Length --> Data... ------->-'
+    .. sourcecode:: text
+
+        Frame type byte <--------------------------------------.
+            |      |                                            |
+            |      `--> (0x00 to 0x7F) --> Data... --> 0xFF -->-+
+            |                                                   |
+            `--> (0x80 to 0xFE) --> Length --> Data... ------->-'
 
     The implementation of this protocol is really simple, in
     HyBi-00/Hixie-76 only 0x00-0xFF is valid so we use 0x00 always
@@ -186,7 +188,7 @@ class HyBi00Frame(object):
 
     @property
     def is_valid(self):
-        """Check if the buffer is valid (no \xff characters on it)
+        """Check if the buffer is valid (no xff characters on it)
         """
 
         for ch in self.buf:
@@ -235,24 +237,26 @@ class HyBi00Frame(object):
 class HyBi07Frame(object):
     """A WebSocket HiBi-07+ frame object representation
 
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-------+-+-------------+-------------------------------+
-    |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
-    |I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
-    |N|V|V|V|       |S|             |   (if payload len==126/127)   |
-    | |1|2|3|       |K|             |                               |
-    +-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
-    |     Extended payload length continued, if payload len == 127  |
-    + - - - - - - - - - - - - - - - +-------------------------------+
-    |                               |Masking-key, if MASK set to 1  |
-    +-------------------------------+-------------------------------+
-    | Masking-key (continued)       |          Payload Data         |
-    +-------------------------------- - - - - - - - - - - - - - - - +
-    :                     Payload Data continued ...                :
-    + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
-    |                     Payload Data continued ...                |
-    +---------------------------------------------------------------+
+    .. sourcecode:: text
+
+         0                   1                   2                   3
+         0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+        +-+-+-+-+-------+-+-------------+-------------------------------+
+        |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
+        |I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
+        |N|V|V|V|       |S|             |   (if payload len==126/127)   |
+        | |1|2|3|       |K|             |                               |
+        +-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
+        |     Extended payload length continued, if payload len == 127  |
+        + - - - - - - - - - - - - - - - +-------------------------------+
+        |                               |Masking-key, if MASK set to 1  |
+        +-------------------------------+-------------------------------+
+        | Masking-key (continued)       |          Payload Data         |
+        +-------------------------------- - - - - - - - - - - - - - - - +
+        :                     Payload Data continued ...                :
+        + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+        |                     Payload Data continued ...                |
+        +---------------------------------------------------------------+
 
     For more information about WebSocket framing read [RFC6455][Section 5.2]
 
@@ -316,7 +320,7 @@ class HyBi07Frame(object):
                 # TODO: look at extensions to chekc if something is negotiated
                 #       as is specified by [RFC6455][Page 28]
                 # Someday, perhaps...
-                raise ResevedFlagsInFrame(
+                raise ReservedFlagsInFrame(
                     'Reserved flag in HyBi-07 frame {}'.format(
                         '{:#x} ({:#b})'.format(header, header)
                     )
