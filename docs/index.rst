@@ -11,6 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   installation_guide
    getting_started
    what_mamba_is
    tutorial
