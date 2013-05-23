@@ -51,7 +51,7 @@ class ControllerOptions(usage.Options):
         ['description', None, None, 'Controller\'s description'],
         ['author', None, None, 'Controller\'s author'],
         ['email', None, None, 'Author\'s email'],
-        ['path', None, None, 'Controller\'s register path (if any)'],
+        ['route', None, None, 'Controller\'s register route (if any)'],
         ['classname', None, None,
             'Set this parameter if you want that your new controller use a '
             'specific class name'],
@@ -106,8 +106,8 @@ class ControllerOptions(usage.Options):
             # just set an invalid RFC2822 email address (thats what irony mean)
             self['email'] = '{}@localhost'.format(self['author'])
 
-        if self['path'] is None:
-            self['path'] = ''
+        if self['route'] is None:
+            self['route'] = ''
 
         if self['platforms'] is None:
             self['platforms'] = 'Linux'
@@ -201,7 +201,7 @@ class Controller(object):
             'author_email': self.options.subOptions.opts['email'],
             'synopsis': self.options.subOptions.opts['description'],
             'controller_class': classname,
-            'register_path': self.options.subOptions.opts['path']
+            'register_path': self.options.subOptions.opts['route']
         }
 
         return controller_template.safe_substitute(**args)
