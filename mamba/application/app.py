@@ -92,12 +92,14 @@ class Mamba(borg.Borg):
             log.startLogging(DailyLogFile.fromFullPath(self.log_file))
 
         # PyPy does not implement set_debug method in gc object
-        if getattr(options, 'debug', False) and hasattr(gc, 'set_debug'):
-            gc.set_debug(gc.DEBUG_STATS | gc.DEBUG_INSTANCES)
-        else:
-            log.msg(
-                'Debug is set as True but gc object is laking set_debug method'
-            )
+        if getattr(options, 'debug', False):
+            if hasattr(gc, 'set_debug'):
+                gc.set_debug(gc.DEBUG_STATS | gc.DEBUG_INSTANCES)
+            else:
+                log.msg(
+                    'Debug is set as True but gc object is laking '
+                    'set_debug method'
+                )
 
         self._header = headers.Headers()
         self._header.language = self.language
