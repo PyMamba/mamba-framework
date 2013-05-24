@@ -36,6 +36,7 @@ Removals
 --------
 
 * Removed unused cleanups in controller tests
+* Removed default update method in :class:`mamba.application.model.Model` object, the user code **must** implicit implement it
 
 Uncompatible Changes
 --------------------

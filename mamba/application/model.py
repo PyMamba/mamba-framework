@@ -152,8 +152,7 @@ class Model(ModelProvider):
         """Update a register in the database
         """
 
-        store = self.database.store()
-        store.commit()
+        raise ModelError('This method is not implemented yet')
 
     @transact
     def delete(self):
