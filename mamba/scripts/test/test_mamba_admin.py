@@ -538,9 +538,9 @@ class MambaAdminControllerTest(unittest.TestCase):
         self.config.parseOptions(['test_controller'])
         self.assertEqual(self.config['platforms'], 'Linux')
 
-    def test_default_path_is_empty(self):
+    def test_default_route_is_empty(self):
         self.config.parseOptions(['test_controller'])
-        self.assertEqual(self.config['path'], '')
+        self.assertEqual(self.config['route'], '')
 
     def test_default_synopsis_is_none(self):
         self.config.parseOptions(['test_controller'])
