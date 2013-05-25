@@ -107,18 +107,18 @@ class SqlConfigOptions(usage.Options):
         """Post options processing
         """
         if self['drop-table'] and self['create-if-not-exists']:
-            raise usage.UsageError, (
+            raise usage.UsageError(
                 'you must choose between `create-if-not-exists` and '
                 '`drop-table` behaviour for table creation'
             )
 
         if self['min-threads'] <= 0:
-            raise usage.UsageError, (
+            raise usage.UsageError(
                 'min-threads should be a positive value greater than zero'
             )
 
         if self['max-threads'] <= 4 or self['max-threads'] > 1024:
-            raise usage.UsageError, (
+            raise usage.UsageError(
                 'max-threads should be a positive number between 5 and 1024'
             )
 
@@ -127,12 +127,12 @@ class SqlConfigOptions(usage.Options):
                 self['hostname'] = 'localhost'
 
             if self['backend'] not in ('sqlite', 'mysql', 'postgres'):
-                raise usage.UsageError, (
+                raise usage.UsageError(
                     'backend must be one of sqlite, mysql or postgres'
                 )
 
             if self['database'] is None:
-                raise usage.UsageError, (
+                raise usage.UsageError(
                     'you should suply a database to connect'
                 )
 

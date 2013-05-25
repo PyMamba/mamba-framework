@@ -194,7 +194,7 @@ class Application(object):
                 directory.basename()).ljust(73), end=''
             )
             directory.createDirectory()
-        except OSError, error:
+        except OSError as error:
             print(darkred(error))
             sys.exit(-1)
 
@@ -213,7 +213,7 @@ class Application(object):
             self._generate_directory_helper('twisted/plugins')
             self._generate_directory_helper('static')
             self._generate_directory_helper('config')
-        except OSError, error:
+        except OSError as error:
             print(darkred(error))
             sys.exit(-1)
 
