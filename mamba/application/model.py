@@ -152,7 +152,31 @@ class Model(ModelProvider):
         """Update a register in the database
         """
 
-        raise ModelError('This method is not implemented yet')
+        store = self.database.store()
+        primary_key = self.get_primary_key()
+        if primary_key is None:
+            raise InvalidModelSchema(
+                '{model} model does not define a primary key'.format(
+                    model=self
+                )
+            )
+
+        if type(primary_key) is tuple:
+            args = []
+            for key in primary_key:
+                args.append(getattr(self.__class__, key) == getattr(self, key))
+            copy = store.find(self.__class__, *args).one()
+        else:
+            value = getattr(self, primary_key)
+            copy = store.find(
+                self.__class__,
+                getattr(self.__class__, primary_key) == value
+            ).one()
+
+        for column in self._storm_columns.values():
+            setattr(copy, column.name, getattr(self, column.name))
+
+        store.commit()
 
     @transact
     def delete(self):
@@ -236,6 +260,17 @@ class Model(ModelProvider):
             )
 
         return adapter
+
+    def get_primary_key(self):
+        """Return back the model primary key (or keys if it's compound)
+        """
+
+        if not hasattr(self, '__storm_primary__'):
+            for column in self._storm_columns.values():
+                if column.primary == 1:
+                    return column.name
+        else:
+            return self.__storm_primary__
 
 
 class ModelManager(module.ModuleManager):

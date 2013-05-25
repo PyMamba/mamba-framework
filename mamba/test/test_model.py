@@ -25,6 +25,7 @@ from mamba.utils import config
 from mamba import Model, ModelManager
 from mamba.core import interfaces, GNU_LINUX
 from mamba.enterprise.common import NativeEnum
+from mamba.application.model import InvalidModelSchema
 from mamba.enterprise.mysql import MySQLMissingPrimaryKey, MySQL
 from mamba.enterprise.sqlite import SQLiteMissingPrimaryKey, SQLite
 from mamba.enterprise.postgres import PostgreSQLMissingPrimaryKey, PostgreSQL
@@ -95,8 +96,14 @@ class ModelTest(unittest.TestCase):
                 '    id INTEGER PRIMARY KEY, name TEXT'
                 ')'
             )
+            store.execute(
+                'CREATE TABLE IF NOT EXISTS `dummy_two` ('
+                '   dummy_id INTEGER, id INTEGER, name TEXT,'
+                '   PRIMARY KEY(dummy_id, id)'
+                ')'
+            )
             store.commit()
-        except DatabaseModuleError, error:
+        except DatabaseModuleError as error:
             raise unittest.SkipTest(error)
 
     def tearDown(self):
@@ -146,13 +153,45 @@ class ModelTest(unittest.TestCase):
     @inlineCallbacks
     def test_model_update_with_read_copy_behaviour(self):
         dummy = yield DummyModel().read(1, True)
-        dummy.name = u'Fellas'
+        dummy.name = u'Dummy'
         dummy.update()
         del(dummy)
 
         dummy2 = yield DummyModel().read(1, True)
         self.assertEqual(dummy2.id, 1)
-        self.assertEqual(dummy2.name, u'Fellas')
+        self.assertEqual(dummy2.name, u'Dummy')
+
+    @inlineCallbacks
+    def test_model_update_with_compound_key(self):
+        dummy = DummyModelCompound(1, 1, u'Dummy')
+        yield dummy.create()
+        del(dummy)
+
+        dummy = yield DummyModelCompound().read((1, 1))
+        dummy.name = u'Fellas'
+        dummy.update()
+
+        del(dummy)
+        dummy = yield DummyModelCompound().read((1, 1))
+        self.assertEqual(dummy.id, 1)
+        self.assertEqual(dummy.dummy_id, 1)
+        self.assertEqual(dummy.name, u'Fellas')
+
+    @inlineCallbacks
+    def test_model_update_raise_exeption_on_invalid_schema(self):
+        dummy = DummyInvalidModel()
+        try:
+            dummy.name = u'Dummy'
+        except:
+            # catch storm.exceptions.ClassInfoError
+            pass
+
+        try:
+            yield dummy.update()
+        except InvalidModelSchema:
+            pass
+        except:
+            raise
 
     def test_model_delete(self):
         dummy = yield DummyModel().read(1)
@@ -435,7 +474,7 @@ class ModelManagerTest(unittest.TestCase):
                 ')'
             )
             store.commit()
-        except DatabaseModuleError, error:
+        except DatabaseModuleError as error:
             raise unittest.SkipTest(error)
 
     def tearDown(self):
@@ -498,6 +537,21 @@ class ModelManagerTest(unittest.TestCase):
         self.assertNotEqual(dummy, dummy2)
 
 
+class DummyInvalidModel(Model):
+    """Dummy Model without primary key for testing purposes
+    """
+
+    __storm_table__ = 'dummy'
+    id = Int(auto_increment=True, unigned=True)
+    name = Unicode(size=64, allow_none=False)
+
+    def __init__(self, name=None):
+        super(DummyInvalidModel, self).__init__()
+
+        if name is not None:
+            self.name = unicode(name)
+
+
 class DummyModel(Model):
     """Dummy Model for testing purposes"""
 
@@ -524,6 +578,22 @@ class DummyModelTwo(Model):
 
         if name is not None:
             self.name = unicode(name)
+
+
+class DummyModelCompound(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_two'
+    __storm_primary__ = 'id', 'dummy_id'
+    id = Int(unsigned=True)
+    dummy_id = Int(unsigned=True)
+
+    def __init__(self, id=None, dummy_id=None, name=None):
+        super(DummyModelCompound, self).__init__()
+
+        self.id = id
+        self.dummy_id = dummy_id
+        self.name = name
 
 
 class DummyModelThree(Model):
