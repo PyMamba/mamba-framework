@@ -22,4 +22,6 @@ Take a look at the `Download <http://www.pymamba.com/download>`_ page in the mam
 People behind Mamba
 -------------------
 
-Mamba is maintained and developer by a team of volunters and no company, organization or foundation controls it in any way.  You can see a list of people that make mamba possible at the Mamba Team page.
+Mamba is maintained and developer by a team of volunters and no company, organization or foundation controls it in any way.  You can see a list of people that make mamba possible at the :doc:`mamba_team` page.
+
+|
