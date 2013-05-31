@@ -19,6 +19,8 @@ Features
     some_field = Decimal(size=10.2)     # using a float
     some_field = Decimal(size='10,2')   # using a string
     some_field = Decimal(size=10)       # using an int (precission is set to 2)
+* If user define `development` as `true` in the `application.json` config file, the twistd server will be started in **no** daemon mode, logging will be printed to standard output and no log file should be produced at all. If the user press Ctrl+C the mamba application will terminate immediately, this mode is quite useful to development stages
+* We redirect all the regular twistd process logging messages to `syslog` if we don't define development mode as `true` in the application.json config file
 
 Bug Fixes
 ---------
@@ -28,6 +30,7 @@ Bug Fixes
 * Model read method now returns a copy of the Sorm object that can be used in other threads if the optional parameter copy is True (it's False by default)
 * Fixed a bug in create SQL mamba-admin command when used with live (-l) option
 * Fixed a bug related with PyPy and it's lack of **set_debug** method in **gc** object
+* Now mamba-admin start and stop subcommands can be used inside valid mamba application directories only
 
 Deprecations
 ------------
@@ -36,7 +39,6 @@ Removals
 --------
 
 * Removed unused cleanups in controller tests
-* Removed default update method in :class:`mamba.application.model.Model` object, the user code **must** implicit implement it
 
 Uncompatible Changes
 --------------------

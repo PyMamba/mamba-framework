@@ -21,10 +21,19 @@ from mamba import copyright as mamba_copyright
 from mamba.utils.output import darkgreen, darkred
 
 from _sql import SqlOptions, Sql
+from commons import import_services
 from _view import ViewOptions, View
 from _model import ModelOptions, Model
 from _project import ApplicationOptions, Application
 from _controller import ControllerOptions, Controller
+
+
+def mamba_services_not_found():
+    print(
+        'error: make sure you are inside a mmaba application root '
+        'directory and then run this command again'
+    )
+    sys.exit(-1)
 
 
 class StartOptions(usage.Options):
@@ -113,6 +122,15 @@ def handle_start_command(options):
     """I handle the start command
     """
 
+    try:
+        mamba_services = import_services()
+    except ImportError:
+        print(
+            'error: make sure you are inside a mamba application root '
+            'directory and then run this command again'
+        )
+        sys.exit(-1)
+
     if GNU_LINUX or BSD:
         app = config.Application('config/application.json')
         if app.port <= 1024:
@@ -152,23 +170,43 @@ def handle_start_command(options):
     if BSD:
         args.append('--reactor=kqueue')
 
+    if mamba_services.config.Application().development is True:
+        args.append('--nodaemon')
+    else:
+        # redirect twistd log to syslog
+        args.append('--syslog')
+
     args.append(app_name)
 
     if options.subOptions.opts['port']:
         args.append('--port={}'.format(options.subOptions.opts['port']))
 
-    print('starting application {}...'.format(app_name).ljust(73), end='')
-    if subprocess.call(args) == 0:
-        print('[{}]'.format(darkgreen('Ok')))
-        sys.exit(0)
+    if mamba_services.config.Application().development is True:
+        print(args)
+        os.execlp('twistd', *args)
     else:
-        print('[{}]'.format(darkred('Fail')))
-        sys.exit(-1)
+        print('starting application {}...'.format(app_name).ljust(73), end='')
+        if subprocess.call(args) == 0:
+            print('[{}]'.format(darkgreen('Ok')))
+            sys.exit(0)
+        else:
+            print('[{}]'.format(darkred('Fail')))
+            sys.exit(-1)
 
 
 def handle_stop_command():
     """I handle the stop command
     """
+
+    try:
+        import_services()
+    except ImportError:
+        print(
+            'error: make sure you are inside a mamba application root '
+            'directory and then run this command again'
+        )
+        sys.exit(-1)
+
     twisted_pid = filepath.FilePath('twistd.pid')
     if not twisted_pid.exists():
         print(
@@ -193,7 +231,7 @@ def run():
     try:
         options = Options()
         options.parseOptions()
-    except usage.UsageError, errortext:
+    except usage.UsageError as errortext:
         print('{}: {}'.format(sys.argv[0], errortext))
         sys.exit(1)
 

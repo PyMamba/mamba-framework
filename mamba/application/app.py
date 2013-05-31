@@ -63,6 +63,7 @@ class Mamba(borg.Borg):
         super(Mamba, self).__init__()
 
         self.monkey_patched = False
+        self.development = False
         self.already_logging = False
         self._mamba_ver = _mamba_version.version.short()
         self._ver = _app_ver.short()
@@ -87,9 +88,7 @@ class Mamba(borg.Borg):
         self._monkey_patch()
 
         # register log file if any
-        if self.log_file is not None:
-            self.already_logging = True
-            log.startLogging(DailyLogFile.fromFullPath(self.log_file))
+        self._handle_logging()
 
         # PyPy does not implement set_debug method in gc object
         if getattr(options, 'debug', False):
@@ -110,23 +109,15 @@ class Mamba(borg.Borg):
             'model': model.ModelManager()
         }
 
-        # self._prepare_render_keys()
+    def _handle_logging(self):
+        """
+        Start logging to file if there is some file configuration and we
+        are not running in development mode
+        """
 
-    def _prepare_render_keys(self):
-        self.render_keys = {
-            'doctype': self._header.get_doctype(),
-            'header': {
-                'title': self.name,
-                'content_type': self._header.content_type,
-                'generator_content': self._header.get_generator_content(),
-                'description_content': self._header.get_description_content(),
-                'language_content': self._header.get_language_content(),
-                'mamba_content': self._header.get_mamba_content(),
-                'media': self._header.get_favicon_content('assets'),
-                'styles': self.managers['styles'].get_styles().values(),
-                'scripts': self.managers['scripts'].get_scripts().values()
-            }
-        }
+        if self.development is False and self.log_file is not None:
+            self.already_logging = True
+            log.startLogging(DailyLogFile.fromFullPath(self.log_file))
 
     def _parse_options(self, options):
         if options is not None:

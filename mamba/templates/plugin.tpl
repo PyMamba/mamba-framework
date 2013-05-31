@@ -16,8 +16,9 @@ settings = config.Application('config/${file}')
 
 
 class Options(usage.Options):
+
     optParameters = [
-        ['port', 'p', settings.port, 'The port number to listen on']
+        ['port', None, settings.port, 'The port number to listen on']
     ]
 
 
