@@ -7,9 +7,17 @@ from __future__ import print_function
 import os
 import sys
 import json
+import zipfile
+import tarfile
 import getpass
 import subprocess
 from string import Template
+try:
+    import pip
+    PIP_IS_AVAILABLE = True
+except ImportError:
+    PIP_IS_AVAILABLE = False
+
 
 from twisted.python import usage, filepath
 
@@ -41,7 +49,7 @@ class PackageInstallOptions(usage.Options):
 
     optFlags = [
         ['user', 'u', 'Install Package into the user directory'],
-        ['global', 'g', 'Instakll Package into the global directory'],
+        ['global', 'g', 'Install Package into the global directory'],
         ['cfgdir', 'c', 'Add the config directory to the package']
     ]
 
@@ -321,7 +329,48 @@ class Package(object):
         except:
             print('[{}]'.format(darkred('Fail')))
             raise
-            sys.exit(-1)
+
+    def _handle_install_already_packed_application(self, path):
+        """Handles the installation of the given installable mamba app
+        """
+
+        packer = Packer()
+        if not packer.is_mamba_package(path):
+            raise usage.UsageError(
+                '{} is not a valid mamba package file'.format(path)
+            )
+
+        print('Installing {} application in {} store...'.format(
+            path, 'global' if not self.options.subOptions['global'] else 'user'
+        ).ljust(73), end='')
+        try:
+            packer.install_package_file(path, self.options.subOptions)
+            print('[{}]'.format(darkgreen('Ok')))
+        except:
+            print('[{}]'.format(darkred('Fail')))
+            raise
+
+    def _handle_uninstall_command(self):
+        """Uninstall a package using pip (we don't want to reinvent the wheel)
+        """
+
+        if not PIP_IS_AVAILABLE:
+            raise usage.UsageError('pip is not available')
+
+        try:
+            mamba_services = commons.import_services()
+            mamba_services.config.Application('config/application.json')
+        except Exception:
+            mamba_services_not_found()
+
+        print('Uninstalling {}...'.format(
+            mamba_services.config.Application().name).ljust(73), end='')
+        try:
+            pip.main(['uninstall', mamba_services.config.Application().name])
+            print('[{}]'.format(darkgreen('Ok')))
+        except:
+            print('[{}]'.format(darkred('Fail')))
+            raise
 
 
 class Packer(object):
@@ -335,6 +384,39 @@ class Packer(object):
         return subprocess.call(
             args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
+
+    def is_mamba_package(self, path):
+        """Determine if the given path is a valid mamba package file
+        """
+
+        if path.endswith('.egg'):
+            zf = zipfile.ZipFile(path)
+            for name in zf.namelist():
+                if '.mamba-package' in name:
+                    return True
+        else:
+            tf = tarfile.open(path)
+            for name in tf.getnames():
+                if '.mamba-package' in name:
+                    return True
+
+        return False
+
+    def install_package_file(self, path, options):
+        """Installs a package file given by path
+        """
+
+        args = ['install']
+        if options['user']:
+            args.append('--user')
+        args.append(path)
+
+        if PIP_IS_AVAILABLE:
+            pip.main(args)
+        else:
+            args.insert(0, 'setup.py')
+            args.insert(0, sys.executable)
+            self.do(args)
 
     def install_package_directory(self, options):
         """Installs a package directory in the given location
@@ -365,6 +447,7 @@ class Packer(object):
                 self.do(['cp', '-Rf', directory, 'package/' + name + '/'])
 
         self.do(['touch', 'package/' + name + '/__init__.py'])
+        self.do(['touch', 'package/' + name + '/.mamba-package'])
         os.chdir('package')
         self.write_setup_script(name, options, config)
         os.chdir('..')

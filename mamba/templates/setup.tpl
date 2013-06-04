@@ -20,19 +20,19 @@ For more information visit the `Mamba website <http://www.pymamba.com>`_
 '''
 
 data = ${data}
-data += ['README', 'README.*', 'LICENSE', 'LICENSE.*']
+data += ['README', 'README.*', 'LICENSE', 'LICENSE.*', '.mamba-package']
 os.chdir('${application}')
 data += findall('static') + findall('application/view') + findall('config')
 os.chdir('..')
 
 
 setup(
-    name='${application_name}',
+    name='''${application_name}''',
     version=${version},
-    description='${description}',
+    description='''${description}''',
     long_description=long_description,
-    author='${author}',
-    author_email='${author_email}',
+    author='''${author}''',
+    author_email='''${author_email}''',
     license='GPL',
     packages=find_packages(),
     package_data={'${application}': data},
