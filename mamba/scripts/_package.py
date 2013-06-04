@@ -4,8 +4,11 @@
 
 from __future__ import print_function
 
+import os
 import sys
+import json
 import getpass
+import subprocess
 from string import Template
 
 from twisted.python import usage, filepath
@@ -25,21 +28,31 @@ def show_version():
 
 
 def mamba_services_not_found():
-    print(
+    raise usage.UsageError(
         'error: make sure you are inside a mamba application root directory '
         'and then run this command again'
     )
-    sys.exit(-1)
 
 
 class PackageInstallOptions(usage.Options):
     """Package Install configuration options for mamba-admin tool
     """
-    synopsis = '[options]'
+    synopsis = '[options] <optional_file_path>'
 
     optFlags = [
         ['user', 'u', 'Install Package into the user directory'],
-        ['global', 'g', 'Instakll Package into the global directory']
+        ['global', 'g', 'Instakll Package into the global directory'],
+        ['cfgdir', 'c', 'Add the config directory to the package']
+    ]
+
+    optParameters = [
+        ['entry_points', None, None,
+            'A Json structured string as valid setuptools entry_points '
+            'configuration (if you don\'t know what this mean, is quite '
+            'possible that you don\'t need this)', str],
+        ['extra_directories', None, None,
+            'Extra directories to been added to the package. This must be '
+            'provided as a valid Json list string', str]
     ]
 
     def opt_version(self):
@@ -56,6 +69,54 @@ class PackageInstallOptions(usage.Options):
             raise usage.UsageError(
                 'you must choose between `user` and `global` installations'
             )
+
+        if self['entry_points'] is not None:
+            print(self['entry_points'])
+            try:
+                self['entry_points'] = json.loads(self['entry_points'])
+            except ValueError:
+                raise usage.UsageError(
+                    'invalid JSON entry_points structure')
+
+            if type(self['entry_points']) is not dict:
+                raise usage.UsageError(
+                    'the entry_points JSON string must be decoded as a dict')
+        else:
+            self['entry_points'] = {}
+
+        if self['extra_directories'] is not None:
+            try:
+                self['extra_directories'] = json.loads(
+                    self['extra_directories'])
+            except ValueError:
+                raise usage.UsageError(
+                    'invalid JSON extra_directories structure')
+
+            if type(self['extra_directories']) is not list:
+                raise usage.UsageError(
+                    'the extra_directories JSON string '
+                    'must be decoded as a list'
+                )
+        else:
+            self['extra_directories'] = []
+
+    def parseArgs(self, path=None):
+        """Parse command arguments
+        """
+
+        if path is None:
+            try:
+                mamba_services = commons.import_services()
+                assert mamba_services
+                self['filepath'] = None
+            except Exception:
+                mamba_services_not_found()
+        else:
+            fp = filepath.FilePath(path)
+            if fp.exists():
+                self['filepath'] = fp
+            else:
+                raise usage.UsageError('{} does not exists...'.format(path))
 
 
 class PackageUninstallOptions(usage.Options):
@@ -76,7 +137,18 @@ class PackagePackOptions(usage.Options):
     synopsis = '[options] <optional_name>'
 
     optFlags = [
-        ['egg', 'e', 'Generate an egg installable file']
+        ['egg', 'e', 'Generate an installable egg file'],
+        ['cfgdir', 'c', 'Add the config directory to the package']
+    ]
+
+    optParameters = [
+        ['entry_points', None, None,
+            'A Json structured string as valid setuptools entry_points '
+            'configuration (if you don\'t know what this mean, is quite '
+            'possible that you don\'t need this)', str],
+        ['extra_directories', None, None,
+            'Extra directories to been added to the package. This must be '
+            'provided as a valid Json list string', str]
     ]
 
     def opt_version(self):
@@ -84,6 +156,40 @@ class PackagePackOptions(usage.Options):
         """
         show_version()
         sys.exit(0)
+
+    def postOptions(self):
+        """Post options processing
+        """
+
+        if self['entry_points'] is not None:
+            print(self['entry_points'])
+            try:
+                self['entry_points'] = json.loads(self['entry_points'])
+            except ValueError:
+                raise usage.UsageError(
+                    'invalid JSON entry_points structure')
+
+            if type(self['entry_points']) is not dict:
+                raise usage.UsageError(
+                    'the entry_points JSON string must be decoded as a dict')
+        else:
+            self['entry_points'] = {}
+
+        if self['extra_directories'] is not None:
+            try:
+                self['extra_directories'] = json.loads(
+                    self['extra_directories'])
+            except ValueError:
+                raise usage.UsageError(
+                    'invalid JSON extra_directories structure')
+
+            if type(self['extra_directories']) is not list:
+                raise usage.UsageError(
+                    'the extra_directories JSON string '
+                    'must be decoded as a list'
+                )
+        else:
+            self['extra_directories'] = []
 
     def parseArgs(self, name=None):
         """Parse command arguments
@@ -96,7 +202,10 @@ class PackagePackOptions(usage.Options):
 
         # if a name is not provided we use the application name instead
         if name is None:
-            self['name'] = mamba_services.config.Application().name
+            self['name'] = 'mamba-{}'.format(
+                mamba_services.config.Application(
+                    'config/application.json').name.lower()
+            )
 
 
 class PackageOptions(usage.Options):
@@ -132,9 +241,9 @@ class Package(object):
     """
 
     def __init__(self, options):
+        self.entry_points = '{}'
         self.options = options
         self.process()
-        self.entry_points = '{}'
 
     def process(self):
         """I process the Package commands
@@ -144,7 +253,7 @@ class Package(object):
             self._handle_pack_command()
         elif self.options.subCommand == 'install':
             self._handle_install_command()
-        elif self._options.subCommand == 'uninstall':
+        elif self.options.subCommand == 'uninstall':
             self._handle_uninstall_command()
         else:
             print(self.options)
@@ -155,6 +264,7 @@ class Package(object):
 
         try:
             mamba_services = commons.import_services()
+            mamba_services.config.Application('config/application.json')
         except Exception:
             mamba_services_not_found()
 
@@ -166,32 +276,131 @@ class Package(object):
                 mamba_services.config.Application().name,
                 'egg' if use_egg else 'source'
             ).ljust(73), end='')
-            self._pack(command, mamba_services.config.Application())
+            Packer().pack_application(
+                command,
+                self.options.subOptions,
+                mamba_services.config.Application()
+            )
             print('[{}]'.format(darkgreen('Ok')))
         except:
             print('[{}]'.format(darkred('Fail')))
             raise
             sys.exit(-1)
 
-    def _pack(self, command, config):
+    def _handle_install_command(self):
+        """Install the current mamba application or a packed one
         """
-        Really pack the application using setuptools. It generates a temp
-        setup.py file and use the Application configuration details in order
-        to fill it
 
-        :param command: the command to use on packing, can be sdist or egg
-        :param config: the Application configuration
+        if self.options.subOptions.opts['filepath'] is None:
+            try:
+                mamba_services = commons.import_services()
+            except Exception:
+                mamba_services_not_found()
+
+            self._handle_install_current_directory(mamba_services)
+        else:
+            self._handle_install_already_packed_application()
+
+    def _handle_install_current_directory(self, mamba_services):
+        """Handles the installation of the current directory
         """
+
+        packer = Packer()
+        config = mamba_services.config.Application('config/application.json')
+
+        print('Installing {} application in {} store...'.format(
+            mamba_services.config.Application().name,
+            'global' if not self.options.subOptions['global'] else 'user'
+        ).ljust(73), end='')
+
+        try:
+            packer.create_package_directory(
+                config.name, self.options.subOptions, config)
+            packer.install_package_directory(self.options.subOptions)
+            print('[{}]'.format(darkgreen('Ok')))
+        except:
+            print('[{}]'.format(darkred('Fail')))
+            raise
+            sys.exit(-1)
+
+
+class Packer(object):
+    """Perform automated tasks in order to pack and installs Mamba projects
+    """
+
+    def do(self, args):
+        """Do a task
+        """
+
+        return subprocess.call(
+            args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+
+    def install_package_directory(self, options):
+        """Installs a package directory in the given location
+        """
+
+        args = [sys.executable, 'setup.py', 'install']
+        if options['user']:
+            args.append('--user')
+
+        os.chdir('package')
+        self.do(args)
+        os.chdir('..')
+        self.do(['rm', '-Rf', 'package'])
+
+    def create_package_directory(self, name, options, config):
+        """Create the package directory layout
+        """
+
+        self.do(['mkdir', '-p', 'package/' + name])
+        self.do(['cp', '-Rf', 'application', 'package/' + name + '/'])
+        self.do(['cp', '-Rf', 'static', 'package/' + name + '/'])
+
+        if options['cfgdir']:
+            self.do(['cp', '-Rf', 'config', 'package/' + name + '/'])
+
+        if len(options['extra_directories']) != 0:
+            for directory in options['extra_directories']:
+                self.do(['cp', '-Rf', directory, 'package/' + name + '/'])
+
+        self.do(['touch', 'package/' + name + '/__init__.py'])
+        os.chdir('package')
+        self.write_setup_script(name, options, config)
+        os.chdir('..')
+
+    def pack_application(self, command, options, config):
+        """Prepare the package directory
+        """
+
+        name = options['name']
+        self.create_package_directory(name, options, config)
+
+        os.chdir('package')
+        self.do([sys.executable, 'setup.py', command, '-d', '../'])
+        self.do([sys.executable, 'setup.py', 'clean'])
+        os.chdir('..')
+        self.do(['rm', '-Rf', 'package'])
+
+    def write_setup_script(self, name, options, config):
+        """Write the setup.py script
+        """
+
+        data = []
+        for directory in options['extra_directories']:
+            data.append(directory + '/*')
 
         with open('setup.py', 'w') as setup_script:
             setup_script_template = self._load_template_from_mamba('setup')
             args = {
-                'application': self['name'],
+                'application': name,
                 'description': config.description,
                 'author': getpass.getuser(),
                 'author_email': '{}@localhost'.format(getpass.getuser()),
-                'application_name': config.name,
-                'entry_points': self['entry_points']
+                'entry_points': options['entry_points'],
+                'version': config.version,
+                'application_name': config.name.lower(),
+                'data': data
             }
             setup_script.write(setup_script_template.safe_substitute(**args))
 
@@ -211,5 +420,5 @@ class Package(object):
                 template if template.endswith('.tpl') else '{}.tpl'.format(
                     template
                 )
-            )).open('rb' if template.endswith('.ico') else 'r').read()
+            )).open('r').read()
         )

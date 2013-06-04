@@ -24,6 +24,7 @@ from _sql import SqlOptions, Sql
 from commons import import_services
 from _view import ViewOptions, View
 from _model import ModelOptions, Model
+from _package import PackageOptions, Package
 from _project import ApplicationOptions, Application
 from _controller import ControllerOptions, Controller
 
@@ -57,6 +58,9 @@ class Options(usage.Options):
         ['controller', None, ControllerOptions, 'Generate new controller'],
         ['model', None, ModelOptions, 'Generate new model'],
         ['view', None, ViewOptions, 'Generate new view'],
+        ['package', None, PackageOptions,
+            'Pack or install a reusable mamba application. See reusability '
+            'documentation for more details about this specific topic'],
         # TODO: some day mamba will add entities and a good integrated test
         # suite... I hope
         # ['entity', None, None, 'Generate a new entity'],
@@ -182,7 +186,6 @@ def handle_start_command(options):
         args.append('--port={}'.format(options.subOptions.opts['port']))
 
     if mamba_services.config.Application().development is True:
-        print(args)
         os.execlp('twistd', *args)
     else:
         print('starting application {}...'.format(app_name).ljust(73), end='')
@@ -255,6 +258,9 @@ def run():
 
     if options.subCommand == 'view':
         View(options)
+
+    if options.subCommand == 'package':
+        Package(options.subOptions)
 
 
 if __name__ == '__main__':

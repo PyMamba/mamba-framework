@@ -62,7 +62,7 @@ class SqlConfigOptions(usage.Options):
     ]
 
     optParameters = [
-        ['uri', 'U', 'sqlite',
+        ['uri', None, 'sqlite',
             'The database connection URI as is used in Storm. Those are '
             'acceptable examples of format:\n\nbackend:database_name\n'
             'backend://hostname/database_name\n'
