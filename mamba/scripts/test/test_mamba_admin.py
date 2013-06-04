@@ -40,7 +40,7 @@ class MambaAdminTest(unittest.TestCase):
         subCommands = config.subCommands
         expectedOrder = [
             'application', 'sql', 'controller',
-            'model', 'view', 'start', 'stop'
+            'model', 'view', 'package', 'start', 'stop'
         ]
 
         for subCommand, expectedCommand in zip(subCommands, expectedOrder):
