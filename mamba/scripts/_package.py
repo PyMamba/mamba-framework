@@ -307,7 +307,9 @@ class Package(object):
 
             self._handle_install_current_directory(mamba_services)
         else:
-            self._handle_install_already_packed_application()
+            self._handle_install_already_packed_application(
+                self.options.subOptions.opts['filepath']
+            )
 
     def _handle_install_current_directory(self, mamba_services):
         """Handles the installation of the current directory
@@ -389,13 +391,13 @@ class Packer(object):
         """Determine if the given path is a valid mamba package file
         """
 
-        if path.endswith('.egg'):
-            zf = zipfile.ZipFile(path)
+        if path.basename().endswith('.egg'):
+            zf = zipfile.ZipFile(path.path)
             for name in zf.namelist():
                 if '.mamba-package' in name:
                     return True
         else:
-            tf = tarfile.open(path)
+            tf = tarfile.open(path.path)
             for name in tf.getnames():
                 if '.mamba-package' in name:
                     return True
@@ -409,7 +411,13 @@ class Packer(object):
         args = ['install']
         if options['user']:
             args.append('--user')
-        args.append(path)
+        args.append(path.path)
+
+        if path.basename().endswith('.egg'):
+            # this is an egg file, pip can't install egg files
+            # we try to import easy_install main func and use it in order
+            # to install the package, if easy_install is not present we fail
+            pass
 
         if PIP_IS_AVAILABLE:
             pip.main(args)
