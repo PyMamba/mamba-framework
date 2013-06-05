@@ -343,7 +343,8 @@ class Package(object):
             )
 
         print('Installing {} application in {} store...'.format(
-            path, 'global' if not self.options.subOptions['global'] else 'user'
+            path.path,
+            'global' if not self.options.subOptions['global'] else 'user'
         ).ljust(73), end='')
         try:
             packer.install_package_file(path, self.options.subOptions)
@@ -417,14 +418,19 @@ class Packer(object):
             # this is an egg file, pip can't install egg files
             # we try to import easy_install main func and use it in order
             # to install the package, if easy_install is not present we fail
-            pass
+            try:
+                from setuptools.command.easy_install import main as emain
+            except ImportError:
+                raise RuntimeError('easy_install is not present on system')
 
-        if PIP_IS_AVAILABLE:
-            pip.main(args)
+            emain(args[1:])
         else:
-            args.insert(0, 'setup.py')
-            args.insert(0, sys.executable)
-            self.do(args)
+            if PIP_IS_AVAILABLE:
+                pip.main(args)
+            else:
+                args.insert(0, 'setup.py')
+                args.insert(0, sys.executable)
+                self.do(args)
 
     def install_package_directory(self, options):
         """Installs a package directory in the given location
