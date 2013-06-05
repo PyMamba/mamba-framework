@@ -21,6 +21,7 @@ Features
     some_field = Decimal(size=10)       # using an int (precission is set to 2)
 * If user define `development` as `true` in the `application.json` config file, the twistd server will be started in **no** daemon mode, logging will be printed to standard output and no log file should be produced at all. If the user press Ctrl+C the mamba application will terminate immediately, this mode is quite useful to development stages
 * We redirect all the regular twistd process logging messages to `syslog` if we don't define development mode as `true` in the application.json config file
+* Added `package` subcommand to `mamba-admin` command line tool that allow us to pack, install and uninstall mamba based applications in order to reuse them (that doesn't replace setuptools and is not the way meant to package a full mamba application in order to distribute it, this is only meant to reuse code already present in other projects)
 
 Bug Fixes
 ---------
