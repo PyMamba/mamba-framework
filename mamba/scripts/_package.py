@@ -5,6 +5,7 @@
 from __future__ import print_function
 
 import os
+import re
 import sys
 import json
 import zipfile
@@ -14,6 +15,7 @@ import subprocess
 from string import Template
 try:
     import pip
+    assert pip
     PIP_IS_AVAILABLE = True
 except ImportError:
     PIP_IS_AVAILABLE = False
@@ -45,12 +47,11 @@ def mamba_services_not_found():
 class PackageInstallOptions(usage.Options):
     """Package Install configuration options for mamba-admin tool
     """
-    synopsis = '[options] <optional_file_path>'
+    synopsis = '[options] <optional_file_path/name> '
 
     optFlags = [
         ['user', 'u', 'Install Package into the user directory'],
-        ['global', 'g', 'Install Package into the global directory'],
-        ['cfgdir', 'c', 'Add the config directory to the package']
+        ['global', 'g', 'Install Package into the global directory']
     ]
 
     optParameters = [
@@ -60,7 +61,12 @@ class PackageInstallOptions(usage.Options):
             'possible that you don\'t need this)', str],
         ['extra_directories', None, None,
             'Extra directories to been added to the package. This must be '
-            'provided as a valid Json list string', str]
+            'provided as a valid Json list string', str],
+        ['author', None, None, 'Controller\'s author'],
+        ['email', None, None, 'Author\'s email'],
+        ['license', None, 'GPL', 'Application License', str],
+        ['license_classifier', None,
+            'License :: OSI Approved :: GNU General Public License v3 (GPLv3)']
     ]
 
     def opt_version(self):
@@ -79,7 +85,6 @@ class PackageInstallOptions(usage.Options):
             )
 
         if self['entry_points'] is not None:
-            print(self['entry_points'])
             try:
                 self['entry_points'] = json.loads(self['entry_points'])
             except ValueError:
@@ -108,6 +113,29 @@ class PackageInstallOptions(usage.Options):
         else:
             self['extra_directories'] = []
 
+         # http://www.rfc-editor.org/rfc/rfc2822.txt
+        RFC2822 = re.compile(
+            r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*"
+            "+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9]"
+            ")?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
+        )
+
+        if self['author'] is None:
+            self['author'] = getpass.getuser()
+
+        if self['email'] is not None:
+            if RFC2822.match(self['email']) is None:
+                print(
+                    'error: the given email address {} is not a valid RFC2822 '
+                    'email address, '
+                    'check http://www.rfc-editor.org/rfc/rfc2822.txt for '
+                    'very extended details'.format(self['email'])
+                )
+                sys.exit(-1)
+        else:
+            # just set an invalid RFC2822 email address (thats what irony mean)
+            self['email'] = '{}@localhost'.format(self['author'])
+
     def parseArgs(self, path=None):
         """Parse command arguments
         """
@@ -117,6 +145,11 @@ class PackageInstallOptions(usage.Options):
                 mamba_services = commons.import_services()
                 assert mamba_services
                 self['filepath'] = None
+                # if a name is not provided we use the application name instead
+                self['name'] = 'mamba-{}'.format(
+                    mamba_services.config.Application(
+                        'config/application.json').name.lower()
+                )
             except Exception:
                 mamba_services_not_found()
         else:
@@ -124,7 +157,9 @@ class PackageInstallOptions(usage.Options):
             if fp.exists():
                 self['filepath'] = fp
             else:
-                raise usage.UsageError('{} does not exists...'.format(path))
+                print('{} does not exists... using it as name'.format(path))
+                # if a name is not provided we use the application name instead
+                self['name'] = path
 
 
 class PackageUninstallOptions(usage.Options):
@@ -156,7 +191,12 @@ class PackagePackOptions(usage.Options):
             'possible that you don\'t need this)', str],
         ['extra_directories', None, None,
             'Extra directories to been added to the package. This must be '
-            'provided as a valid Json list string', str]
+            'provided as a valid Json list string', str],
+        ['author', None, None, 'Controller\'s author'],
+        ['email', None, None, 'Author\'s email'],
+        ['license', None, 'GPL', 'Application License', str],
+        ['license_classifier', None,
+            'License :: OSI Approved :: GNU General Public License v3 (GPLv3)']
     ]
 
     def opt_version(self):
@@ -170,7 +210,6 @@ class PackagePackOptions(usage.Options):
         """
 
         if self['entry_points'] is not None:
-            print(self['entry_points'])
             try:
                 self['entry_points'] = json.loads(self['entry_points'])
             except ValueError:
@@ -198,6 +237,29 @@ class PackagePackOptions(usage.Options):
                 )
         else:
             self['extra_directories'] = []
+
+         # http://www.rfc-editor.org/rfc/rfc2822.txt
+        RFC2822 = re.compile(
+            r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*"
+            "+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9]"
+            ")?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
+        )
+
+        if self['author'] is None:
+            self['author'] = getpass.getuser()
+
+        if self['email'] is not None:
+            if RFC2822.match(self['email']) is None:
+                print(
+                    'error: the given email address {} is not a valid RFC2822 '
+                    'email address, '
+                    'check http://www.rfc-editor.org/rfc/rfc2822.txt for '
+                    'very extended details'.format(self['email'])
+                )
+                sys.exit(-1)
+        else:
+            # just set an invalid RFC2822 email address (thats what irony mean)
+            self['email'] = '{}@localhost'.format(self['author'])
 
     def parseArgs(self, name=None):
         """Parse command arguments
@@ -320,7 +382,7 @@ class Package(object):
 
         print('Installing {} application in {} store...'.format(
             mamba_services.config.Application().name,
-            'global' if not self.options.subOptions['global'] else 'user'
+            'global' if self.options.subOptions['global'] else 'user'
         ).ljust(73), end='')
 
         try:
@@ -343,7 +405,7 @@ class Package(object):
             )
 
         print('Installing {} application in {} store...'.format(
-            path.path,
+            path.basename(),
             'global' if not self.options.subOptions['global'] else 'user'
         ).ljust(73), end='')
         try:
@@ -369,8 +431,18 @@ class Package(object):
         print('Uninstalling {}...'.format(
             mamba_services.config.Application().name).ljust(73), end='')
         try:
-            pip.main(['uninstall', mamba_services.config.Application().name])
-            print('[{}]'.format(darkgreen('Ok')))
+            p = subprocess.Popen(
+                ['pip', 'uninstall', mamba_services.config.Application().name],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                stdin=subprocess.PIPE
+            )
+            stdout, error = p.communicate('y')
+            if error is not '':
+                raise RuntimeError(error)
+            elif p.returncode is not 0:
+                raise RuntimeError(stdout)
+            else:
+                print('[{}]'.format(darkgreen('Ok')))
         except:
             print('[{}]'.format(darkred('Fail')))
             raise
@@ -380,13 +452,11 @@ class Packer(object):
     """Perform automated tasks in order to pack and installs Mamba projects
     """
 
-    def do(self, args):
+    def do(self, args, out=subprocess.PIPE):
         """Do a task
         """
 
-        return subprocess.call(
-            args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
+        return subprocess.call(args, stdout=out, stderr=out)
 
     def is_mamba_package(self, path):
         """Determine if the given path is a valid mamba package file
@@ -419,18 +489,35 @@ class Packer(object):
             # we try to import easy_install main func and use it in order
             # to install the package, if easy_install is not present we fail
             try:
-                from setuptools.command.easy_install import main as emain
+                from setuptools.command.easy_install import main
+                assert main
             except ImportError:
                 raise RuntimeError('easy_install is not present on system')
 
-            emain(args[1:])
+            p = subprocess.Poepn(
+                args[1:], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
+            output, error = p.communicate()
+            if error is not '':
+                raise RuntimeError(error)
         else:
             if PIP_IS_AVAILABLE:
-                pip.main(args)
+                args.insert(0, 'pip')
+                p = subprocess.Popen(
+                    args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                )
+                output, error = p.communicate()
+                if error is not '':
+                    raise RuntimeError(error)
             else:
                 args.insert(0, 'setup.py')
                 args.insert(0, sys.executable)
-                self.do(args)
+                p = subprocess.Popen(
+                    args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                )
+                output, error = p.communicate()
+                if error is not '':
+                    raise RuntimeError(error)
 
     def install_package_directory(self, options):
         """Installs a package directory in the given location
@@ -441,63 +528,108 @@ class Packer(object):
             args.append('--user')
 
         os.chdir('package')
-        self.do(args)
+        p = subprocess.Popen(
+            args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        output, error = p.communicate()
+
         os.chdir('..')
         self.do(['rm', '-Rf', 'package'])
+
+        if error is not '':
+            raise RuntimeError(error)
 
     def create_package_directory(self, name, options, config):
         """Create the package directory layout
         """
 
-        self.do(['mkdir', '-p', 'package/' + name])
-        self.do(['cp', '-Rf', 'application', 'package/' + name + '/'])
-        self.do(['cp', '-Rf', 'static', 'package/' + name + '/'])
+        # check if README.rst and LICENSE files are present
+        if not filepath.exists('README.rst') or not filepath.exists('LICENSE'):
+            raise usage.UsageError(
+                'You must create a README.rst and LICENSE files if you want '
+                'to pack/install this application.')
 
-        if options['cfgdir']:
-            self.do(['cp', '-Rf', 'config', 'package/' + name + '/'])
+        # check if docs directory exists
+        if not filepath.exists('docs'):
+            raise usage.UsageError(
+                'You have to add a *docs* directory to your package')
+
+        # check if MANIFEST.in exits and copy it if does
+        if filepath.exists('MANIFEST.in'):
+            self.do(['cp', 'MANIFEST.in', 'package/'])
+
+        # clean the application
+        self.do(['find', '.', '-type', 'f', '-name', '"*.py[co]"', "-delete"])
+
+        # create layout
+        self.do(['mkdir', 'package'])
+        self.do(['cp', '-Rf', 'docs', 'package/'])
+        self.do(['cp', '-Rf', 'static', 'package/'])
+        self.do(['cp', 'README.rst', 'LICENSE', 'package/'])
+        self.do(['cp', '-Rf', 'application', 'package/' + name])
 
         if len(options['extra_directories']) != 0:
             for directory in options['extra_directories']:
-                self.do(['cp', '-Rf', directory, 'package/' + name + '/'])
+                self.do(['cp', '-Rf', directory, 'package/'])
 
-        self.do(['touch', 'package/' + name + '/__init__.py'])
-        self.do(['touch', 'package/' + name + '/.mamba-package'])
+        self.do(['touch', 'package/.mamba-package'])
         os.chdir('package')
         self.write_setup_script(name, options, config)
+        self.fix_application_path(name)
+        self.write_manifest(name, options, config)
         os.chdir('..')
 
     def pack_application(self, command, options, config):
         """Prepare the package directory
         """
 
-        name = options['name']
+        name = config.name.lower()
         self.create_package_directory(name, options, config)
 
         os.chdir('package')
         self.do([sys.executable, 'setup.py', command, '-d', '../'])
         self.do([sys.executable, 'setup.py', 'clean'])
         os.chdir('..')
-        self.do(['rm', '-Rf', 'package'])
+        # self.do(['rm', '-Rf', 'package'])
+
+    def fix_application_path(self, name):
+        """Fix the application path renaming `application` to `name`
+        """
+
+        command = (
+            'find -type f -name "*.py" -print0 | xargs -0 sed -i '
+            '"s/from application/from {}/"'.format(name)
+        )
+        subprocess.call(command, shell=True)
+
+    def write_manifest(self, name, options, config):
+        """Write the MANIFEST.in file
+        """
+
+        with open('MANIFEST.in', 'a+') as manifest:
+            manifest.write('include .mamba-package\n')
+            manifest.write('recursive-include static *\n')
+            manifest.write('recursive-include {}/view *\n'.format(name))
+
+            for directory in options['extra_directories']:
+                manifest.write('recursive-include {} *\n'.format(directory))
 
     def write_setup_script(self, name, options, config):
         """Write the setup.py script
         """
-
-        data = []
-        for directory in options['extra_directories']:
-            data.append(directory + '/*')
 
         with open('setup.py', 'w') as setup_script:
             setup_script_template = self._load_template_from_mamba('setup')
             args = {
                 'application': name,
                 'description': config.description,
-                'author': getpass.getuser(),
-                'author_email': '{}@localhost'.format(getpass.getuser()),
+                'author': options['author'],
+                'author_email': options['email'],
                 'entry_points': options['entry_points'],
                 'version': config.version,
-                'application_name': config.name.lower(),
-                'data': data
+                'application_name': options['name'],
+                'license': options['license'],
+                'license_classifier': options['license_classifier']
             }
             setup_script.write(setup_script_template.safe_substitute(**args))
 
