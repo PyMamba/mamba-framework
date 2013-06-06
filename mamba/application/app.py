@@ -60,6 +60,9 @@ class Mamba(borg.Borg):
 
         super(Mamba, self).__init__()
 
+        if hasattr(self, 'initialized') and self.initialized is True:
+            return
+
         self.monkey_patched = False
         self.development = False
         self.already_logging = False
@@ -106,6 +109,8 @@ class Mamba(borg.Borg):
             'controller': controller.ControllerManager(),
             'model': model.ModelManager()
         }
+
+        self.initialized = True
 
     def _handle_logging(self):
         """
