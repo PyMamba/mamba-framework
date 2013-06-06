@@ -25,9 +25,13 @@ class Resource(TwistedResource):
     """
     Mamba resources base class. A web accessible resource that add common
     childs for scripts in Mamba applications
+
+    :param template_paths: additional template paths for resources
+    :param cache_size: the cache size for Jinja2 Templating system
+    :param static: route for static data for this resouce
     """
 
-    def __init__(self, template_paths=None, cache_size=50):
+    def __init__(self, template_paths=None, cache_size=50, static_path=None):
         TwistedResource.__init__(self)
 
         sep = filepath.os.sep
@@ -87,7 +91,12 @@ class Resource(TwistedResource):
         self.insert_scripts()
 
         # static accessible data (scripts, css, images, and others)
-        self.putChild('assets', static.File(filepath.os.getcwd() + '/static'))
+        if static_path is None:
+            self.putChild(
+                'assets', static.File(filepath.os.getcwd() + '/static')
+            )
+        else:
+            self.putChild('assets', static_path)
 
         # template environment
         self.environment = templating.Environment(
@@ -108,8 +117,8 @@ class Resource(TwistedResource):
         .. caution::
 
             If there is a controller with the same path than the path
-            then it will be hidden and the template in templates path
-            should be rendered instead
+            parameter then it will be hidden and the template in templates
+            path should be rendered instead
 
         :param path: the path
         :type path: str
