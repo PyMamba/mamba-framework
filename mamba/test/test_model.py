@@ -486,6 +486,12 @@ class ModelManagerTest(unittest.TestCase):
         sys.path.append('../mamba/test/dummy_app')
         self.mgr.load('../mamba/test/dummy_app/application/model/dummy.py')
 
+    def test_constructor_overwrites_module_store(self):
+        mgr = ModelManager('overwritten/store')
+        if GNU_LINUX:
+            self.addCleanup(mgr.notifier.loseConnection)
+        self.assertEqual(mgr._module_store, 'overwritten/store')
+
     def test_inotifier_provided_by_controller_manager(self):
         if not GNU_LINUX:
             raise unittest.SkipTest('File monitoring only available on Linux')

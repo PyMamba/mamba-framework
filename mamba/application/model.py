@@ -279,13 +279,14 @@ class ModelManager(module.ModuleManager):
 
     :attr:`_model_store` A private attribute that sets the prefix
     path for the models store
+    :param store: if is not None it sets the _module_store attr
     """
 
-    def __init__(self):
+    def __init__(self, store=None):
         """Initialize
         """
 
-        self._module_store = 'application/model'
+        self._module_store = 'application/model' if not store else store
         super(ModelManager, self).__init__()
 
     def get_models(self):
