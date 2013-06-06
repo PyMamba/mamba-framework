@@ -871,7 +871,6 @@ class ViewScriptTest(unittest.TestCase):
 def _test_use_outside_application_directory_fails(self, dump_opt=False):
 
     def fake_exit(val):
-        print val
         pass
 
     sys.exit = fake_exit
@@ -884,13 +883,8 @@ def _test_use_outside_application_directory_fails(self, dump_opt=False):
     try:
         sql._handle_create_command()
     except UnboundLocalError:
-        self.assertEqual(
-            'error: make sure you are inside a mmaba application root '
-            'directory and then run this command again',
-            self.capture.getvalue().split('\n')[-3:-2][0]
-        )
-        # sys.exit(-1) :)
-        self.assertEqual(
-            '-1',
-            self.capture.getvalue().split('\n')[-2:-1][0]
+        self.assertTrue(
+            'error: make sure you are inside a mmaba '
+            'application root directory and then run '
+            'this command again' in self.capture.getvalue()
         )
