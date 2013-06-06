@@ -54,3 +54,45 @@ class DatabaseTest(unittest.TestCase):
         config.Database()
         self.assertTrue(config.Database().loaded)
         self.assertEqual(config.Database().min_threads, 5)
+
+
+class ApplicationTest(unittest.TestCase):
+    """Fallback functionallity already tested on Database Tests
+    """
+
+    def tearDown(self):
+        config.Application('default')
+
+    def test_application_load(self):
+        config.Application('../mamba/test/dummy_app/config/application.json')
+        self.assertTrue(config.Application().loaded)
+        self.assertEqual(config.Application().name, 'dummy')
+        self.assertEqual(
+            config.Application().description,
+            'This is a Dummy application just for testing purposes'
+        )
+        self.assertEqual(config.Application().version, '0.1.2')
+        self.assertEqual(config.Application().port, 8080)
+        self.assertEqual(config.Application().logfile, None)
+
+    def test_fallback_works(self):
+        self.assertFalse(config.Application().loaded)
+        self.assertEqual(config.Application().name, None)
+        self.assertEqual(config.Application().port, None)
+        self.assertEqual(config.Application().description, None)
+        self.assertEqual(config.Application().doctype, 'html')
+
+
+class InstalledPackagesTest(unittest.TestCase):
+    """Fallback is default on InstalledPackages
+    """
+
+    def tearDown(self):
+        config.InstalledPackages('default')
+
+    def test_intalled_packages_laod(self):
+        config.InstalledPackages(
+            '../mamba/test/dummy_app/config/installed_packages.json')
+        self.assertFalse(config.InstalledPackages().loaded)
+        self.assertEqual(config.InstalledPackages().repositories, [])
+        self.assertFalse(config.InstalledPackages().local_only)

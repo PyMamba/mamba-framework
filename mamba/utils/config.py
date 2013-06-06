@@ -191,7 +191,7 @@ class Application(BaseConfig):
     This object loads and parses the Mamba application configuration options
     using a JSON file with the following format:
 
-    .. sourcecode:: javascript
+    .. sourcecode:: json
 
         {
             "name": "Mamba Application",
@@ -230,6 +230,46 @@ class Application(BaseConfig):
         self.description = None
         self.favicon = 'favicon.ico'
         self.platform_debug = False
+
+
+class InstalledPackages(BaseConfig):
+    """
+    Instaleld Packages configuration object
+
+    This object loads and parses configuration that indicates to the Mamba
+    framework that this application have to import and register the indicated
+    shared packages.
+
+    The JSON file must follow this format:
+
+    .. sourcecode:: json
+
+        {
+            "repositories": [],
+            "packages": ["package_one", "package_two", "package_three"],
+            "local_only": false
+        }
+
+    If we need to donwload some of the packages from specific repositories
+    we can use the `respositories` list to add from which repositories we
+    want to donwload the required packages (those are PiPY repositories)
+
+    :param config_file: the JSON file to load
+    :type config_file: str
+    """
+
+    def __init__(self, config_file=''):
+        super(InstalledPackages, self).__init__()
+
+        self.load(config_file)
+
+    def _defaults(self):
+        """Set default data to config
+        """
+
+        self.repositories = []
+        self.packages = []
+        self.local_only = False
 
 
 __all__ = ['Database', 'Application']
