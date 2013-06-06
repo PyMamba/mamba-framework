@@ -50,8 +50,6 @@ class Mamba(borg.Borg):
         from mamba import Mamba
         app = Mamba({'name': 'MyApp', 'description': 'My App', ...})
 
-    Mamba only works in the GNU/Linux operating system (for now).
-
     :param options: options to initialize the application with
     :type options: dict
 
