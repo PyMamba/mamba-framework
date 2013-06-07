@@ -13,15 +13,16 @@
 
 import inspect
 
-from storm import variables
+from storm import variables, properties
 from storm.expr import Undef
 from twisted.python import components
 from storm.references import Reference
+from singledispatch import singledispatch
 
 from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL
 from mamba.core.adapters import MambaSQLAdapter
-from mamba.enterprise.common import CommonSQL, NativeEnumVariable
+from mamba.enterprise.common import CommonSQL, NativeEnumVariable, NativeEnum
 
 
 class MySQLError(Exception):
@@ -49,6 +50,25 @@ class MySQL(CommonSQL):
 
     def __init__(self, model):
         self.model = model
+
+        self._columns_mapping = {
+            properties.Bool: 'tinyint',
+            properties.UUID: 'blob',
+            properties.RawStr: 'blob',
+            properties.Pickle: 'varbinary',
+            properties.JSON: 'blob',
+            properties.DateTime: 'datetime',
+            properties.Date: 'date',
+            properties.Time: 'time',
+            properties.Enum: 'integer',
+            NativeEnum: 'enum'
+        }
+
+        self.parse = singledispatch(self.parse)
+        self.parse.register(properties.Int, self.parse_int)
+        self.parse.register(properties.Decimal, self.parse_decimal)
+        self.parse.register(properties.Unicode, self._parse_unicode)
+        self.parse.register(properties.Float, self._parse_float)
 
     @property
     def engine(self):
@@ -136,6 +156,55 @@ class MySQL(CommonSQL):
 
         return ', '.join(references)
 
+    def parse(self, column):
+        """This function is just a fallback to text (tears are comming)
+        """
+
+        return self._columns_mapping.get(column.__class__, 'text')
+
+    def parse_int(self, column):
+        """
+        Parse an specific integer type for MySQL, for example:
+
+            smallint UNSIGNED
+
+        :param column: the Storm properties column to parse
+        :type column: :class:`storm.properties.Int`
+        """
+
+        column_name = column.__class__.__name__
+        wrap_column = column._get_column(self.model.__class__)
+        auto_increment = wrap_column.auto_increment
+        unsigned = wrap_column.unsigned
+        size = wrap_column.size
+
+        return '{}{}{}'.format(
+            '{}{}'.format(
+                column_name.lower(),
+                '({})'.format(size) if size is not Undef else ''
+            ),
+            ' UNSIGNED' if unsigned else '',
+            ' AUTO_INCREMENT' if auto_increment else ''
+        )
+
+    def parse_decimal(self, column):
+        """Parse decimal sizes for MySQL, for example:
+
+            decimal(10,2)
+
+        :param column: the Storm properties column to parse
+        :type column: :class:`storm.properties.Decimal`
+        """
+
+        column_name = column.__class__.__name__
+        wrap_column = column._get_column(self.model.__class__)
+        size = wrap_column.size
+
+        return '{}{}'.format(
+            column_name.lower(), '({},{})'.format(
+                parse_decimal_size(size, column_name))
+        )
+
     def parse_column(self, column):
         """
         Parse a Storm column to the correct MySQL value type. For example,
@@ -148,51 +217,16 @@ class MySQL(CommonSQL):
         :type column: :class:`storm.properties`
         """
 
-        if column.variable_class is variables.IntVariable:
-            column_type = self._parse_int(column)
-        elif column.variable_class is variables.BoolVariable:
-            column_type = 'tinyint'
-        elif column.variable_class is variables.DecimalVariable:
-            column_type = self._parse_decimal(column)
-        elif column.variable_class is variables.FloatVariable:
-            column_type = self._parse_float(column)
-        elif column.variable_class is variables.UnicodeVariable:
-            column_type = self._parse_unicode(column)
-        elif column.variable_class is variables.UUIDVariable:
-            column_type = 'blob'
-        elif column.variable_class is variables.RawStrVariable:
-            # we don't care about different blob sizes
-            column_type = 'blob'
-        elif column.variable_class is variables.PickleVariable:
-            # we don't care about different varbinary sizes
-            column_type = 'varbinary'
-        elif column.variable_class is variables.JSONVariable:
-            column_type = 'blob'
-        elif column.variable_class is variables.DateTimeVariable:
-            column_type = 'datetime'
-        elif column.variable_class is variables.DateVariable:
-            column_type = 'date'
-        elif column.variable_class is variables.TimeVariable:
-            column_type = 'time'
-        elif column.variable_class is variables.TimeDeltaVariable:
-            column_type = 'text'
-        elif column.variable_class is variables.EnumVariable:
-            column_type = 'integer'
-        elif column.variable_class is NativeEnumVariable:
-            column_type = 'enum'
-        else:
-            column_type = 'text'  # fallback to text (tears are comming)
-
         column_type = '`{}` {}{}{}'.format(
             column._detect_attr_name(self.model.__class__),
-            column_type,
+            self.parse(column),
             self._null_allowed(column),
             self._default(column)
         )
         return column_type
 
     def parse_enum(self, column):
-        """
+        """Parse an enum column
         """
 
         if column.variable_class is not NativeEnumVariable:
@@ -285,69 +319,6 @@ class MySQL(CommonSQL):
 
         return query
 
-    def _parse_decimal(self, column):
-        """Parse decimal sizes for MySQL, for example:
-
-            decimal(10,2)
-
-        :param column: the Storm properties column to parse
-        :type column: :class:`storm.properties.Decimal`
-        """
-
-        column_name = column.__class__.__name__
-        wrap_column = column._get_column(self.model.__class__)
-        size = wrap_column.size
-
-        if type(size) is tuple or type(size) is list:
-            length = size[0]
-            precission = size[1]
-        elif type(size) is str:
-            size = size.split(',')
-            if len(size) == 1:
-                length = size[0]
-                precission = 2
-            else:
-                length = size[0]
-                precission = size[1]
-        elif type(size) is int:
-            length = size
-            precission = 2
-        elif type(size) is float:
-            size = str(size).split('.')
-            length = size[0]
-            precission = size[1]
-        else:
-            return column_name.lower()
-
-        return '{}{}'.format(
-            column_name.lower(), '({},{})'.format(length, precission)
-        )
-
-    def _parse_int(self, column):
-        """
-        Parse an specific integer type for MySQL, for example:
-
-            smallint UNSIGNED
-
-        :param column: the Storm properties column to parse
-        :type column: :class:`storm.properties.Int`
-        """
-
-        column_name = column.__class__.__name__
-        wrap_column = column._get_column(self.model.__class__)
-        auto_increment = wrap_column.auto_increment
-        unsigned = wrap_column.unsigned
-        size = wrap_column.size
-
-        return '{}{}{}'.format(
-            '{}{}'.format(
-                column_name.lower(),
-                '({})'.format(size) if size is not Undef else ''
-            ),
-            ' UNSIGNED' if unsigned else '',
-            ' AUTO_INCREMENT' if auto_increment else ''
-        )
-
     def _default(self, column):
         """
         Get the default argument for a column (if any)
@@ -372,3 +343,47 @@ class MySQL(CommonSQL):
             return ' default {}'.format(variable._value)
 
         return ''
+
+
+@singledispatch
+def parse_decimal_size(size, column_name=None):
+    """This is just a fallbacl for unknown decimal size type
+
+    :param size: the given size
+    :returns: tuple of (length, precission)
+    """
+    return column_name.lower()
+
+
+@parse_decimal_size.register(list)
+@parse_decimal_size.register(tuple)
+def _parse_decimal_size_list(size, column_name=None):
+    """Parse list decimal size
+    """
+    return size[0], size[1]
+
+
+@parse_decimal_size.register(str)
+def _parse_decimal_size_str(size, column_name=None):
+    """Parse str decimal size
+    """
+    size = size.split(',')
+    if len(size) == 1:
+        return size[0], 2
+    else:
+        return size[0], size[1]
+
+
+@parse_decimal_size.register(int)
+def _parse_decimal_size_int(size, column_name=None):
+    """Parse int decimal size
+    """
+    return size, 2
+
+
+@parse_decimal_size.register(float)
+def _parse_decimal_size_float(size, column_name=None):
+    """Parse float decimal size
+    """
+    size = str(size).split('.')
+    return size[0], size[1]

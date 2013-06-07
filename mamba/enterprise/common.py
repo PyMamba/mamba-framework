@@ -78,7 +78,7 @@ class NativeEnum(properties.SimpleProperty):
         properties.SimpleProperty.__init__(self, name, primary, **kwargs)
 
 
-class CommonSQL:
+class CommonSQL(object):
     """I do nothing, my only purpse is serve as dummy object
     """
 

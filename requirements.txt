@@ -4,6 +4,7 @@ storm >= 0.19
 zope.component
 transaction
 jinja2 >= 2.4
+singledispatch >= 3.4.0.1
 
 # Testing utils
 doublex >= 1.5.1
