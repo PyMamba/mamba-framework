@@ -31,6 +31,7 @@ class ApplicationTests(unittest.TestCase):
         class Dummy:
             name = 'Test'
 
+        app.Mamba().initialized = False
         app_tmp = app.Mamba(Dummy())
         if GNU_LINUX:
             self.addCleanup(
