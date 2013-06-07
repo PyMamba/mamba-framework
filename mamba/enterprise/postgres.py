@@ -13,15 +13,16 @@
 
 import sys
 import inspect
+from singledispatch import singledispatch
 
-from storm import variables
 from twisted.python import components
 from storm.references import Reference
+from storm import variables, properties
 
 from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL
 from mamba.core.adapters import MambaSQLAdapter
-from mamba.enterprise.common import CommonSQL, NativeEnumVariable
+from mamba.enterprise.common import CommonSQL, NativeEnum, NativeEnumVariable
 
 
 class PostgreSQLError(Exception):
@@ -79,6 +80,27 @@ class PostgreSQL(CommonSQL):
                 )
 
         self.model = model
+
+        self._columns_mapping = {
+            properties.Bool: 'bool',
+            properties.UUID: 'uuid',
+            properties.RawStr: 'bytea',
+            properties.Pickle: 'bytea',
+            properties.JSON: 'json',
+            properties.DateTime: 'timestamp',
+            properties.Date: 'date',
+            properties.Time: 'time',
+            properties.TimeDelta: 'interval',
+            properties.Enum: 'integer',
+            properties.Decimal: 'decimal'
+        }
+
+        self.parse = singledispatch(self.parse)
+        self.parse.register(properties.Int, self._parse_int)
+        self.parse.register(properties.Unicode, self._parse_unicode)
+        self.parse.register(properties.Float, self._parse_float)
+        self.parse.register(properties.List, self._parse_list)
+        self.parse.register(NativeEnum, self._parse_enum)
 
     def parse_references(self):
         """
@@ -152,49 +174,19 @@ class PostgreSQL(CommonSQL):
         :type column: :class:`storm.properties`
         """
 
-        if column.variable_class is variables.IntVariable:
-            column_type = self._parse_int(column)
-        elif column.variable_class is variables.BoolVariable:
-            column_type = 'bool'
-        elif column.variable_class is variables.DecimalVariable:
-            column_type = 'decimal'
-        elif column.variable_class is variables.FloatVariable:
-            column_type = self._parse_float(column)
-        elif column.variable_class is variables.UnicodeVariable:
-            column_type = self._parse_unicode(column)
-        elif column.variable_class is variables.UUIDVariable:
-            column_type = 'uuid'
-        elif column.variable_class is variables.RawStrVariable:
-            column_type = 'bytea'
-        elif column.variable_class is variables.PickleVariable:
-            column_type = 'bytea'
-        elif column.variable_class is variables.JSONVariable:
-            column_type = 'json'
-        elif column.variable_class is variables.DateTimeVariable:
-            column_type = 'timestamp'
-        elif column.variable_class is variables.DateVariable:
-            column_type = 'date'
-        elif column.variable_class is variables.TimeVariable:
-            column_type = 'time'
-        elif column.variable_class is variables.TimeDeltaVariable:
-            column_type = 'interval'
-        elif column.variable_class is variables.ListVariable:
-            column_type = self._parse_list(column)
-        elif column.variable_class is variables.EnumVariable:
-            column_type = 'integer'
-        elif column.variable_class is NativeEnumVariable:
-            column_type = 'enum_'
-            column_type += column._detect_attr_name(self.model.__class__)
-        else:
-            column_type = 'text'  # fallback to text (tears are comming)
-
         column_type = '{} {}{}{}'.format(
             column._detect_attr_name(self.model.__class__),
-            column_type,
+            self.parse(column),
             self._null_allowed(column),
             self._default(column)
         )
         return column_type
+
+    def parse(self, column):
+        """This function is just a fallback to text (tears are comming)
+        """
+
+        return self._columns_mapping.get(column.__class__, 'text')
 
     def parse_enum(self, column):
         """
@@ -382,6 +374,11 @@ class PostgreSQL(CommonSQL):
             )
 
         return array
+
+    def _parse_enum(self, column):
+        """Simple parse enum helper function
+        """
+        return 'enum_' + column._detect_attr_name(self.model.__class__)
 
     @staticmethod
     def register():

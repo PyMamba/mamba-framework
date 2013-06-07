@@ -13,10 +13,10 @@
 
 import inspect
 
-from storm import variables, properties
 from storm.expr import Undef
 from twisted.python import components
 from storm.references import Reference
+from storm import variables, properties
 from singledispatch import singledispatch
 
 from mamba.utils import config
