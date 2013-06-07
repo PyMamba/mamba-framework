@@ -27,6 +27,9 @@ Minimum Dependencies
   <tr>
     <td>Jinja2</td><td>>= 2.4</td><td><a href="http://jinja.pocoo.org/docs/#" target="_blank">http://jinja.pocoo.org/docs/</a></td>
   </tr>
+  <tr>
+    <td>singledispatch</td><td>>=3.4.0.1</td><td><a href="https://pypi.python.org/pypi/singledispatch" target="_blank">https://pypi.python.org/pypi/singledispatch</a></td>
+  </tr>
 </table>
 
 There are other requirements in order to run the test suite or build the documentation, for more information, please check the [mamba main site](http://www.pymamba.com).
@@ -79,7 +82,7 @@ this was not tested and we have no `buildbot slaves` under those operating syste
     </td>
     <td align="center">
         <img align="center" src="http://buildbot.pymamba.com/png?builder=Gentoo-2013-Python2.7&size=large" />
-    </td>    
+    </td>
     <td align="center">
         <img align="center" src="http://buildbot.pymamba.com/png?builder=FreeBSD-9.1_amd64_python2.7&size=large" />
     </td>
