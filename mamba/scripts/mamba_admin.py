@@ -155,7 +155,7 @@ def handle_start_command(options):
     args = ['twistd']
     try:
         app_name = glob.glob(
-            'twisted/plugins/*.py')[0].split(os.sep)[-1].split('_')[0]
+            'twisted/plugins/*.py')[0].split(os.sep)[-1].rsplit('_', 1)[0]
     except IndexError:
         print(
             'error: twisted directory can\'t be found. You should be in '
