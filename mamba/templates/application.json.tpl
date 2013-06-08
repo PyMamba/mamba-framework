@@ -3,5 +3,6 @@
     "description": "${description}",
     "version": "${version}",
     "port": ${port},
-    "log_file": ${logfile}
+    "log_file": ${logfile},
+    "development": false
 }
