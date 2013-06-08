@@ -12,3 +12,4 @@ PyHamcrest
 
 # Documentation
 sphinx >= 1.1.3
+fabric
