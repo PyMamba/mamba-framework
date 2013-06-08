@@ -33,6 +33,7 @@ Bug Fixes
 * Fixed a bug related with PyPy and it's lack of **set_debug** method in **gc** object
 * Now mamba-admin start and stop subcommands can be used inside valid mamba application directories only
 * Adding dependency to fabric package as docs will not build without it
+* Added mandatory option parameter `development` to the application.json template.
 
 
 Deprecations
