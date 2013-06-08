@@ -11,6 +11,8 @@
 
 """
 
+from singledispatch import singledispatch
+
 from twisted.web import static
 from twisted.python import filepath
 from twisted.web.resource import Resource as TwistedResource
@@ -43,13 +45,14 @@ class Resource(TwistedResource):
                 filepath.os.path.dirname(__file__).rsplit(sep, 1)[0]
             )
         ]
+
+        self.add_template_paths = singledispatch(self.add_template_paths)
+        self.add_template_paths.register(str, self._add_template_paths_str)
+        self.add_template_paths.register(list, self._add_template_paths_list)
+        self.add_template_paths.register(tuple, self._add_template_paths_tuple)
+
         if template_paths is not None:
-            if type(template_paths) is str:
-                self.template_paths.append(template_paths)
-            elif type(template_paths) is list:
-                self.template_paths + template_paths
-            elif type(template_paths) is tuple:
-                self.template_paths + list(template_paths)
+            self.add_template_paths(template_paths)
 
         self.config = Application()
 
@@ -174,3 +177,28 @@ class Resource(TwistedResource):
 
         for name, script in self._scripts_manager.get_scripts().iteritems():
             self.containers['scripts'].putChild(name, static.File(script.path))
+
+    def add_template_paths(self, paths):
+        """Add template paths to the underlying Jinja2 templating system
+        """
+
+        raise RuntimeError(
+            '{} type for paths can not be handled'.format(type(paths)))
+
+    def _add_template_paths_str(self, paths):
+        """Append template paths for single str template path given
+        """
+
+        self.template_paths.append(paths)
+
+    def _add_template_paths_list(self, paths):
+        """Adds the given template paths list
+        """
+
+        self.template_paths + paths
+
+    def _add_template_paths_tuple(self, paths):
+        """Adds the given template paths tuple
+        """
+
+        self.template_paths + list(paths)

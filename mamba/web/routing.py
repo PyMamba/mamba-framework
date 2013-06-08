@@ -15,6 +15,7 @@ import json
 import inspect
 import logging
 import functools
+from singledispatch import singledispatch
 from collections import defaultdict, OrderedDict
 
 from twisted.python import log
@@ -156,6 +157,11 @@ class Router(object):
             'PATCH': defaultdict(dict),
             'HEAD': defaultdict(dict)
         }
+
+        self._prepare_response = singledispatch(self._prepare_response)
+        self._prepare_response.register(str, self._prepare_response_str)
+        self._prepare_response.register(
+            response.Response, self._prepare_response_object)
 
         super(Router, self).__init__()
 
@@ -326,21 +332,31 @@ class Router(object):
         Renders the result to cobvert it to the appropiate format
         """
 
-        if type(result) is str:
-            if re.match(UrlRegex.html_regex, result):
-                retval = response.Ok(result, {'content-type': 'text/html'})
-            else:
-                retval = response.Ok(result, {'content-type': 'text/plain'})
-        elif isinstance(result, response.Response):
-            if 'application/json' in result.headers.values():
-                result.subject = Converter.serialize(result.subject)
-            retval = result
-        else:
-            result = Converter.serialize(result)
-            headers = {'content-type': 'application/json'}
-            retval = response.Ok(result, headers)
+        result = Converter.serialize(result)
+        headers = {'content-type': 'application/json'}
+        retval = response.Ok(result, headers)
 
         return retval
+
+    def _prepare_response_str(self, result, request):
+        """Renders the result into 'text/html' or 'text/plain' content-type
+        """
+
+        if re.match(UrlRegex.html_regex, result):
+            result = response.Ok(result, {'content-type': 'text/html'})
+        else:
+            result = response.Ok(result, {'content-type': 'text/plain'})
+
+        return result
+
+    def _prepare_response_object(self, result, request):
+        """Renders the result.subject into JSON if needed
+        """
+
+        if 'application/json' in result.headers.values():
+            result.subject = Converter.serialize(result.subject)
+
+        return result
 
 
 class RouteDispatcher(object):

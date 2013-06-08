@@ -322,12 +322,8 @@ class PostgreSQL(CommonSQL):
         auto_increment = wrap_column.auto_increment
 
         if auto_increment:
-            if column_name.lower() == 'smallint':
-                column_name = 'smallserial'
-            elif column_name.lower() == 'bigint':
-                column_name = 'bigserial'
-            else:
-                column_name = 'serial'
+            column_mapping = {'smallint': 'smallserial', 'bigint': 'bigserial'}
+            column_name = column_mapping.get(column_name.lower(), 'serial')
 
         return column_name.lower()
 
