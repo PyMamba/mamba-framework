@@ -16,7 +16,7 @@ from storm import version as storm_version
 
 from mamba.utils import config
 from mamba import version, license
-from mamba.core import BSD, GNU_LINUX
+from mamba.core import GNU_LINUX, BSD, OSX, WINDOWS
 from mamba import copyright as mamba_copyright
 from mamba.utils.output import darkgreen, darkred
 
@@ -171,8 +171,7 @@ def handle_start_command(options):
         )
         sys.exit(-1)
 
-    if BSD:
-        args.append('--reactor=kqueue')
+    args.append(determine_platform_reactor())
 
     if mamba_services.config.Application().development is True:
         args.append('--nodaemon')
@@ -227,6 +226,44 @@ def handle_stop_command():
     except:
         print('[{}]'.format(darkred('Fail')))
         raise
+
+
+def determine_platform_reactor():
+    """Determine the reactor to use for the running platform
+    """
+
+    reactor = '--reactor={}'
+    default = 'select'
+    if GNU_LINUX:
+        try:
+            from twisted.internet import epollreactor
+            assert epollreactor
+            default = 'epoll'
+        except ImportError:
+            pass
+    elif BSD:
+        try:
+            from twisted.internet import kqreactor
+            assert kqreactor
+            default = 'kqueue'
+        except ImportError:
+            pass
+    elif OSX:
+        try:
+            from twisted.internet import cfreactor
+            assert cfreactor
+            default = 'cf'
+        except ImportError:
+            pass
+    elif WINDOWS:
+        try:
+            from twisted.internet import iocpreactor
+            assert iocpreactor
+            default = 'iocp'
+        except ImportError:
+            pass
+
+    return reactor.format(default)
 
 
 def run():
