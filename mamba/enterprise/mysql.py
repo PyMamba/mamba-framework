@@ -5,7 +5,7 @@
 """
 .. module:: mysql_adapter
     :platform: Unix, Windows
-    :synopsis: MySQL adapter for create SQLite tables
+    :synopsis: MySQL adapter for create MySQL tables
 
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 

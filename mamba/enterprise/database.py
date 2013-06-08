@@ -252,16 +252,12 @@ class AdapterFactory(object):
     def __init__(self, scheme, model):
         self.scheme = scheme
         self.model = model
+        self.adapter_mapping = {
+            'sqlite': SQLite, 'mysql': MySQL, 'postgres': PostgreSQL
+        }
 
     def produce(self):
-        if self.scheme == 'sqlite':
-            return SQLite(self.model)
-        elif self.scheme == 'mysql':
-            return MySQL(self.model)
-        elif self.scheme == 'postgres':
-            return PostgreSQL(self.model)
-        else:
-            return CommonSQL(self.model)
+        return self.adapter_mapping.get(self.scheme, CommonSQL)(self.model)
 
 
 # Monkey Patching Storm (only a bit)

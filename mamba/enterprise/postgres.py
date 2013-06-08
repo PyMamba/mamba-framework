@@ -5,7 +5,7 @@
 """
 .. module:: postgres_adapter
     :platform: Unix, Windows
-    :synopsis: PostgreSQL adapter for create SQLite tables
+    :synopsis: PostgreSQL adapter for create PosetgreSQL tables
 
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 
@@ -15,9 +15,9 @@ import sys
 import inspect
 from singledispatch import singledispatch
 
+from storm import properties
 from twisted.python import components
 from storm.references import Reference
-from storm import variables, properties
 
 from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL
