@@ -75,6 +75,7 @@ The following dependencies must be satisfied if we are planning on running mamba
 * `doublex <https://bitbucket.org/DavidVilla/python-doublex>`_, version >= 1.5.1
 * `PyHamcrest <http://pythonhosted.org/PyHamcrest/>`_
 * `sphinx <http://sphinx-doc.org>`_, version >= 1.1.3
+* `fabric <http://fabfile.org>`_
 * `virtualenv <https://pypi.python.org/pypi/virtualenv/1.9.1>`_
 * `pyflakes <https://launchpad.net/pyflakes>`_
 * `pep8 <http://github.com/jcrocholl/pep8>`_
