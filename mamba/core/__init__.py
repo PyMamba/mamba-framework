@@ -15,5 +15,6 @@ GNU_LINUX = True if 'linux' in sys.platform else False
 BSD = True if 'bsd' in sys.platform else False
 OSX = True if 'darwin' in sys.platform else False
 WINDOWS = True if 'win' in sys.platform else False
+POSIX = not WINDOWS
 
-__all__ = ['GNU_LINUX', 'BSD', 'OSX', 'WINDOWS']
+__all__ = ['GNU_LINUX', 'BSD', 'OSX', 'WINDOWS', 'POSIX']

@@ -14,9 +14,8 @@ from twisted import copyright
 from twisted.python import usage, filepath
 from storm import version as storm_version
 
-from mamba.utils import config
 from mamba import version, license
-from mamba.core import GNU_LINUX, BSD, OSX, WINDOWS
+from mamba.core import GNU_LINUX, BSD, OSX, WINDOWS, POSIX
 from mamba import copyright as mamba_copyright
 from mamba.utils.output import darkgreen, darkred
 
@@ -128,6 +127,7 @@ def handle_start_command(options):
 
     try:
         mamba_services = import_services()
+        mamba_services.config.Application('config/application.json')
     except ImportError:
         print(
             'error: make sure you are inside a mamba application root '
@@ -135,8 +135,8 @@ def handle_start_command(options):
         )
         sys.exit(-1)
 
-    if GNU_LINUX or BSD:
-        app = config.Application('config/application.json')
+    if POSIX:
+        app = mamba_services.config.Application()
         if app.port <= 1024:
             if os.getuid() != 0:
                 print(
@@ -235,33 +235,13 @@ def determine_platform_reactor():
     reactor = '--reactor={}'
     default = 'select'
     if GNU_LINUX:
-        try:
-            from twisted.internet import epollreactor
-            assert epollreactor
-            default = 'epoll'
-        except ImportError:
-            pass
+        default = 'epoll'
     elif BSD:
-        try:
-            from twisted.internet import kqreactor
-            assert kqreactor
-            default = 'kqueue'
-        except ImportError:
-            pass
+        default = 'kqueue'
     elif OSX:
-        try:
-            from twisted.internet import cfreactor
-            assert cfreactor
-            default = 'cf'
-        except ImportError:
-            pass
+        default = 'cf'
     elif WINDOWS:
-        try:
-            from twisted.internet import iocpreactor
-            assert iocpreactor
-            default = 'iocp'
-        except ImportError:
-            pass
+        default = 'iocp'
 
     return reactor.format(default)
 
