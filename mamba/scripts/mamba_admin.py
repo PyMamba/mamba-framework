@@ -171,7 +171,7 @@ def handle_start_command(options):
         )
         sys.exit(-1)
 
-    args.append(determine_platform_reactor())
+    args.append(determine_platform_reactor(mamba_services))
 
     if mamba_services.config.Application().development is True:
         args.append('--nodaemon')
@@ -228,11 +228,16 @@ def handle_stop_command():
         raise
 
 
-def determine_platform_reactor():
+def determine_platform_reactor(mamba_services):
     """Determine the reactor to use for the running platform
+
+    If there is a configured reactor for this application, we force it
     """
 
     reactor = '--reactor={}'
+    if hasattr(mamba_services.config.Application(), 'reactor'):
+        return reactor.format(mamba_services.config.Application().reactor)
+
     default = 'select'
     if GNU_LINUX:
         default = 'epoll'

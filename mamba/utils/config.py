@@ -204,8 +204,17 @@ class Application(BaseConfig):
             "language": "en",
             "description": "This is my cool application",
             "favicon": "favicon.ico",
-            "platform_debug": false
+            "platform_debug": false,
+            "development": true
         }
+
+    If we want to force the mamba application to run under some specific
+    twisted reactor, we can add the `"reactor"` option to the configuration
+    file to enforce mamba to use the configured reactor.
+
+    .. warning:
+
+        The configured reactor must be installed and be usable in the platform
 
     :param config_file: the JSON file to load
     :type config_file: str
@@ -230,6 +239,7 @@ class Application(BaseConfig):
         self.description = None
         self.favicon = 'favicon.ico'
         self.platform_debug = False
+        self.development = False
 
 
 class InstalledPackages(BaseConfig):
