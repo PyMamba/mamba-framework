@@ -11,14 +11,11 @@
 
 """
 
-from singledispatch import singledispatch
 
 from twisted.web import static
-from twisted.python import filepath
 from twisted.web.resource import NoResource, Resource as TwistedResource
 
 from mamba.http import headers
-from mamba.core import templating
 from mamba.utils.config import Application
 from mamba.application import scripts, appstyles
 
@@ -39,24 +36,6 @@ class Resource(TwistedResource):
     def __init__(self, template_paths=None, cache_size=50):
         TwistedResource.__init__(self)
 
-        sep = filepath.os.sep
-        self._templates = {}
-        self.cache_size = cache_size
-        self.template_paths = [
-            'application/view/templates',
-            '{}/templates/jinja'.format(
-                filepath.os.path.dirname(__file__).rsplit(sep, 1)[0]
-            )
-        ]
-
-        self.add_template_paths = singledispatch(self.add_template_paths)
-        self.add_template_paths.register(str, self._add_template_paths_str)
-        self.add_template_paths.register(list, self._add_template_paths_list)
-        self.add_template_paths.register(tuple, self._add_template_paths_tuple)
-
-        if template_paths is not None:
-            self.add_template_paths(template_paths)
-
         self.config = Application()
 
         # headers and render keys for root_page and index templates
@@ -75,94 +54,6 @@ class Resource(TwistedResource):
                 'scripts': self._scripts_manager.get_scripts().values()
             }
         }
-
-        # template environment
-        self.environment = templating.Environment(
-            autoescape=lambda name: (
-                name.rsplit('.', 1)[1] == 'html' if name is not None else False
-            ),
-            cache_size=self.cache_size,
-            loader=templating.FileSystemLoader(self.template_paths)
-        )
-
-    def getChild(self, path, request):
-        """
-        If path is an empty string or index, render_GET should be called,
-        if not, we just look at the templates loaded from the view templates
-        directory. If we find a template with the same name than the path
-        then we render that template.
-
-        .. caution::
-
-            If there is a controller with the same path than the path
-            parameter then it will be hidden and the template in templates
-            path should be rendered instead
-
-        :param path: the path
-        :type path: str
-        :param request: the Twisted request object
-        """
-
-        if path == '' or path is None or path == 'index':
-            return self
-
-        for template in self.environment.list_templates():
-            if path == template.rsplit('.', 1)[0]:
-                return self
-
-        return TwistedResource.getChild(self, path, request)
-
-    def render_GET(self, request):
-        """Renders the index page or other templates of templates directory
-        """
-
-        if not request.prepath[0].endswith('.html'):
-            request.prepath[0] += '.html'
-
-        try:
-            template = templating.Template(
-                self.environment, template=request.prepath[0]
-            )
-            return template.render(**self.render_keys).encode('utf-8')
-        except templating.TemplateNotFound:
-            try:
-                template = templating.Template(
-                    self.environment, template='index.html'
-                )
-                return template.render(**self.render_keys).encode('utf-8')
-            except templating.TemplateNotFound:
-                pass
-
-        template = templating.Template(
-            self.environment,
-            template='root_page.html'
-        )
-        return template.render(**self.render_keys).encode('utf-8')
-
-    def add_template_paths(self, paths):
-        """Add template paths to the underlying Jinja2 templating system
-        """
-
-        raise RuntimeError(
-            '{} type for paths can not be handled'.format(type(paths)))
-
-    def _add_template_paths_str(self, paths):
-        """Append template paths for single str template path given
-        """
-
-        self.template_paths.append(paths)
-
-    def _add_template_paths_list(self, paths):
-        """Adds the given template paths list
-        """
-
-        self.template_paths + paths
-
-    def _add_template_paths_tuple(self, paths):
-        """Adds the given template paths tuple
-        """
-
-        self.template_paths + list(paths)
 
 
 class Assets(TwistedResource):

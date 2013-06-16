@@ -69,8 +69,7 @@ class MambaTemplate(object):
 class Template(object):
     """
     This class loads and render templates from Mamba Applications view and
-    controller directories. This class is used internally by mamba you don't
-    have the need to use this class in your code.
+    controller directories.
 
     If controller is not None, then we use the controller directory templates
     instead of global view ones.
