@@ -55,7 +55,7 @@ class TemplateTest(unittest.TestCase):
         os.chdir('../mamba/test/dummy_app')
 
         self.dummy = DummyController()
-        self.template = Template(cache_size=0)
+        self.template = Template(size=0)
 
     def tearDown(self):
         os.chdir(self.currdir)
@@ -124,7 +124,7 @@ class TemplateTest(unittest.TestCase):
     def test_template_with_template_arg_on_render_hides_controller(self):
 
         def dummy_test2(self):
-            return Template(controller=self, cache_size=0).render(
+            return Template(controller=self, size=0).render(
                 template='dummy_test2.html')
 
         dummy = self.dummy
