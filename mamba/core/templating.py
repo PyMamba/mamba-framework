@@ -135,7 +135,7 @@ class Template(object):
                 else:
                     loader = self.loader(self.search_paths)
             else:
-                loader = kwargs.get('loader')(self.search_paths)
+                loader = kwargs.pop('loader')(self.search_paths)
 
             self.env = Environment(
                 autoescape=lambda name: (
