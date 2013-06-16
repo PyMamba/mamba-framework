@@ -19,6 +19,8 @@ from twisted.python.logfile import DailyLogFile
 
 from mamba.core import templating, resource
 
+os = filepath.os
+
 
 class Page(resource.Resource):
     """
@@ -31,33 +33,26 @@ class Page(resource.Resource):
 
     :param app: The Mamba Application that implements this page
     :type app: :class:`~mamba.application.app.Application`
+    :param template_paths: additional template paths for resources
+    :param cache_size: the cache size for Jinja2 Templating system
+    :param loader: Jinja2 custom templating loader
     """
 
-    def __init__(self, app, template_paths=None, cache_size=50):
+    def __init__(self, app, template_paths=None, cache_size=50, loader=None):
+        resource.Resource.__init__(self)
 
         # register log file if any
         if (app.development is False and
                 app.already_logging is False and app.log_file is not None):
             log.startLogging(DailyLogFile.fromFullPath(app.log_file))
 
-        resource.Resource.__init__(self)
-
-        sep = filepath.os.sep
-        self.app = app
-        self.cache_size = cache_size
-        self._controllers_manager = None
-        self._stylesheets = []
-        self._scripts = []
-        self._assets = resource.Assets([filepath.os.getcwd() + '/static'])
+        self._assets = resource.Assets([os.getcwd() + '/static'])
         self.template_paths = [
             'application/view/templates',
             '{}/templates/jinja'.format(
-                filepath.os.path.dirname(__file__).rsplit(sep, 1)[0]
+                os.path.dirname(__file__).rsplit(os.sep, 1)[0]
             )
         ]
-        self.generate_dispatches()
-        if template_paths is not None:
-            self.add_template_paths(template_paths)
 
         # set managers
         self._controllers_manager = app.managers.get('controller')
@@ -72,11 +67,9 @@ class Page(resource.Resource):
             'styles': static.Data('', 'text/css'),
             'scripts': static.Data('', 'text/javascript')
         }
-
         # register containers
         self.putChild('styles', self.containers['styles'])
         self.putChild('scripts', self.containers['scripts'])
-
         # insert stylesheets and scripts
         self.insert_stylesheets()
         self.insert_scripts()
@@ -84,14 +77,9 @@ class Page(resource.Resource):
         # static accessible data (scripts, css, images, and others)
         self.putChild('assets', self._assets)
 
-        # template environment
-        self.environment = templating.Environment(
-            autoescape=lambda name: (
-                name.rsplit('.', 1)[1] == 'html' if name is not None else False
-            ),
-            cache_size=self.cache_size,
-            loader=templating.FileSystemLoader(self.template_paths)
-        )
+        # other initializations
+        self.generate_dispatches()
+        self.initialize_templating_system(template_paths, cache_size, loader)
 
     def getChild(self, path, request):
         """
@@ -180,18 +168,42 @@ class Page(resource.Resource):
 
         for package in self._shared_controllers_manager.packages.values():
             real_manager = package['controller']
+
             for controller in real_manager.get_controllers().values():
+                module = controller['module'].__file__
                 self._register_controller_module(controller, True)
+
                 static_data = filepath.FilePath(
-                    '{}/static'.format(
-                        filepath.os.path.normpath(
-                            filepath.os.path.dirname(
-                                controller['module'].__file__
-                            ).split('controller')[0])
+                    '{}/static'.format(os.path.normpath(
+                        os.path.dirname(module).split('controller')[0])
                     )
                 )
                 if static_data.exists():
                     self._assets.add_paths([static_data.path])
+
+    def initialize_templating_system(self, template_paths, cache_size, loader):
+        """Initialize the Jinja2 templating system for static HTML resources
+        """
+
+        if self._shared_controllers_manager is not None:
+            for package in self._shared_controllers_manager.packages.values():
+                self.add_template_paths('{}/view/templates'.format(
+                    package.get('path'))
+                )
+
+        if template_paths is not None:
+            self.add_template_paths(template_paths)
+
+        if loader is None:
+            loader = templating.FileSystemLoader
+
+        self.environment = templating.Environment(
+            autoescape=lambda name: (
+                name.rsplit('.', 1)[1] == 'html' if name is not None else False
+            ),
+            cache_size=cache_size,
+            loader=loader(self.template_paths)
+        )
 
     def insert_stylesheets(self):
         """Insert stylesheets into the HTML
