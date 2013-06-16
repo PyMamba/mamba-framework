@@ -14,7 +14,8 @@
 import os
 from inspect import getframeinfo, currentframe, getfile
 
-from jinja2 import Environment, PackageLoader, FileSystemLoader
+from jinja2 import Environment
+from jinja2 import PackageLoader, FileSystemLoader, ChoiceLoader
 from jinja2 import TemplateNotFound
 
 from mamba.http import headers
@@ -83,13 +84,12 @@ class Template(object):
     :raises: NotConfigured it no parameters are provided
     """
 
-    def __init__(
-            self, env=None, controller=None, size=50, template=None, **kargs):
+    def __init__(self, env=None, controller=None, size=50, template=None):
         self.env = env
-        self.controller = controller
+        self.loader = None
         self.cache_size = size
         self.template = template
-        self.options = kargs
+        self.controller = controller
         self._header = headers.Headers()
         self.search_paths = [
             'application/view/templates',
@@ -105,16 +105,13 @@ class Template(object):
 
             if 'application' not in controller.__module__:
                 # this controller is a packed shared controller
-
-                straw = controller.__module__.split('.', 1)[1]
-                straw = straw.replace('.', '/')
+                dum = controller.__module__.split('.', 1)[1].replace('.', '/')
                 path = os.path.normpath('{}'.format(
-                    getfile(controller.__class__).split(straw)[0])
-                )
+                    getfile(controller.__class__).split(dum)[0]))
                 self.search_paths.insert(
-                    0, '{}/view/{}'.format(path, controller.name)
-                )
+                    0, '{}/view/{}'.format(path, controller.name))
                 self.search_paths.insert(0, '{}/view/templates'.format(path))
+                self.loader = ChoiceLoader
 
     def render(self, template=None, **kwargs):
         """
@@ -128,13 +125,25 @@ class Template(object):
             template = self.template
 
         if self.env is None:
+            if kwargs.get('loader', None) is None:
+                if self.loader is None:
+                    loader = FileSystemLoader(self.search_paths)
+                elif self.loader is ChoiceLoader:
+                    loader = self.loader(
+                        [FileSystemLoader(path) for path in self.search_paths]
+                    )
+                else:
+                    loader = self.loader(self.search_paths)
+            else:
+                loader = kwargs.get('loader')(self.search_paths)
+
             self.env = Environment(
                 autoescape=lambda name: (
                     name.rsplit('.', 1)[1] == 'html'
                     if name is not None else False
                 ),
                 cache_size=self.cache_size,
-                loader=FileSystemLoader(self.search_paths)
+                loader=loader
             )
 
         for arg, value in kwargs.iteritems():
