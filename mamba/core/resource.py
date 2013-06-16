@@ -23,17 +23,13 @@ from mamba.application import scripts, appstyles
 class Resource(TwistedResource):
     """
     Mamba resources base class. A web accessible resource that add common
-    childs for scripts in Mamba applications
-
-    :param template_paths: additional template paths for resources
-    :param cache_size: the cache size for Jinja2 Templating system
-    :param static: route for static data for this resouce
+    properties for scripts in Mamba applications
     """
 
     _styles_manager = appstyles.AppStyles()
     _scripts_manager = scripts.AppScripts()
 
-    def __init__(self, template_paths=None, cache_size=50):
+    def __init__(self):
         TwistedResource.__init__(self)
 
         self.config = Application()
