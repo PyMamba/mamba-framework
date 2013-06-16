@@ -49,13 +49,15 @@ class PackagesManager(object):
                 log.err('{} is not installed on the system'.format(package))
                 continue
 
+            path = os.path.dirname(os.path.normpath(module.__file__))
+            self.packages[package] = {'path': path}
+
             if data.get('autoimport', False) is True:
-                path = os.path.dirname(os.path.normpath(module.__file__))
-                self.packages[package] = {
+                self.packages[package].update({
                     'controller': ControllerManager(
                         '{}/controller'.format(path), package
                     ),
                     'model': ModelManager(
                         '{}/model'.format(path), package
                     )
-                }
+                })
