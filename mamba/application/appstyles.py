@@ -2,6 +2,8 @@
 # Copyright (c) 2012 - Oscar Campos <oscar.campos@member.fsf.org>
 # See LICENSE for more details
 
+import os
+
 from mamba.web import stylesheet
 from mamba.utils.config import InstalledPackages
 
@@ -26,8 +28,8 @@ class AppStyles(object):
             if data.get('use_scripts', False) is False:
                 continue
 
-            from .application.app import Mamba
-            path = Mamba().managers['packages'][package]['path']
+            module = __import__(package, globals(), locals())
+            path = os.path.dirname(os.path.normpath(module.__file__))
             self.managers.append(stylesheet.StylesheetManager(
                 '{}/view/stylesheets'.format(path))
             )
