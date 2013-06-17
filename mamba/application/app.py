@@ -21,6 +21,7 @@ from twisted.python import versions, filepath, log
 
 from mamba.utils import borg
 from mamba.http import headers
+from mamba.core import packages
 from mamba import _version as _mamba_version
 from mamba.application import controller, model
 
@@ -107,7 +108,8 @@ class Mamba(borg.Borg):
 
         self.managers = {
             'controller': controller.ControllerManager(),
-            'model': model.ModelManager()
+            'model': model.ModelManager(),
+            'packages': packages.PackagesManager()
         }
 
         self.initialized = True
@@ -123,17 +125,21 @@ class Mamba(borg.Borg):
             log.startLogging(DailyLogFile.fromFullPath(self.log_file))
 
     def _parse_options(self, options):
-        if options is not None:
-            for key in dir(options):
-                if not key.startswith('__'):
-                    if key == 'port':
-                        setattr(self, '_port', getattr(options, key))
-                    elif key == 'version':
-                        setattr(self, '_ver', getattr(options, key))
-                    elif key == 'log_file':
-                        setattr(self, '_log_file', getattr(options, key))
-                    else:
-                        setattr(self, key, getattr(options, key))
+        if options is None:
+            return
+
+        for key in dir(options):
+            if key.startswith('__'):
+                continue
+
+            if key == 'port':
+                setattr(self, '_port', getattr(options, key))
+            elif key == 'version':
+                setattr(self, '_ver', getattr(options, key))
+            elif key == 'log_file':
+                setattr(self, '_log_file', getattr(options, key))
+            else:
+                setattr(self, key, getattr(options, key))
 
     def _monkey_patch(self):
         """
