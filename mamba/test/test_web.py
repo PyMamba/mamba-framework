@@ -404,6 +404,27 @@ class PageTest(unittest.TestCase):
             mgr.lookup('dummy')['object']
         )
 
+    def test_page_add_template_paths_string(self):
+
+        self.root.add_template_paths('/test_string')
+        self.assertTrue('/test_string' in self.root.template_paths)
+
+    def test_page_add_template_paths_list(self):
+
+        self.root.add_template_paths(['/test_list1', '/test_list2'])
+        self.assertTrue('/test_list1' in self.root.template_paths)
+        self.assertTrue('/test_list2' in self.root.template_paths)
+
+    def test_page_add_template_paths_tuples(self):
+
+        self.root.add_template_paths(('/test_tuple1', '/test_tuple2'))
+        self.assertTrue('/test_tuple1' in self.root.template_paths)
+        self.assertTrue('/test_tuple2' in self.root.template_paths)
+
+    def test_page_add_template_fails_on_unknown_type(self):
+
+        self.assertRaises(RuntimeError, self.root.add_template_paths, False)
+
 
 class RouteTest(unittest.TestCase):
 

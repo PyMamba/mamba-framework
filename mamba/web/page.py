@@ -251,13 +251,13 @@ class Page(resource.Resource):
         """Adds the given template paths list
         """
 
-        self.template_paths + paths
+        self.template_paths += paths
 
     def _add_template_paths_tuple(self, paths):
         """Adds the given template paths tuple
         """
 
-        self.template_paths + list(paths)
+        self.template_paths += list(paths)
 
     def _register_controller_module(self, controller, shared=False):
         """Efectively register the controller in the routing system
