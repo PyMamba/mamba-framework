@@ -72,11 +72,11 @@ class Controller(resource.Resource, ControllerProvider):
     isLeaf = True
     _router = routing.Router()
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         """Initialize
         """
 
-        resource.Resource.__init__(self)
+        resource.Resource.__init__(self, *args, **kwargs)
         self._router.install_routes(self)
 
     def getChild(self, name, request):
@@ -229,11 +229,12 @@ class ControllerManager(module.ModuleManager):
     :param store: if is not None it sets the _module_store attr
     """
 
-    def __init__(self, store=None):
+    def __init__(self, store=None, package=None):
         """Initialize
         """
 
         self._module_store = 'application/controller' if not store else store
+        self._package = package
         super(ControllerManager, self).__init__()
 
     def get_controllers(self):

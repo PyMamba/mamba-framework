@@ -343,7 +343,7 @@ class Package(object):
 
         try:
             print('Packing {} application into {} format...'.format(
-                mamba_services.config.Application().name,
+                self.options.subOptions['name'],
                 'egg' if use_egg else 'source'
             ).ljust(73), end='')
             Packer().pack_application(
@@ -381,13 +381,13 @@ class Package(object):
         config = mamba_services.config.Application('config/application.json')
 
         print('Installing {} application in {} store...'.format(
-            mamba_services.config.Application().name,
+            self.options.subOptions['name'],
             'global' if self.options.subOptions['global'] else 'user'
         ).ljust(73), end='')
 
         try:
             packer.create_package_directory(
-                config.name, self.options.subOptions, config)
+                config.name.lower(), self.options.subOptions, config)
             packer.install_package_directory(self.options.subOptions)
             print('[{}]'.format(darkgreen('Ok')))
         except:
@@ -428,11 +428,13 @@ class Package(object):
         except Exception:
             mamba_services_not_found()
 
-        print('Uninstalling {}...'.format(
-            mamba_services.config.Application().name).ljust(73), end='')
+        name = 'mamba-{}'.format(mamba_services.config.Application(
+            'config/application.json').name.lower()
+        )
+        print('Uninstalling {}...'.format(name).ljust(73), end='')
         try:
             p = subprocess.Popen(
-                ['pip', 'uninstall', mamba_services.config.Application().name],
+                ['pip', 'uninstall', name],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 stdin=subprocess.PIPE
             )
@@ -564,9 +566,9 @@ class Packer(object):
         # create layout
         self.do(['mkdir', 'package'])
         self.do(['cp', '-Rf', 'docs', 'package/'])
-        self.do(['cp', '-Rf', 'static', 'package/'])
         self.do(['cp', 'README.rst', 'LICENSE', 'package/'])
         self.do(['cp', '-Rf', 'application', 'package/' + name])
+        self.do(['cp', '-Rf', 'static', 'package/' + name + '/static'])
 
         if len(options['extra_directories']) != 0:
             for directory in options['extra_directories']:
@@ -590,7 +592,7 @@ class Packer(object):
         self.do([sys.executable, 'setup.py', command, '-d', '../'])
         self.do([sys.executable, 'setup.py', 'clean'])
         os.chdir('..')
-        # self.do(['rm', '-Rf', 'package'])
+        self.do(['rm', '-Rf', 'package'])
 
     def fix_application_path(self, name):
         """Fix the application path renaming `application` to `name`
@@ -608,7 +610,7 @@ class Packer(object):
 
         with open('MANIFEST.in', 'a+') as manifest:
             manifest.write('include .mamba-package\n')
-            manifest.write('recursive-include static *\n')
+            manifest.write('recursive-include {}/static *\n'.format(name))
             manifest.write('recursive-include {}/view *\n'.format(name))
 
             for directory in options['extra_directories']:

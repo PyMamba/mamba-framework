@@ -8,8 +8,8 @@ Tests for mamba.web
 
 import sys
 import tempfile
-from os import sep
 from cStringIO import StringIO
+from os import sep, getcwd, chdir
 
 from twisted.internet import defer
 from twisted.trial import unittest
@@ -84,7 +84,8 @@ class StylesheetTest(unittest.TestCase):
 class StylesheetManagerTest(unittest.TestCase):
 
     def setUp(self):
-        self.mgr = appstyles.AppStyles()
+        # self.mgr = appstyles.AppStyles()
+        self.mgr = stylesheet.StylesheetManager()
 
     def tearDown(self):
         self.flushLoggedErrors()
@@ -94,6 +95,7 @@ class StylesheetManagerTest(unittest.TestCase):
             '../mamba/test/dummy_app/application/view/stylesheets/dummy.less')
 
     def test_setup_doesnt_works_until_correct_path(self):
+        self.mgr._styles_store = ''
         self.mgr.setup()
         self.assertFalse(len(self.mgr._stylesheets))
 
@@ -129,6 +131,22 @@ class StylesheetManagerTest(unittest.TestCase):
             self.mgr.lookup('dummy.less'),
             stylesheet.Stylesheet
         )
+
+
+class AppStylesTest(unittest.TestCase):
+
+    def setUp(self):
+        self.currdir = getcwd()
+        chdir('../mamba/test/dummy_app/')
+        self.mgr = appstyles.AppStyles()
+
+    def tearDown(self):
+        chdir(self.currdir)
+
+    def test_setup_and_get_styles(self):
+        self.mgr.setup()
+        self.assertEqual(len(self.mgr.get_styles()), 1)
+        self.assertEqual(self.mgr.get_styles().keys()[0], 'dummy.less')
 
 
 class ScriptTest(unittest.TestCase):
@@ -188,7 +206,8 @@ class ScriptTest(unittest.TestCase):
 class ScriptManagerTest(unittest.TestCase):
 
     def setUp(self):
-        self.mgr = scripts.Scripts()
+        # self.mgr = scripts.Scripts()
+        self.mgr = script.ScriptManager()
 
     def tearDown(self):
         self.flushLoggedErrors()
@@ -198,6 +217,7 @@ class ScriptManagerTest(unittest.TestCase):
             '../mamba/test/dummy_app/application/view/scripts/dummy.js')
 
     def test_setup_doesnt_works_until_correct_path(self):
+        self.mgr._scripts_store = ''
         self.mgr.setup()
         self.assertFalse(len(self.mgr._scripts))
 
@@ -229,6 +249,22 @@ class ScriptManagerTest(unittest.TestCase):
             self.mgr.lookup('dummy.js'),
             script.Script
         )
+
+
+class AppScriptTest(unittest.TestCase):
+
+    def setUp(self):
+        self.currdir = getcwd()
+        chdir('../mamba/test/dummy_app/')
+        self.mgr = scripts.AppScripts()
+
+    def tearDown(self):
+        chdir(self.currdir)
+
+    def test_setup_and_get_styles(self):
+        self.mgr.setup()
+        self.assertEqual(len(self.mgr.get_scripts()), 1)
+        self.assertEqual(self.mgr.get_scripts().keys()[0], 'dummy.js')
 
 
 class AsyncJSONTest(unittest.TestCase):

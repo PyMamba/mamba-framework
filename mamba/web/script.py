@@ -13,14 +13,6 @@
 import re
 from os.path import normpath
 
-from mamba.core import GNU_LINUX
-
-if GNU_LINUX:
-    from zope.interface import implements
-    from twisted.internet import inotify
-    from twisted.python._inotify import INotifyError
-    from mamba.core.interfaces import INotifier
-
 from twisted.python import filepath
 
 from mamba.utils import filevariables
@@ -95,8 +87,10 @@ class ScriptManager(object):
     Manager for Scripts
     """
 
-    def __init__(self):
+    def __init__(self, scripts_store=None):
         self._scripts = {}
+        if scripts_store is not None:
+            self._scripts_store = scripts_store
 
     @property
     def scripts(self):

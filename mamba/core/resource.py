@@ -15,7 +15,7 @@ from singledispatch import singledispatch
 
 from twisted.web import static
 from twisted.python import filepath
-from twisted.web.resource import Resource as TwistedResource
+from twisted.web.resource import NoResource, Resource as TwistedResource
 
 from mamba.http import headers
 from mamba.core import templating
@@ -33,7 +33,10 @@ class Resource(TwistedResource):
     :param static: route for static data for this resouce
     """
 
-    def __init__(self, template_paths=None, cache_size=50, static_path=None):
+    _styles_manager = appstyles.AppStyles()
+    _scripts_manager = scripts.AppScripts()
+
+    def __init__(self, template_paths=None, cache_size=50):
         TwistedResource.__init__(self)
 
         sep = filepath.os.sep
@@ -56,10 +59,6 @@ class Resource(TwistedResource):
 
         self.config = Application()
 
-        # set resources managers
-        self._styles_manager = appstyles.AppStyles()
-        self._scripts_manager = scripts.Scripts()
-
         # headers and render keys for root_page and index templates
         header = headers.Headers()
         self.render_keys = {
@@ -76,30 +75,6 @@ class Resource(TwistedResource):
                 'scripts': self._scripts_manager.get_scripts().values()
             }
         }
-
-        # containers
-        self.containers = {
-            'styles': static.Data('', 'text/css'),
-            'scripts': static.Data('', 'text/javascript')
-        }
-
-        # register containers
-        self.putChild('styles', self.containers['styles'])
-        self.putChild('scripts', self.containers['scripts'])
-
-        # insert stylesheets
-        self.insert_stylesheets()
-
-        # insert scripts
-        self.insert_scripts()
-
-        # static accessible data (scripts, css, images, and others)
-        if static_path is None:
-            self.putChild(
-                'assets', static.File(filepath.os.getcwd() + '/static')
-            )
-        else:
-            self.putChild('assets', static_path)
 
         # template environment
         self.environment = templating.Environment(
@@ -164,20 +139,6 @@ class Resource(TwistedResource):
         )
         return template.render(**self.render_keys).encode('utf-8')
 
-    def insert_stylesheets(self):
-        """Insert stylesheets into the HTML
-        """
-
-        for name, style in self._styles_manager.get_styles().iteritems():
-            self.containers['styles'].putChild(name, static.File(style.path))
-
-    def insert_scripts(self):
-        """Insert scripts to the HTML
-        """
-
-        for name, script in self._scripts_manager.get_scripts().iteritems():
-            self.containers['scripts'].putChild(name, static.File(script.path))
-
     def add_template_paths(self, paths):
         """Add template paths to the underlying Jinja2 templating system
         """
@@ -202,3 +163,44 @@ class Resource(TwistedResource):
         """
 
         self.template_paths + list(paths)
+
+
+class Assets(TwistedResource):
+    """
+    This object is used to serve the static assets for all the packages that
+    we use in a mamba application.
+
+    :param paths: a list of filepaths
+    :type paths: list
+    """
+
+    def __init__(self, paths):
+        TwistedResource.__init__(self)
+        self.paths = []
+
+        self.add_paths(paths)
+
+    def add_paths(self, paths):
+        """Add a new path to the list of paths
+
+        :param path: the paths to add
+        :type path: list
+        """
+
+        for path in paths:
+            self.paths.append(static.File(path))
+
+    def getChild(self, path, request):
+        for file in self.paths:
+            if path in file.listNames():
+                return file.getChild(path, request)
+
+        if path != '':
+            return NoResource('File not found')
+
+        return self
+
+    def render_GET(self, request):
+        return ''
+
+    render_HEAD = render_GET

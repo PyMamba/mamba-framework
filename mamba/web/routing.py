@@ -30,8 +30,7 @@ from mamba.core.decorators import unlimited_cache
 
 
 class UrlRegex(object):
-    """
-    Common static URL regex
+    """Common static URL regex
     """
 
     url_matcher = re.compile(r'<(int|float|):?([^/]+)>')
@@ -47,8 +46,7 @@ class UrlRegex(object):
 
 
 class Route(object):
-    """
-    I am a Route in the Mamba routing system.
+    """I am a Route in the Mamba routing system.
     """
 
     def __init__(self, method, url, callback):
@@ -167,8 +165,7 @@ class Router(object):
 
     @unlimited_cache
     def dispatch(self, controller, request):
-        """
-        Dispatch a route and return back the appropiate response.
+        """Dispatch a route and return back the appropiate response.
 
         :param controller: the mamba controller
         :type controller: :class:`~mamba.Controller`
@@ -218,8 +215,7 @@ class Router(object):
         return result
 
     def install_routes(self, controller):
-        """
-        Install all the routes in a controller.
+        """Install all the routes in a controller.
 
         :param controller: the controller where to fid routes
         :type controller: :class:`~mamba.Controller`
@@ -266,8 +262,7 @@ class Router(object):
                     self.register_route(controller, route)
 
     def register_route(self, controller, route):
-        """
-        Decorator that register a route for the given controller
+        """Decorator that register a route for the given controller
 
         :param controller: the controller where to register the route
         :type controller: :class:`~mamba.Controller`
@@ -286,8 +281,7 @@ class Router(object):
 
     # decorator
     def route(self, url, method='GET'):
-        """
-        Register routes for controllers or full REST resources.
+        """Register routes for controllers or full REST resources.
         """
         def decorator(func):
             @functools.wraps(func)
@@ -301,8 +295,7 @@ class Router(object):
         return decorator
 
     def _process(self, result, request):
-        """
-        Prepare and process the result.
+        """Prepare and process the result.
         """
 
         if result is None:
@@ -314,8 +307,7 @@ class Router(object):
             return self._process_error(result, request, error)
 
     def _process_error(self, result, request, error=''):
-        """
-        Process and sendback an error response
+        """Process and sendback an error response
         """
 
         if isinstance(error, response.Response):
@@ -328,8 +320,7 @@ class Router(object):
         )
 
     def _prepare_response(self, result, request):
-        """
-        Renders the result to cobvert it to the appropiate format
+        """Renders the result to cobvert it to the appropiate format
         """
 
         result = Converter.serialize(result)
@@ -360,8 +351,7 @@ class Router(object):
 
 
 class RouteDispatcher(object):
-    """
-    Look for a route, compile/process if neccesary and return it
+    """Look for a route, compile/process if neccesary and return it
     """
 
     def __init__(self, router, controller, request):
@@ -406,8 +396,7 @@ class RouteDispatcher(object):
         return None
 
     def _parse_request_args(self, route):
-        """
-        Parses JSON data and request form if present
+        """Parses JSON data and request form if present
         """
 
         data = self.request.content.read()

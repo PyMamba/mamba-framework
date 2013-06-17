@@ -12,7 +12,7 @@
 """
 
 import os
-from inspect import getframeinfo, currentframe
+from inspect import getframeinfo, currentframe, getfile
 
 from jinja2 import Environment, PackageLoader, FileSystemLoader
 from jinja2 import TemplateNotFound
@@ -98,10 +98,24 @@ class Template(object):
                 os.path.dirname(__file__).rsplit(os.sep, 1)[0]
             )
         ]
+
         if controller is not None:
             self.search_paths.append(
                 'application/view/{}'.format(controller.name)
             )
+
+            if 'application' not in controller.__module__:
+                # this controller is a packed shared controller
+
+                straw = controller.__module__.split('.', 1)[1]
+                straw = straw.replace('.', '/')
+                path = os.path.normpath('{}'.format(
+                    getfile(controller.__class__).split(straw)[0])
+                )
+                self.search_paths.insert(
+                    0, '{}/view/{}'.format(path, controller.name)
+                )
+                self.search_paths.insert(0, '{}/view/templates'.format(path))
 
     def render(self, template=None, **kwargs):
         """

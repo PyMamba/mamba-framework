@@ -213,7 +213,7 @@ def handle_stop_command():
     if not twisted_pid.exists():
         print(
             'error: twistd.pid file can\'t be found. You should be in the '
-            'application directory in order to stop it'
+            'applicatin directory in order to stop it'
         )
         sys.exit(-1)
 

@@ -282,11 +282,12 @@ class ModelManager(module.ModuleManager):
     :param store: if is not None it sets the _module_store attr
     """
 
-    def __init__(self, store=None):
+    def __init__(self, store=None, package=None):
         """Initialize
         """
 
         self._module_store = 'application/model' if not store else store
+        self._package = package
         super(ModelManager, self).__init__()
 
     def get_models(self):

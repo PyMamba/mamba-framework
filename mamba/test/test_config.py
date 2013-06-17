@@ -94,5 +94,4 @@ class InstalledPackagesTest(unittest.TestCase):
         config.InstalledPackages(
             '../mamba/test/dummy_app/config/installed_packages.json')
         self.assertFalse(config.InstalledPackages().loaded)
-        self.assertEqual(config.InstalledPackages().repositories, [])
-        self.assertFalse(config.InstalledPackages().local_only)
+        self.assertEqual(config.InstalledPackages().packages, {})

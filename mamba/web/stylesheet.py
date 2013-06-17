@@ -13,14 +13,6 @@
 import re
 from os.path import normpath
 
-from mamba.core import GNU_LINUX
-
-if GNU_LINUX:
-    from zope.interface import implements
-    from twisted.internet import inotify
-    from twisted.python._inotify import INotifyError
-    from mamba.core.interfaces import INotifier
-
 from twisted.python import filepath
 
 from mamba.utils import filevariables
@@ -93,8 +85,10 @@ class StylesheetManager(object):
     Manager for Stylesheets
     """
 
-    def __init__(self):
+    def __init__(self, styles_store=None):
         self._stylesheets = {}
+        if styles_store is not None:
+            self._styles_store = styles_store
 
     @property
     def stylesheets(self):

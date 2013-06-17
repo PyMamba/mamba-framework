@@ -224,7 +224,16 @@ class ModuleManager(object):
         """Return a modularized version of the module store path
         """
 
-        return self._module_store.replace('/', '.')
+        if self._package is not None:
+            # this is a shared package
+            retval = '{}{}'.format(
+                self._package,
+                self._module_store.rsplit(self._package, 1)[1]
+            ).replace('/', '.')
+        else:
+            retval = self._module_store.replace('/', '.')
+
+        return retval
 
 
 __all__ = ['ModuleError', 'ModuleManager']
