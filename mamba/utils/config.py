@@ -255,14 +255,14 @@ class InstalledPackages(BaseConfig):
     .. sourcecode:: json
 
         {
-            "repositories": [],
-            "packages": ["package_one", "package_two", "package_three"],
-            "local_only": false
+            "packages": {
+                "package_one": {"autoimport": true, "use_scripts": true},
+                "package_two": {"autoimport": true, "use_scripts": false},
+                "package_three": {"autoimport": false, "use_scripts": true}
+            }
         }
 
-    If we need to donwload some of the packages from specific repositories
-    we can use the `respositories` list to add from which repositories we
-    want to donwload the required packages (those are PiPY repositories)
+    The packages *must* be installed already in the system
 
     :param config_file: the JSON file to load
     :type config_file: str
@@ -277,9 +277,7 @@ class InstalledPackages(BaseConfig):
         """Set default data to config
         """
 
-        self.repositories = []
-        self.packages = []
-        self.local_only = False
+        self.packages = {}
 
 
 __all__ = ['Database', 'Application']
