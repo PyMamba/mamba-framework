@@ -25,7 +25,6 @@ class ${controller_class}(controller.Controller):
 
     implements(interfaces.IController)
     name = '${controller_class}'
-    loaded = False
     __route__ = '${register_path}'
 
     def __init__(self):

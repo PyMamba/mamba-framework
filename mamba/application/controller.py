@@ -70,6 +70,7 @@ class Controller(resource.Resource, ControllerProvider):
     """
 
     isLeaf = True
+    loaded = False
     _router = routing.Router()
 
     def __init__(self, *args, **kwargs):

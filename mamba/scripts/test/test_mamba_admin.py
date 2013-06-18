@@ -590,7 +590,6 @@ class ControllerScriptTest(unittest.TestCase):
             '    """\n\n'
             '    implements(interfaces.IController)\n'
             '    name = \'TestController\'\n'
-            '    loaded = False\n'
             '    __route__ = \'\'\n\n'
             '    def __init__(self):\n'
             '        """\n'
