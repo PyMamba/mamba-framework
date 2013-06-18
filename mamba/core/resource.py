@@ -1,4 +1,4 @@
-
+# -*- test-case-name: mamba.test.test_resource -*-
 # Copyright (c) 2012 - 2013 Oscar Campos <oscar.campos@member.fsf.org>
 # See LICENSE for more details
 
@@ -32,14 +32,14 @@ class Resource(TwistedResource):
     def __init__(self):
         TwistedResource.__init__(self)
 
-        self.config = Application()
+        config = Application()
 
         # headers and render keys for root_page and index templates
         header = headers.Headers()
         self.render_keys = {
             'doctype': header.get_doctype(),
             'header': {
-                'title': self.config.name,
+                'title': config.name,
                 'content_type': header.content_type,
                 'generator_content': header.get_generator_content(),
                 'description_content': header.get_description_content(),
