@@ -24,11 +24,11 @@ class PackagesManager(object):
     """Load packed shared resources configured to be used on the application
     """
 
-    def __init__(self):
+    def __init__(self, config_file='config/installed_packages.json'):
         super(PackagesManager, self).__init__()
         self.packages = {}
         # initialize the configuration and the object
-        self.config = InstalledPackages('config/installed_packages.json')
+        self.config = InstalledPackages(config_file)
         self.register_packages()
 
     def register_packages(self):
