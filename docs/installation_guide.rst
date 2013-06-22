@@ -7,6 +7,8 @@ Mamba is written in the `Python <http://python.org/>`_ programming language and 
 
 In order to execute mamba tests suite `doublex <https://bitbucket.org/DavidVilla/python-doublex>`_ and `PyHamcrest <http://pythonhosted.org/PyHamcrest/>`_ are required.
 
+To build the documentation, `Fabric <http://docs.fabfile.org/en/1.6/#>`_ must be installed on the system.
+
 Installation Step
 -----------------
 

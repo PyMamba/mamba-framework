@@ -27,10 +27,10 @@ AppStyles
     :members:
     :inherited-members:
 
-Scripts
-.......
+AppScripts
+..........
 
-.. autoclass:: mamba.application.scripts.Scripts
+.. autoclass:: mamba.application.scripts.AppScripts
     :members:
     :inherited-members:
 
@@ -249,6 +249,15 @@ config.Application
 As with the previous one, this class is used to load configuration related with the application from files in JSON format in the file system. If no configuration file is provided, a basic configuration is automatically created for us.
 
 .. autoclass:: mamba.utils.config.Application
+    :members:
+    :inherited-members:
+
+config.InstalledPackages
+........................
+
+This is used to load configuration realated to the :doc:`reusability` system. If no configuration file is provided (or it doesn't exists), a basic configuration is automatically created for us.
+
+.. autoclass:: mamba.utils.config.InstalledPackages
     :members:
     :inherited-members:
 
