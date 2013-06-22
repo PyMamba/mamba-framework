@@ -7,7 +7,7 @@
 
 from twisted.trial import unittest
 
-from mamba.core import GNU_LINUX
+from mamba.core import GNU_LINUX, packages
 from mamba.application import app, controller
 
 
@@ -105,3 +105,7 @@ class ApplicationTests(unittest.TestCase):
     def test_controller_manager_is_instanced(self):
         manager = self.app.managers.get('controller')
         self.assertIsInstance(manager, controller.ControllerManager)
+
+    def test_packages_manager_is_instances(self):
+        manager = self.app.managers.get('packages')
+        self.assertIsInstance(manager, packages.PackagesManager)
