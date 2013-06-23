@@ -21,7 +21,17 @@ from mamba.application.controller import ControllerManager
 
 
 class PackagesManager(object):
-    """Load packed shared resources configured to be used on the application
+    """
+    The PackagesManager is used to register the shared packages that our
+    mamba applications are going to import and use. The manager is instanced
+    once by the :class:`~mamba.application.app.Mamba` borg and create and
+    load controllers and models managers for every package that we want to
+    use in our application.
+
+    :param config_file: the path to config file that we want to use
+    :type config_file: str
+
+    .. versionadded:: 0.3.6
     """
 
     def __init__(self, config_file='config/installed_packages.json'):
@@ -36,7 +46,7 @@ class PackagesManager(object):
 
         Styles and Scripts are a bit special and we register the main
         application ones here so we can just refer all of them from the
-        :class:`mamba.core.resource.Resource` subclasses and they will be
+        :class:`~mamba.core.resource.Resource` subclasses and they will be
         auto imported in our templates
         """
 

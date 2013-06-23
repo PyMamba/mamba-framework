@@ -1,13 +1,13 @@
-.. _installation_guide;:
+.. _installation_guide:
 
 Mamba installation guide
 ========================
 
-Mamba is written in the `Python <http://python.org/>`_ programming language and supports only version 2.7 of the language (some mamba components doesn't support Python 3.x yet). Mamba also need a database server `SQLite <http://sqlite.org/>`_, `MySQL <http://mysql.com/>`_, `MariaDB <https://mariadb.org/>`_ or `PostgreSQL <http://www.postgresql.org/>`_ in order to create and use schemes through `Storm ORM <http://storm.canonical.com>`_. For HTML rendering, mamba uses the `Jinja2 <http://jinja.pocoo.org/docs/>`_ templating system.
+Mamba is written in the Python programming language and supports only version 2.7 of the language (some mamba components doesn't support Python 3.x yet). Mamba also need a database server `SQLite <http://sqlite.org/>`_, `MySQL <http://mysql.com/>`_, `MariaDB <https://mariadb.org/>`_ or `PostgreSQL <http://www.postgresql.org/>`_ in order to create and use schemes through `Storm ORM <http://storm.canonical.com>`_. For HTML rendering, mamba uses the `Jinja2 <http://jinja.pocoo.org/docs/>`_ templating system.
 
 In order to execute mamba tests suite `doublex <https://bitbucket.org/DavidVilla/python-doublex>`_ and `PyHamcrest <http://pythonhosted.org/PyHamcrest/>`_ are required.
 
-To build the documentation, `Fabric <http://docs.fabfile.org/en/1.6/#>`_ must be installed on the system.
+To build the documentation, Fabric must be installed on the system.
 
 Installation Step
 -----------------

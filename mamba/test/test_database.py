@@ -55,7 +55,7 @@ class DatabaseTest(unittest.TestCase):
                 ')'
             )
             store.commit()
-        except DatabaseModuleError, error:
+        except DatabaseModuleError as error:
             raise unittest.SkipTest(error)
 
         return mgr

@@ -1,4 +1,4 @@
-.. _mamba_team::
+.. _mamba_team:
 
 The Mamba Team
 ==============

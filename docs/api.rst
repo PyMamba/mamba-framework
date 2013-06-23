@@ -1,7 +1,7 @@
 .. _api:
 
-API
-===
+API Documentation
+=================
 
 .. module:: mamba
     :synopsis: public Mamba API
@@ -145,6 +145,16 @@ Core Services used by mamba applications
     :members:
 
 
+Packages
+........
+.. versionadded:: 0.3.6
+
+Mamba packages are used by the :doc:`reusability` system to make posible the reuse of mamba applications and components between mamba applications.
+
+.. autoclass:: mamba.core.packages.PackagesManager
+    :members:
+
+
 Resource
 ........
 
@@ -183,7 +193,7 @@ Mamba integrates the Jinja2 templating system as a core component of the framewo
 Deployment
 ----------
 
-Mamba integrates the Fabric deployment library and it's used by Mamba itself to release new versions and deploy the framework to the live mamba web site. Too see an example of usage you can check the `mamba devel <https://github.com/DamnWidget/mamba_devel>`_ package on GitHub.
+Mamba integrates the Fabric deployment library and it's used by Mamba itself to release new versions and deploy the framework to the live mamba web site. To see an example of usage you can check the `mamba devel <https://github.com/DamnWidget/mamba_devel>`_ package on GitHub.
 
 .. autoclass:: mamba.deployment.deployer.DeployerImporter
     :members:
@@ -254,6 +264,8 @@ As with the previous one, this class is used to load configuration related with 
 
 config.InstalledPackages
 ........................
+
+.. versionadded:: 0.3.6
 
 This is used to load configuration realated to the :doc:`reusability` system. If no configuration file is provided (or it doesn't exists), a basic configuration is automatically created for us.
 

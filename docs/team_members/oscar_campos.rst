@@ -1,4 +1,4 @@
-.. _oscar_campos::
+.. _oscar_campos:
 
 Oscar Campos
 ============

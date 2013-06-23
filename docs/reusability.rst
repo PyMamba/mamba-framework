@@ -19,7 +19,7 @@ Although we are allow to ruese any Python application just adding a package dire
 Installing an application
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When we are happy with our reusable application code we can then make it shareable between mamba applications using the `package` system but we have to fit some requirements first::
+When we are happy with our reusable application code we can then make it shareable between mamba applications using the `package` system but we have to fit some requirements first:
 
     * Your application root **must** contain a `docs` directory (with documentation about your shared package)
     * Your application root **must** contain a `LICENSE` and `README.rst` files on it
@@ -28,7 +28,9 @@ When we are happy with our reusable application code we can then make it shareab
 When we fit all those requirements we can just use the `mamna-admin package` command line to *pack* or *install* our application::
 
     $ mamba-admin package install -g
+
 |
+
 The above command will install the mamba application directly to the global `site-package` of our Python installation. If we can't install our application direcly in the global `site-package` maybe because we don't have root access and we are not running into a `virtualenv` environment we can install the package in the `user site-package` using the `-u` option instead of `-g`. Obviously we can't use both options at time.
 
 Packing an application
@@ -122,7 +124,9 @@ If `use_scripts` is set as `true`, mamba will include all the scripts from the s
 
 The same is applicable for shared templates and scripts in controller sub-directories.
 
-In the other hand, shared templates are always included in the `Jinja2` search path so them are always available in our application. If we need to override a shared template we just have to create a template in our `application/view/templates` or `application/view/<controller>` directories and mamba will use those instead of the shared one.
+In the other hand, shared templates are always included in the `Jinja2` search path so them are always available in our application. If we need to override a shared template we just have to create a template in our `application/view/templates` or `application/view/<controller>` directories and mamba will use those instead of the shared ones.
+
+Assets included in the `static` directory of the shared package are always available in our application `assets/` route as well. If we need to override one of them, just create a new file in our application `static` directory with the same name as the asset that we want to override.
 
 |
 |

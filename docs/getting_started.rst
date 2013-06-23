@@ -1,9 +1,9 @@
-.. _getting_started;:
+.. _getting_started:
 
 Getting Started
 ===============
 
-Ready to get started? This is a section for the impatient, and give you a very basic introduction about Mamba. If you are looking for detailed information about how mamba works go to :ref:`what_mamba_is` page. If what you are looking for, is documentation about `Twisted <http://www.twistedmatrix.com>`_ just click on the link to go their main site.
+Ready to get started? This is a section for the impatient, and give you a very basic introduction about Mamba. If you are looking for detailed information about how to contribute with mamba go to :ref:`contributing` page. If what you are looking for, is documentation about `Twisted <http://www.twistedmatrix.com>`_ just click on the link to go their main site.
 
 In this section we are going to create a first dummy mamba application to get familiar with the `mamba-admin` command line tool and the mamba's MVC model.
 
@@ -52,7 +52,7 @@ Adding some HTML content
 
 Now, we are going to add some HTML static content to our new mamba web application, to do that we have to edit the main Jinja2 template layout.html file in the ``view/templates`` directory.
 
-.. note:: To get detailed information about the mamba MVC pattern and directory hierarchy refer to :ref:`MVC_and_hierarchy` page
+.. note:: To get detailed information about the mamba MVC pattern and directory hierarchy refer to :ref:`development/MVC_and_hierarchy` page
 
 For the purpose of this introduction we are using the *vim* text editor in the GNU/Linux interpreter directly but you can use whatever text editor you are comfortable with. When we first open the file we should get a common Jinja2 template file that looks like this:
 

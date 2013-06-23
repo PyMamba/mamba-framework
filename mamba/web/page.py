@@ -161,6 +161,8 @@ class Page(resource.Resource):
         """
         Add a child for each shared package controller. If the package
         includes a static files directory we add an asset for it
+
+        .. versionadded:: 0.3.6
         """
 
         if self._shared_controllers_manager is None:

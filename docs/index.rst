@@ -6,20 +6,44 @@
 Welcome to mamba's documentation!
 =================================
 
-Contents:
+Welcomte to the official mamba project documentation. Mamba is a high level rapid application development framework developed using the `Python <http://www.python.org>`_ language and licensed under the terms of the `GPL v3 <https://raw.github.com/DamnWidget/mamba/master/LICENSE>`_ from the `Free Software Foundation <http://www.fsf.org>`_.
+
+Using Mamba:
+------------
 
 .. toctree::
    :maxdepth: 2
+   :numbered:
 
+   what_mamba_is
    installation_guide
    getting_started
-   what_mamba_is
-   tutorial
    reusability
-   developers
+   development/mamba_development_guide
    api
 
+Getting Involved:
+-----------------
 
+.. toctree::
+   :maxdepth: 2
+   :numbered:
+
+   contributing
+   contributing/guide_to_code_contributions
+   contributing/mamba_12_steps
+   contributing/commits_and_messages
+   contributing/submitting_code
+   contributing/coding_style
+   contributing/unit_tests
+
+.. toctree::
+   :hidden:
+   :glob:
+
+   mamba_team
+   team_members/*
+   relnotes/*
 
 Indices and tables
 ==================

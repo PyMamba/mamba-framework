@@ -49,7 +49,7 @@ Bug Fixes
 Changes
 -------
 
-* Now we can add a custom Jinja2 templated loader to our controller templates in two different ways:
+* Now we can add a custom Jinja2 templates loader to our controller templates in two different ways:
 
     * **Method One**: Just pass the named param `loader=<your customer loader class>` to the `Template.render` call and it will overwrite any previous loader configuration
     * **Method Two**: When you first instanciate your template object (commonly with `self.template = templating.Template()`) add just your custom loader class as a property of the new template instance::
@@ -62,6 +62,8 @@ Changes
 Deprecations
 ------------
 
+None
+
 Removals
 --------
 
@@ -69,6 +71,8 @@ Removals
 
 Uncompatible Changes
 --------------------
+
+None
 
 Details
 -------
