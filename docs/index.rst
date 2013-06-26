@@ -18,8 +18,8 @@ Using Mamba:
    what_mamba_is
    installation_guide
    getting_started
-   reusability
    development/mamba_development_guide
+   reusability
    api
 
 Getting Involved:

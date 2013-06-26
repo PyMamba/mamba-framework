@@ -7,5 +7,12 @@ Mamba development guide
 Here you can find any resource you need to learn howto use mamba as your web applications framework.
 
 .. toctree::
-    :maxdepth: 1
+    :maxdepth: 2
+
+    MVC_and_hierarchy
+    access_sql_database
+    model
+    controller
+    view
+    put_together
 

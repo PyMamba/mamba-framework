@@ -34,19 +34,19 @@ Mandatory Dependencies
 
 The following dependencies must to ve satisfied to install mamba.
 
-* `Python <http://python.org>`_, version >= 2.7 <= 2.7.5 (3.x is not supported)
-* `Twisted <http://www.twistedmatrix.com>`_, version >= 10.2.0
-* `Storm <http://storm.canonical.com>`_, version >= 0.19
+* |python|_, version >= 2.7 <= 2.7.5 (3.x is not supported)
+* |twisted|_, version >= 10.2.0
+* |storm|_, version >= 0.19
 * `zope.component <http://docs.zope.org/zope.component/>`_
 * `transaction <http://www.zodb.org/zodbbook/transactions.html>`_
-* `Jinja2 <http://jinja.pocoo.org/docs/>`_, version >= 2.4
+*  |jinja2|_, version >= 2.4
 
 Is pretty possible that you also need a database manager and teh corresponding Python bindings for it. The database can be either SQLite, MySQL, MariaDB (recommended) or PostgreSQL (recommended).
 
 For SQLite database
 ~~~~~~~~~~~~~~~~~~~
 
-As you must be using Python 2.7 SQLite should be already built on it. This maybe is not true if you compiled Python interpreter yourself, in that case make sure you compile it with ` --enable-loadable-sqlite-extensions`` option.
+As you must be using Python 2.7 SQLite should be already built on it. This maybe is not true if you compiled Python interpreter yourself, in that case make sure you compile it with --enable-loadable-sqlite-extensions option.
 
 If you are using PyPy, SQLite should be always compiled and present in your installation.
 
@@ -74,13 +74,13 @@ Optional Dependencies
 
 The following dependencies must be satisfied if we are planning on running mamba tests, building the documentation ourselves or contributing with the mamba project
 
-* `doublex <https://bitbucket.org/DavidVilla/python-doublex>`_, version >= 1.5.1
+* |doublex|_, version >= 1.5.1
 * `PyHamcrest <http://pythonhosted.org/PyHamcrest/>`_
-* `sphinx <http://sphinx-doc.org>`_, version >= 1.1.3
-* `fabric <http://fabfile.org>`_
-* `virtualenv <https://pypi.python.org/pypi/virtualenv/1.9.1>`_
-* `pyflakes <https://launchpad.net/pyflakes>`_
-* `pep8 <http://github.com/jcrocholl/pep8>`_
+* |sphinx|_, version >= 1.1.3
+* |fabric|_
+* |virtualenv|_
+* |pyflakes|_
+* |pep8|_
 
 .. _Installing Mamba:
 
@@ -120,7 +120,7 @@ We recommend the use of ``virtualenvwrapper`` in development environments to be 
 Living on the edge
 ..................
 
-If you like to live in the edge you can clone the mamba's `GitHub repository <https://github.com/DamnWidget/mamba>`_ and use the ``setup.py`` script to install it yourself::
+If you like to live in the edge you can clone the mamba's |repo|_ and use the ``setup.py`` script to install it yourself::
 
     $ git clone https://github.com/DamnWidget/mamba
     $ cd mamba
@@ -131,7 +131,7 @@ If you like to live in the edge you can clone the mamba's `GitHub repository <ht
 
 .. warning::
 
-    The mamba GitHub repository is under heavy development, we dont guarantee the stability of the mamba in-development version
+    The mamba |repo| is under heavy development, we dont guarantee the stability of the mamba in-development version
 
 .. _Using Mamba:
 

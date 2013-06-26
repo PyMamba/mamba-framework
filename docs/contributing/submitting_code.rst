@@ -16,7 +16,7 @@ Before start working in your fix, you have to go to the `mamba issues <https://g
 
 If you don't find any open issue related to the bug that you found, make sure that the bug is not already fixed in a more up-to-date version of mamba. You can do that just checking the code in the last commit of the GitHub repo or just looking for a closed issue related with the bug.
 
-Another useful place were to find information related with the bug is the `relnotes index file <https://github.com/DamnWidget/mamba/blob/master/docs/relnotes/index.rst>`_ where the developers add information about bug fixes and other changes for the incomming new release version.
+Another useful place were to find information related with the bug is the |relnotes|_ where the developers add information about bug fixes and other changes for the incomming new release version.
 
 Of course your bugfix **must** follow the :doc:`coding_style` and :doc:`unit_tests` guidelines.
 

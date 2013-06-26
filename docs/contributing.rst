@@ -17,7 +17,7 @@ You can also send an email to any of the `mamba mailing lists <http://www.pymamb
 Documentation contributions
 ---------------------------
 
-If you want to contribute with some documentation for the project, thank you very much, we really appreciate it. Mamba uses the `Sphinx <sphinx-doc.org>`_ documentation system so you should be familiarized with it if you want to contribute mamba with some documentation.
+If you want to contribute with some documentation for the project, thank you very much, we really appreciate it. Mamba uses the |sphinx|_ documentation system so you should be familiarized with it if you want to contribute mamba with some documentation.
 
 Code contributions
 ------------------
@@ -34,6 +34,4 @@ Others way to contribute with mamba
 
 As you already noticed, no mamba developers are native english speakers so corrections to the full documentation will be really welcomed.
 
-
-|
 |
