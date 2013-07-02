@@ -95,6 +95,70 @@ The following is a list of all the options that can be passed to the ``mamba-adm
           --version               Show version information and exit
           --help                  Display this help and exit.
 
+The database URI
+================
+
+Mamba uses a valid `URI <http://en.wikipedia.org/wiki/Uniform_resource_identifier>`_ as parameters to connect with the database.
+
+SQLite URIs
+-----------
+
+The simplest valid URI that we can use for our mamba application is just the SQLite in memory database:
+
+.. sourcecode:: python
+
+    "uri": "sqlite:"
+
+Relative (to the web application root directory) or absolute paths can be used for database name/location, the following are all valid possible sqlite configurations:
+
+.. sourcecode:: python
+
+    "uri": "sqlite:foo"
+    "uri": "sqlite:/home/user/foo"
+    "uri": "sqlite:///foo"
+    "uri": "sqlite:///home/user/foo"
+
+If the database doesn't exists yet, mamba will create it when we try to use first. If the path doesn't exists or is not accessible (e.g. permission denied), an exception ``OperationalError`` will be raised.
+
+SQLite accepts one option in the option part of the URI. We can set the time that SQLite will wait when trying to obtain a lock on the database. The default value for the timeout is five seconds, an example of the exposed is as follows:
+
+.. sourcecode:: python
+
+    "uri": "sqlite:dummy?timeout=0.5"
+
+This will create a new SQLite databse connection with a timeout of half a second.
+
+MySQL/MariaDB URIs
+------------------
+
+MySQL and MariaDB share syntax for URI's:
+
+.. sourcecode:: python
+
+    "uri": "mysql://username:password@hostname:port/database_name"
+
+.. note::
+
+    MySQL supports depends on the `MySQLdb <http://mysql-python.sourceforge.net/>`_ |python| module
+
+
+PostgreSQL
+----------
+
+Syntax for PostgreSQL is exactly the same than MySQL/MariaDB but replacing the ``mysql://`` for the right ``postgres://`` scheme:
+
+.. sourcecode:: python
+
+    "uri": "postgres://username:password@hostname:port/database_name"
+
+.. note::
+
+    PostgreSQL supports depends on the `psycopg2 <http://initd.org/psycopg/>`_ Python module
+
+.. warning::
+
+    If you are planning to use PyPy as your interpreter, you **must** install `psycopg2ct <https://github.com/mvantellingen/psycopg2-ctypes>`_ that is an implementation of the psycopg2 module using ctypes
+
 Create or dump SQL schema from mamba models
 ===========================================
 
@@ -122,10 +186,10 @@ If you ever used ``mysqldump`` you will be familiarized with ``mamba-admin sql d
 
 The above command will dump the database into a file in the current directory named ``database-dump.sql``
 
-Truncating all the data in your database
-========================================
+Truncating all data in your database
+====================================
 
-Some times we need to truncate all the tables in our database, normally because development tasks. For that scenario you can use the ``reset`` command as::
+Some times we need to truncate all tables in our database, normally because development tasks. For that scenario you can use the ``reset`` command as::
 
     $ mamba-admin sql reset --noquestions
 
