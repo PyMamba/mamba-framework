@@ -29,9 +29,9 @@ Style rules
 Inconsistences
 --------------
 
-Mamba uses |twisted@_ as his main component and Twisted doesn't follow |pep8|_ coding style and is never going to follow+ it. Because that you are going to be aware of some pretty inconsistences where we use twisted objects and methods.
+Mamba uses |twisted|_ as his main component and Twisted doesn't follow |pep8|_ coding style and is never going to follow+ it. Because that you are going to be aware of some pretty inconsistences where we use twisted objects and methods.
 
-We want to be clear on that, we never use |twisted| coding name conventions in mamba code, no exceptions to this rule.
+We want to be clear on that, we **never** use |twisted| coding name conventions in exclusive mamba code, **no exceptions** to this rule.
 
 Principles
 ----------
