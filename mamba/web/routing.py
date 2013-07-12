@@ -26,7 +26,6 @@ from mamba.web import response
 from mamba.utils import output, config
 from mamba.utils.converter import Converter
 from mamba.web.url_sanitizer import UrlSanitizer
-from mamba.core.decorators import unlimited_cache
 
 
 class UrlRegex(object):
@@ -163,7 +162,6 @@ class Router(object):
 
         super(Router, self).__init__()
 
-    @unlimited_cache
     def dispatch(self, controller, request):
         """Dispatch a route and return back the appropiate response.
 
