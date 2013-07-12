@@ -4,7 +4,7 @@
 Using SQL databases
 ===================
 
-Mamba provides access to SQL databases through the :class:`~mamba.core.model.Model` class in asyncrhonous or synchronous way using the same database connection. Actually, Mamba supports **SQLite**, **MySQL/MariaDB** and **PostgreSQL** databases. In order to connect to a database, you have to configure the connection details in the ``config/database.json`` file:
+Mamba provides access to SQL databases through the :class:`~mamba.core.model.Model` class in asyncrhonous or synchronous way using the same database connection. Actually, Mamba supports **SQLite**, **MySQL/MariaDB** and **PostgreSQL** databases. In order to connect to a database, you have to configure the connection details in your application ``config/database.json`` file:
 
 .. code-block:: json
 
@@ -24,16 +24,15 @@ Mamba provides access to SQL databases through the :class:`~mamba.core.model.Mod
         }
     }
 
-Ths databse configuration file can be created by hand or using the ``mamba-admin`` command line tool::
+Ths database configuration file can be created manually or using the ``mamba-admin`` command line tool using a valid URI or passing explicit parameters::
 
-    $ mamba-admin sql configure --autoadjust-pool --create-if-not-exists --noquestions --uri=backend://user:password@host/dbname
+    $ mamba-admin sql configure --uri=backend://user:password@host/dbname
 
 Or::
 
-    $ mamba-admin sql configure --autoadjust-pool --create-if-not-exists --noquestions --username='user' --password='password' \
-    --hostname='hostname' --backend='backend' --database='dbname'
+    $ mamba-admin sql configure --username='user' --password='password' --hostname='hostname' --backend='backend' --database='dbname'
 
-The above two commands are exactly the same, both of them generates a new databse config file with ``auto_adjust_pool_size`` set as ``true``, ``create_table_if_not_exists`` behaviour for create tables and connects to the given backend (can be one of: sqlite, mysql or postgres) with the given user and password credentials in the given host and the given database.
+The above two commands are exactly the same, both of them generates a new database config file with default options and connects to the given backend (can be one of: sqlite, mysql or postgres) with the given user and password credentials in the given host and the given database.
 
 The following is a list of all the options that can be passed to the ``mamba-admin sql configure`` command::
 
@@ -120,13 +119,13 @@ Relative (to the web application root directory) or absolute paths can be used f
 
 If the database doesn't exists yet, mamba will create it when we try to use first. If the path doesn't exists or is not accessible (e.g. permission denied), an exception ``OperationalError`` will be raised.
 
-SQLite accepts one option in the option part of the URI. We can set the time that SQLite will wait when trying to obtain a lock on the database. The default value for the timeout is five seconds, an example of the exposed is as follows:
+SQLite accepts one option in the option part of the URI. We can set the time that SQLite will wait when trying to obtain a lock on the database. The default value for the timeout is five seconds, an example of the above is as follows:
 
 .. sourcecode:: python
 
     "uri": "sqlite:dummy?timeout=0.5"
 
-This will create a new SQLite databse connection with a timeout of half a second.
+This will create a new SQLite database connection with a timeout of half a second.
 
 MySQL/MariaDB URIs
 ------------------
@@ -162,9 +161,9 @@ Syntax for PostgreSQL is exactly the same than MySQL/MariaDB but replacing the `
 Create or dump SQL schema from mamba models
 ===========================================
 
-In mamba we don't create a schema config file that is used then to generate our model classes, instead of that, we define our model classes and then we generate our SQL schema using our already defined Python code.
+In mamba we don't create a schema config file that is then used to generate our model classes, instead of that, we define our model classes and then we generate our SQL schema using our already defined Python code.
 
-To crate our database structure in live or dump a SQL file with the schema (for whatever SQL backend we configured) we use the ``mamba-admin sql create`` subcommand in the command line interface, so for example to dump the schema into a file we should use::
+To create our database structure in live or dump a SQL file with the schema (for whatever SQL backend we configured) we use the ``mamba-admin sql create`` subcommand in the command line interface, so for example to dump the schema into a file we should use::
 
     $ mamba-admin sql create schema.sql
 
@@ -180,7 +179,7 @@ And for create it in live in the database (this may delete all your previous dat
 Dump SQL data from the database
 ===============================
 
-If you ever used ``mysqldump`` you will be familiarized with ``mamba-admin sql dump`` command. It dumps the actual data into the database to the stdout. Doesn't matter which databse backend you are using, it works with SQLite, MySQL and PostgreSQL and you don't need to have installed ``mysqldump`` command to dump MySQL databases::
+If you ever used ``mysqldump`` you will be familiarized with ``mamba-admin sql dump`` command. It dumps the actual data into the database to the stdout. Doesn't matter which database backend you are using, it works with SQLite, MySQL and PostgreSQL and you don't need to have installed ``mysqldump`` command to dump MySQL databases::
 
     $ mamba-admin sql dump > database-dump.sql
 
@@ -246,7 +245,7 @@ If we need to create and insert a new row into the database we just instantiate 
     store = self.database.store()
     store.add(peter)
 
-Once an object is added to or trieved from a store, we can verify if and object if bound or related to an store easily:
+Once an object is added to or retrieved from a store, we can verify if it is bound or related to an store easily:
 
 .. sourcecode:: python
 
@@ -255,7 +254,7 @@ Once an object is added to or trieved from a store, we can verify if and object 
     >>> Store.of(User()) is store
     False
 
-If we are using the ``@transact`` decorator in our methods we don't have to care about the commit to the database because that is performed in an automatic way by the ``@transact`` decorator, otherwise we **must** call the ``commit`` method of the store object:
+If we are using the ``@transact`` decorator in our methods we don't have to care about commit to the database because that is performed in an automatic way by the ``@transact`` decorator, otherwise we **must** call the ``commit`` method of the store object:
 
 .. sourcecode:: python
 
@@ -322,7 +321,7 @@ Just decorate your model methods with the ``@transact`` decorator and make sure 
             This is not thread safe
             """
             store = self.database.store()
-            return store.find(self.__class__).order_by(self.__class__.id).last()
+            return store.find(Dummy).order_by(Dummy.id).last()
 
 The ``get_last`` method above will retrieve the last inserted row in the database, as we are using the ``@transact`` decorator we couldn't use ``Reference`` or ``ReferenceSet`` in the returned object cos those are lazy evaluated and the object was created in a different thread, if we ever try to do that we will get an exception from |storm| ZStore module.
 
@@ -331,9 +330,9 @@ If we don't want to use an asynchronous operation we can just remove the ``@tran
 How do I use a store from outside the model method?
 ===================================================
 
-The first question that you have to ask yourself is "Why you are going to need to use the store object from outside the model?", this violates the MVC pattern and the encapsulation principle.
+Even mamba allows us to use Store objects everywhere, them are not supossed to be used outside the model but nothing stop you tu use it in the controller or whatever other part of your application.
 
-If you already think that you need to use a store object from outside your model class then you can do it in several ways:
+If you think that you need to use a store object from outside your model class then you can do it in several ways:
 
 1. Don't decorate a method in your moddel with ``@transact`` and then return the store from it. As this store as been created in the same thread that the rest of the application you can use it anywhere.
 2. Just retrieve a store object executing the ``database.store()`` object directly from your model at class level:
@@ -346,6 +345,11 @@ If you already think that you need to use a store object from outside your model
 
 .. warning::
 
-    Please, be careful, we recommend energically to don't use stores outside the model.
+    Please, be careful, we recommend energically to don't use stores outside the model. It doesn't follow the MVC pattern and violates the encapsulation principle.
+
+Should I share stores between threads?
+--------------------------------------
+
+Please no, everytime that you call the ``database.store()`` method in the model object, mamba gives you a ready to use Store for the thread that you are calling the method from. Don't even try to share stores between threads. That means that you are not able to share stores between methods if they are decorated with the ``@transact`` decorator.
 
 |

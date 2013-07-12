@@ -32,7 +32,7 @@ class MambaStorm(PropertyPublisherMeta, plugin.ExtensionPoint):
     __metaclass__ as model.MambaStorm to prevent metaclasses inheritance
     problems. For example::
 
-        class Foo(model.Model, model.ModelProvider, Storm):
+        class Foo(model.Model, Storm):
 
             __metaclass__ = model.MambaStorm
 

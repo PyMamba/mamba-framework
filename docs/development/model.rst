@@ -235,7 +235,7 @@ Finally the delete operation is not different, we just call the ``delete`` metho
 References
 ==========
 
-Of course we can define references between models (and between tables by extension) intanciating :class:`~storm.locals.Reference` and :class:`~storm.locals.ReferenceSet` objects in our model definition:
+Of course we can define references between models (and between tables by extension) instanciating :class:`~storm.locals.Reference` and :class:`~storm.locals.ReferenceSet` objects in our model definition:
 
 .. sourcecode:: python
 
@@ -249,7 +249,7 @@ Of course we can define references between models (and between tables by extensi
         __storm_table__ = 'figther'
 
         id = Int(primary=True, auto_increment=True, unsigned=True)
-        dojo_id = Int(unsigned)
+        dojo_id = Int(unsigned=True)
         dojo = Reference(dojo_id, Dojo.id)
 
 In the previous example we defined a ``Figther`` class that define a many-to-one reference with the ``Dojo`` class imported from the dojo model. As this reference has been set we can use the following code to refer to the figther's dojo in our application:
@@ -262,3 +262,266 @@ In the previous example we defined a ``Figther`` class that define a many-to-one
     >>> print(figther.dojo.name)
     u'SuperDojo'
 
+Many-to-many relationships are a bit more complex than the last example. Let's continue with our previous figther example to draw this operation:
+
+.. sourcecode:: python
+
+    from mamba.application import model
+    from storm.expr import Join, Select, Not
+    from storm.locals import Int, Unicode, Reference, ReferenceSet
+
+    from application.model.dojo import Dojo
+    from application.model.tournament import Tournament
+
+
+    class Figther(model.Model):
+
+        __storm_table__ = 'figther'
+
+        id = Int(primary=True, auto_increment=True, unsigned=True)
+        name = Unicode(size=128)
+        dojo_id = Int(unsigned=true)
+        dojo = Reference(dojo_id, Dojo.id)
+
+        def __init__(self, name):
+            self.name = name
+
+
+    class TournamentFigther(model.Model):
+
+        __storm_table__ = 'tournament_figther'
+        __storm_primary__ = 'tournament_id', 'figther_id'
+
+        tournament_id = Int(unsigned=True)
+        figther_id = Int(unsigned=True)
+
+.. note::
+
+    Tournament and Dojo definition classes has been avoided to maintain the simplicity of the example
+
+In the above example we defined a ``TournamentFigther`` class to reference tournaments and figthers in a many-to-many relationship. We defined a compound primary key with the ``tournament_id`` and ``figther_id`` fields. To make the relationship real we have to add a ``ReferenceSet``:
+
+.. sourcecode:: python
+
+    Tournament.figthers = ReferenceSet(
+        Tournament.id, TournamentFigther.tournament_id,
+        TournamentFigther.figther_id, Figther.id
+    )
+
+We can also add the definition to the ``Tournament`` class definition directly but in that case we have to use special inheritance that we didn't see yet, we will cover it later in this chapter. Since the reference set is created we can use it as follows:
+
+.. sourcecode:: python
+
+    >>> chuck = Figther(u'Chuck Norris')
+    >>> bruce = Figther(u'Bruce Lee')
+
+    >>> kung_fu_masters = Tournament(u'Kung Fu Masters Tournament')
+    >>> kung_fu_masters.figthers.add(chuck)
+    >>> kung_fu_masters.figthers.add(bruce)
+
+    >>> kung_fu_masters.figthers.count()
+    2
+
+    >>> store.get(TournamentFigthers, (kung_fu_masters.id, chuck.id))
+    <TournamentFigther object at 0x...>
+
+    >>> [figther.name for figther in kung_fu_masters.figthers]
+    [u'Chuck Norris', u'Bruce Lee']
+
+We can also create a reversed relationship between figthers and tournaments to know in which tournaments is a person figthing on:
+
+.. sourcecode:: python
+
+    >>> Figther.tournaments = ReferenceSet(
+        Figther.id, TournamentFigther.figther_id,
+        TournamentFigther.tournament_id, Tournament.id
+    )
+
+    >>> [tournament.name for tournament in chuck.tournaments]
+    [u'Kung Fu Masters Tournament']
+
+SQL Subselects
+==============
+
+Sometimes we need to use subselects to retrieve some data, for example we may want to get all the figthers that are not actually figthing in any tournament:
+
+.. sourcecode:: python
+
+    >>> yip_man = Figther(u'Yip Man')
+    >>> store.add(yip_man)
+
+    >>> [figther.name for figther in store.find(
+            Figther, Not(Figther.id.is_in(Select(
+                TournamentFigther.figther_id, distinct=True))
+            )
+    )]
+    [u'Yip Man']
+
+You can of course split this operation in two steps for improve readability:
+
+.. sourcecode:: python
+
+    >>> subselect = Select(TournamentFigther.figther_id, distinct=True)
+    >>> result = store.find(Figther, Not(Figther.id.is_in(subselect)))
+
+
+SQL Joins
+=========
+
+We can perform implicit or explicit joins. An implicit join that use the data in our previous examples may be:
+
+.. sourcecode:: python
+
+    >>> resutl = store.find(
+        Dojo, Figther.dojo_id == Dojo.id, Figther.name.like(u'%Lee')
+    )
+
+    >>> [dojo.name for dojo in result]
+    [u'Bruce Lee awesome Dojo']
+
+The same query using explicit joins should look like:
+
+.. sourcecode:: python
+
+    >>> join = [Dojo, Join(Figther, Figther.dojo_id == Dojo.id)]
+    >>> result = store.using(*join).find(Dojo, Figther.name.like(u'%Lee'))
+
+    >>> [dojo.name for dojo in result]
+    [u'Bruce Lee awesome Dojo']
+
+Or more compact sytax as:
+
+.. sourcecode:: python
+
+    >>> [dojo.name for dojo in store.using(
+            Dojo, Join(Figther, Figther.dojo_id == Dojo.id)
+        ).find(Dojo, Figther.name.like(u'%Lee'))]
+    [u'Bruce Lee awesome Dojo']
+
+Common SQL operations
+=====================
+
+Two common operations with SQL are just ordering and limiting results, you can also perform those operations using the underlying |storm| ORM when you are using mamba model. Order our results is really simple as you can see in the following example:
+
+.. sourcecode:: python
+
+    >>> result = store.find(Figther)
+    >>> [figther.name for figther in result.order_by(Figther.name)]
+    [u'Bruce Lee', u'Chuck Norris', u'Yip Man']
+
+    >>> [figther.name for figther in result.order_by(Desc(Figther.name))]
+    [u'Yip Man', u'Chuck Norris', u'Bruce Lee']
+
+In the example above we get all the records from the figthers database and order them by name and then order them by name in descendent way. As you can see Chuck Norris is always inmutable but that is just because he is Chuck Norris.
+
+To limit the given results we just slice the result:
+
+.. sourcecode:: python
+
+    >>> [figther.name for figther in result.order_by(Figther.name)[:2]]
+    [u'Bruce Lee', u'Chuck Norris']
+
+As you already noticed, this just operates at Python level and not at database level and sometimes this is not optim because we need to limit or order just in the SQL level. Storm adds the possibility to use SQL expressions in an agnostic database backend way to perform those operations:
+
+.. sourcecode:: python
+
+    >>> result = store.execute(Select(Figther.name, order_by=Desc(Figther.name), limit=2))
+    >>> result.get_all()
+    [(u'Yip Man',), (u'Chuck Norris',)]
+
+Multiple results
+================
+
+Sometimes is useful that we get more than one object from the underlying database using only one query:
+
+.. sourcecode:: python
+
+    >>> result = store.find(
+        (Dojo, Figther),
+        Figther.dojo_id == Dojo.id, Figther.name.like(u'Bruce %')
+    )
+
+    >>> [(dojo.name, figther.name) for dojo, figther in result]
+    [(u'Bruce Lee awesome Dojo', u'Bruce Lee')]
+
+Value auto reload and expression values
+=======================================
+
+Storm offers a way to make values to be auto reloaded from the database when touched. This is performed assigning the ``AutoReload`` attribute to it
+
+.. sourcecode:: python
+
+    >>> from storm.locals import AutoReload
+
+    >>> steven = store.add(Person(u'Steven'))
+    >>> print(steven.id)
+    None
+
+    >>> steven.id = AutoReload
+    print(steven.id)
+    4
+
+Steven has been autoflushed into the database. This is useful to making objects automatically flushed if neccesary.
+
+You cal also assign what in the |storm| project they call a "*lazy expression*" to any attribute. The expressions are flushed to the database when the attribute  is accessed or when the object is flushed to the database.
+
+.. sourcecode:: python
+
+    >>> from storm.locals import SQL
+    >>> steven.name = SQL('(SELECT name || ? FROM figther WHERE id=4)', (' Seagal',))
+    >>> steven.name
+    u'Steven Seagal'
+
+Queries debug
+=============
+
+Sometimes is really useful to can see which statement |storm| is executing behind the scenes. We can use a debug tracer that comes integrated in |storm| itself, use it is really easy.
+
+.. sourcecode:: python
+
+    >>> import sys
+    >>> from storm.tracer import debug
+
+    >>> debug(True, stream=sys.stdout)
+    >>> result = store.find(Figther, Figther.id == 1)
+    >>> list(result)
+    EXECUTE: 'SELECT figther.id, figther.name, figther.dojo_id FROM figthers WHERE figther.id = 1', ()
+    [<Figther object at 0x...>]
+
+    >>> debug(False)
+    >>> list(result)
+    [<Figther object at 0x...>]
+
+Real SQL Queries
+================
+
+Of course we can use real **non database agnostic** queries if we want to
+
+.. sourcecode:: python
+
+    >>> result = store.execute('SELECT * FROM figthers')
+    >>> result.get_all()
+    [u'Bruce Lee', u'Chuck Norris', u'Yip Man', u'Steven Seagal']
+
+The Storm base class
+====================
+
+In some situations we are not going to be able to import every other model class into our local scope (mainly because circular import issues) to define ``Reference`` and ``ReferenceSet`` properties. In that scenario we can define these references using a stringfield version of the class and property names involved in the relationship.
+
+To do that, we have to inherit our classes from the ``Storm`` base class as well as from ``Model`` class. There is another inconvenience related with this. When we inherit from both classes we have to define that the metaclass of the class that we are defining is :class:`~mamba.application.model.MambaStorm` to avoid metaclass collisions between mamba model and storm itself.
+
+.. sourcecode:: python
+
+    from storm.locals import Int, Unicode, Reference, ReferenceSet
+
+    class Figther(model.Model, Storm):
+
+        __metaclass__ = model.MambaStorm
+        __storm_table__ = 'figthers'
+
+        id = Int(primary=True)
+        name = Unicode()
+        dojo_id = Int()
+        dojo = Reference(dojo_id, 'Dojo.id')
+
+|
