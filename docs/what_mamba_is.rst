@@ -5,12 +5,12 @@ What Mamba is?
 
 A part of a genus of *tree snakes*, mamba is a rapid application development (RAD) framework built on top of Twisted, Storm and Jinja2 templating system.
 
-Mamba intended to be used for web applications development but can be used to develop any kind of application that we are able to develop using Twisted itself because mamba is just Twisted.
+Mamba is intended to be used for web applications development but can be used to develop any kind of application that we are able to develop using Twisted because mamba is just Twisted.
 
 The Mamba Project
 -----------------
 
-As mamba is based on `Twisted <http://www.twistedmatrix.com>`_, itself is a web server so you don't need additional software like `Apache <http://www.apache.org/>`_ web server to tun mamba applications.
+As mamba is based on `Twisted <http://www.twistedmatrix.com>`_, itself is a web server so you don't need additional software like `Apache <http://www.apache.org/>`_ web server to run mamba applications.
 
 Mamba is available under the `GNU General Public License <http://www.gnu.org/copyleft/gpl.html>`_.
 

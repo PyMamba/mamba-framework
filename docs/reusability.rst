@@ -120,7 +120,7 @@ If you really need to extend the imported packages controllers, is better if the
         def root(self, request, **kwargs):
             return super(Shared, self).root(request, **kwargs)
 
-If `use_scripts` is set as `true`, mamba will include all the scripts from the shared package in the `scripts` and `stylesheets` mambaerized resources so them are totally available into your applicatio. You can override them by creating you own scripts with the same name in your `application/view/scripts` and `application/view/stylesheets` directories.
+If `use_scripts` is set as `true`, mamba will include all the scripts from the shared package in the `scripts` and `stylesheets` mambaerized resources so them are totally available into your application. You can override them by creating you own scripts with the same name in your `application/view/scripts` and `application/view/stylesheets` directories.
 
 The same is applicable for shared templates and scripts in controller sub-directories.
 

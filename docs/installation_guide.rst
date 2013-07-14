@@ -41,7 +41,7 @@ The following dependencies must to ve satisfied to install mamba.
 * `transaction <http://www.zodb.org/zodbbook/transactions.html>`_
 *  |jinja2|_, version >= 2.4
 
-Is pretty possible that you also need a database manager and teh corresponding Python bindings for it. The database can be either SQLite, MySQL, MariaDB (recommended) or PostgreSQL (recommended).
+Is pretty possible that you also need a database manager and the corresponding Python bindings for it. The database can be either SQLite, MySQL, MariaDB (recommended) or PostgreSQL (recommended).
 
 For SQLite database
 ~~~~~~~~~~~~~~~~~~~

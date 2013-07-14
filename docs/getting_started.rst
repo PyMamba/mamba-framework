@@ -52,7 +52,7 @@ Adding some HTML content
 
 Now, we are going to add some HTML static content to our new mamba web application, to do that we have to edit the main Jinja2 template layout.html file in the ``view/templates`` directory.
 
-.. note:: To get detailed information about the mamba MVC pattern and directory hierarchy refer to :ref:`development/MVC_and_hierarchy` page
+.. note:: To get detailed information about the mamba MVC pattern and directory hierarchy refer to :doc:`development/MVC_and_hierarchy` page
 
 For the purpose of this introduction we are using the *vim* text editor in the GNU/Linux interpreter directly but you can use whatever text editor you are comfortable with. When we first open the file we should get a common Jinja2 template file that looks like this:
 

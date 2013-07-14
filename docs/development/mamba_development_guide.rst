@@ -14,5 +14,6 @@ Here you can find any resource you need to learn howto use mamba as your web app
     model
     controller
     view
+    routing
     put_together
 

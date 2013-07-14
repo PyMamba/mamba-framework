@@ -45,6 +45,7 @@ Bug Fixes
 * Now mamba-admin start and stop subcommands can be used inside valid mamba application directories only
 * Adding dependency to fabric package as docs will not build without it
 * Added mandatory option parameter `development` to the application.json template.
+* Fixed memory leak in the routing system cache
 
 Changes
 -------
@@ -57,7 +58,15 @@ Changes
         self.template.loader = CustomLoader
 
     Note that is a class and not an instance what you have to use in both methods. The class **must** expect a list of strings (paths) as first and unique argument.
+* The mamba-admin application subcommand generates now a ``logs`` directory and logs files are created inside it
+* The mamba-admin application subcommand generates now a ``lib`` directory into the ``application`` directory in oreder to place code that doesn't fit the MVC pattern and 3rd party libraries
+* The ``@route`` decorator now accepts lists and tuples defining more than one HTTP method where to register the given action
 
+Documentation
+-------------
+
+* Added contributors documentation
+* Added developers documentation
 
 Deprecations
 ------------

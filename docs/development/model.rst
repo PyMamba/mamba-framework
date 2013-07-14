@@ -389,7 +389,7 @@ The same query using explicit joins should look like:
     >>> [dojo.name for dojo in result]
     [u'Bruce Lee awesome Dojo']
 
-Or more compact sytax as:
+Or more compact syntax as:
 
 .. sourcecode:: python
 

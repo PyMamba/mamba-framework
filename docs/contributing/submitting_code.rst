@@ -4,7 +4,7 @@
 Howto submit code
 =================
 
-Code submition in mamba is done through `GitHub pull requests system <https://help.github.com/articles/using-pull-requests>` so you should be familiarized with it before trying to contribute your code with mamba.
+Code submition in mamba is done through `GitHub pull requests system <https://help.github.com/articles/using-pull-requests>`_ so you should be familiarized with it before trying to contribute your code with mamba.
 
 
 Contributing with a bug fix
@@ -35,7 +35,7 @@ You can pull the in-development version of the framework (that is always the las
 My bug is listed as an open issue
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Then this is a known issue, just read the issue discussion thread to discover if some else is already working on a fix for that, if someone is already working to fix this problem, you can just contact with him (or her) to work together in solving the issue.
+Then this is a known issue, just read the issue discussion thread to discover if someone else is already working on a fix for that, if someone is already working to fix this problem, you can just contact with him (or her) to work together in solving the issue.
 
 If no other person is working in fix the issue, just write a new comment to the issue discussion thread informing that you are going to work on solve the issue actively and ask other developers about guidance or ideas.
 
@@ -57,6 +57,11 @@ New features **may or may not** been always welcome, that depends of the nature 
 
 .. note::
     Remember that all the code that you submit to the project **must** include unit tests.
+
+Licenseing the code
+-------------------
+
+All the code that get into the mamba framework **must** be licensed under the **GPLv3** (or a later version on your choice) license.
 
 |
 |
