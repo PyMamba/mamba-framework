@@ -28,6 +28,11 @@ from mamba.utils.converter import Converter
 from mamba.web.url_sanitizer import UrlSanitizer
 
 
+class RouterError(Exception):
+    """Fired on router exceptions
+    """
+
+
 class UrlRegex(object):
     """Common static URL regex
     """
@@ -257,15 +262,17 @@ class Router(object):
                             error = True
 
                 if not error:
-                    self.register_route(controller, route)
+                    self.register_route(controller, route, func[0])
 
-    def register_route(self, controller, route):
-        """Decorator that register a route for the given controller
+    def register_route(self, controller, route, func_name):
+        """Method that register a route for the given controller
 
         :param controller: the controller where to register the route
         :type controller: :class:`~mamba.Controller`
         :param route: the :class:`~mamba.Route` to register
         :type route: :class:`~mamba.web.Route`
+        :param func_name: the callable object name
+        :type func_name: str
         """
 
         controller_name = controller.__class__.__name__
@@ -275,7 +282,20 @@ class Router(object):
             log.msg(
                 bold('Registering route:') + ' {route}'.format(route=route))
 
-        self.routes[route.method][route.url][controller_name] = route
+        try:
+            if type(route.method) in [tuple, list]:
+                for method in route.method:
+                    self.routes[method][route.url][controller_name] = route
+            else:
+                self.routes[route.method][route.url][controller_name] = route
+        except KeyError as error:
+            raise RouterError(
+                '{} is not a valid request method, at action {} in controller '
+                '{}, valid mathods are: GET, POST, PUT, DELETE, OPTIONS, '
+                'PATCH and HEAD. Cant register route {}'.format(
+                    error.message, func_name, controller_name, route.url
+                )
+            )
 
     # decorator
     def route(self, url, method='GET'):
@@ -361,6 +381,7 @@ class RouteDispatcher(object):
             [controller.get_register_path()] + request.postpath
         )
 
+    # @cache_dispatch
     def lookup(self):
         """
         I traverse the URLs at router picking up the ones that match the
@@ -385,7 +406,7 @@ class RouteDispatcher(object):
         for url in self.router.routes.values():
             controllers = url.values()
             if len(controllers):
-                for i in xrange(len(controllers)):
+                for i in range(len(controllers)):
                     if self.controller in controllers[i]:
                         r = controllers[i].get(self.controller).validate(self)
                         if r:

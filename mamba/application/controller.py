@@ -65,7 +65,7 @@ class Controller(resource.Resource, ControllerProvider):
         def helloworld(self, request, **kwargs):
             return 'Hello World'
 
-    seealso: :class:`~mamba.web.Router`, :class:`~mamba.web.Route`
+    .. seealso:: :class:`~mamba.web.Router`, :class:`~mamba.web.Route`
 
     """
 

@@ -204,6 +204,7 @@ class Application(object):
 
         try:
             self._generate_directory_helper('application/')
+            self._generate_directory_helper('application/lib')
             self._generate_directory_helper('application/controller')
             self._generate_directory_helper('application/model')
             self._generate_directory_helper('application/view')
@@ -213,6 +214,7 @@ class Application(object):
             self._generate_directory_helper('twisted/plugins')
             self._generate_directory_helper('static')
             self._generate_directory_helper('config')
+            self._generate_directory_helper('logs')
         except OSError as error:
             print(darkred(error))
             sys.exit(-1)
