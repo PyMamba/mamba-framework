@@ -13,7 +13,7 @@ Here you can find any resource you need to learn howto use mamba as your web app
     access_sql_database
     model
     controller
-    view
     routing
+    view
     put_together
 

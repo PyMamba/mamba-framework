@@ -315,34 +315,34 @@ Page
 Response
 ........
 
-.. autoclass:: mamba.web.Response
+.. autoclass:: mamba.web.response.Response
     :members:
 
-.. autoclass:: mamba.web.Ok
+.. autoclass:: mamba.web.response.Ok
     :members:
 
-.. autoclass:: mamba.web.Found
+.. autoclass:: mamba.web.response.Found
     :members:
 
-.. autoclass:: mamba.web.NotFound
+.. autoclass:: mamba.web.response.NotFound
     :members:
 
-.. autoclass:: mamba.web.BadRequest
+.. autoclass:: mamba.web.response.BadRequest
     :members:
 
-.. autoclass:: mamba.web.Unauthorized
+.. autoclass:: mamba.web.response.Unauthorized
     :members:
 
-.. autoclass:: mamba.web.Conflict
+.. autoclass:: mamba.web.response.Conflict
     :members:
 
-.. autoclass:: mamba.web.AlreadyExists
+.. autoclass:: mamba.web.response.AlreadyExists
     :members:
 
-.. autoclass:: mamba.web.NotImplemented
+.. autoclass:: mamba.web.response.NotImplemented
     :members:
 
-.. autoclass:: mamba.web.InternalServerError
+.. autoclass:: mamba.web.response.InternalServerError
     :members:
 
 

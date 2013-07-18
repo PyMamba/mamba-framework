@@ -247,3 +247,25 @@ We just used the |twisted|'s ``@defer.inlineCallbacks`` decorator to yield resul
 .. seealso::
 
     `Twisted: Introduction to Deferreds <http://twistedmatrix.com/documents/current/core/howto/defer-intro.html>`_, `Twisted: Deferred Reference <http://twistedmatrix.com/documents/current/core/howto/defer.html>`_, `Twisted: Generating Deferreds <http://twistedmatrix.com/documents/current/core/howto/gendefer.html>`_
+
+Returning values from controller actions
+========================================
+
+I'm pretty sure that the reader already notices that we use an ``Ok`` object as return from our controller actions. The :class:`~mamba.web.responses.Ok` class is one of the multiple built-in response objects that you can return from your application controllers.
+
+Mamba defines 10 predefined types of response objects that set the content-type and other parameters of the HTTP response that our applications can return back to the web clients.
+
+    * :class:`~mamba.web.response.Response` dummy base response object, we can use this object to create ad-hoc responses on demand. All the rest of responses inherits from this class
+    * :class:`~mamba.web.response.Ok` - 200 HTTP Response
+    * :class:`~mamba.web.response.Found` - 302 HTTP Response
+    * :class:`~mamba.web.response.BadRequest` - 400 HTTP Response
+    * :class:`~mamba.web.response.Unauthorized` - 401 HTTP Response
+    * :class:`~mamba.web.response.NotFound` - 404 HTTP Response
+    * :class:`~mamba.web.response.Conflict` - 409 HTTP Response
+    * :class:`~mamba.web.response.AlreadyExists` - 409 HTTP Response (Conflict found in POST)
+    * :class:`~mamba.web.response.InternalServererror` - 500 HTTP Response
+    * :class:`~mamba.web.response.NotImplemented` - 501 HTTP Response
+
+Mamba return back some of those codes by itself in some situations, for example, if we try to use a route that exists but in a different HTTP method, we get a :class:`~mamba.web.response.NotImplemented` response object.
+
+You can return whatever of those objects from your controller, mamba take care to render it correctly to the web client. You can also return dictionaries and other objects, mamba should try to convert whatever object that you return from a controller into a serializable JSON structure with a default 200 OK HTTP response code and an 'application/json' encoding.
