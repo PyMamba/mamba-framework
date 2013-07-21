@@ -253,18 +253,21 @@ Returning values from controller actions
 
 I'm pretty sure that the reader already notices that we use an ``Ok`` object as return from our controller actions. The :class:`~mamba.web.responses.Ok` class is one of the multiple built-in response objects that you can return from your application controllers.
 
-Mamba defines 10 predefined types of response objects that set the content-type and other parameters of the HTTP response that our applications can return back to the web clients.
+Mamba defines 13 predefined types of response objects that set the content-type and other parameters of the HTTP response that our applications can return back to the web clients.
 
     * :class:`~mamba.web.response.Response` dummy base response object, we can use this object to create ad-hoc responses on demand. All the rest of responses inherits from this class
-    * :class:`~mamba.web.response.Ok` - 200 HTTP Response
-    * :class:`~mamba.web.response.Found` - 302 HTTP Response
-    * :class:`~mamba.web.response.BadRequest` - 400 HTTP Response
-    * :class:`~mamba.web.response.Unauthorized` - 401 HTTP Response
-    * :class:`~mamba.web.response.NotFound` - 404 HTTP Response
-    * :class:`~mamba.web.response.Conflict` - 409 HTTP Response
-    * :class:`~mamba.web.response.AlreadyExists` - 409 HTTP Response (Conflict found in POST)
-    * :class:`~mamba.web.response.InternalServererror` - 500 HTTP Response
-    * :class:`~mamba.web.response.NotImplemented` - 501 HTTP Response
+    * :class:`~mamba.web.response.Ok` - Ok 200 HTTP Response
+    * :class:`~mamba.web.response.Created` - Ok 201 HTTP Response
+    * :class:`~mamba.web.response.MovedPermanently` - Ok 301 HTTP Response
+    * :class:`~mamba.web.response.Found` - Ok 302 HTTP Response
+    * :class:`~mamba.web.response.SeeOther` - Ok 303 HTTP Response
+    * :class:`~mamba.web.response.BadRequest` - Error 400 HTTP Response
+    * :class:`~mamba.web.response.Unauthorized` - Error 401 HTTP Response
+    * :class:`~mamba.web.response.NotFound` - Error 404 HTTP Response
+    * :class:`~mamba.web.response.Conflict` - Error 409 HTTP Response
+    * :class:`~mamba.web.response.AlreadyExists` - Error 409 HTTP Response (Conflict found in POST)
+    * :class:`~mamba.web.response.InternalServerError` - Internal Error 500 HTTP Response
+    * :class:`~mamba.web.response.NotImplemented` - Error 501 HTTP Response
 
 Mamba return back some of those codes by itself in some situations, for example, if we try to use a route that exists but in a different HTTP method, we get a :class:`~mamba.web.response.NotImplemented` response object.
 
