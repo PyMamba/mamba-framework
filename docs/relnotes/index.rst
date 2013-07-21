@@ -11,7 +11,10 @@ Those are the release notes for Mamba ${version} released on ${release_date}.
 Features
 --------
 
+* Added Created (201 HTTP) Response to predefined responses
 * Added Unauthorized (401 HTTP) Response to predefined responses
+* Added MovedPErmanently (301 HTTP) Response to predefined responses
+* Added SeeOther (303 HTTP) Response to predefined responses
 * Added decimal size and precission using size property for MySQL decimal fields definitions::
 
     some_field = Decimal(size=(10, 2))  # using a tuple
