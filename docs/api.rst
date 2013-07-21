@@ -321,7 +321,16 @@ Response
 .. autoclass:: mamba.web.response.Ok
     :members:
 
+.. autoclass:: mamba.web.response.Created
+    :members:
+
+.. autoclass:: mamba.web.response.MovedPermanently
+    :members:
+
 .. autoclass:: mamba.web.response.Found
+    :members:
+
+.. autoclass:: mamba.web.response.SeeOther
     :members:
 
 .. autoclass:: mamba.web.response.NotFound
