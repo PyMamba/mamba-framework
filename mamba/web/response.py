@@ -15,7 +15,7 @@ import logging
 
 from twisted.web import http
 from twisted.python import log
-from zope.interface import implements
+from zope.interface import implementer
 
 from mamba.utils.output import brown
 from mamba.core.interfaces import IResponse
@@ -52,32 +52,69 @@ class Response(object):
         )
 
 
+@implementer(IResponse)
 class Ok(Response):
     """
     Ok 200 HTTP Response
 
-    :param subject: the subject body of he response
+    :param subject: the subject body of the response
     :type subject: :class:`~mamba.web.Response` or dict or str
     :param headers: the HTTP headers to return back in the response to the
                     browser
     :type headers: dict or a list of dicts
     """
 
-    implements(IResponse)
-
     def __init__(self, subject='', headers={}):
         super(Ok, self).__init__(http.OK, subject, headers)
 
 
+@implementer(IResponse)
+class Created(Response):
+    """
+    Ok Created 201 HTTP Response
+
+    :param subject: the subject body of the response
+    :type subject: :class:`~mamba.web.Response` or dict or str
+    :param headers: the HTTP headers to return back in the response to the
+                    browser
+    :type headers: dict or a list of dicts
+    """
+
+    def __init__(self, subject='', headers={}):
+        super(Created, self).__init__(http.CREATED, subject, headers)
+
+
+@implementer(IResponse)
+class MovedPermanently(Response):
+    """
+    Ok 301 Moved Permanently HTTP Response
+
+    :param url: the url where the resource has been moved
+    :type url: str
+
+    .. seealso:: https://tools.ietf.org/html/rfc2616#page-62
+
+    """
+
+    def __init__(self, url):
+        super(MovedPermanently, self).__init__(
+            http.MOVED_PERMANENTLY,
+            '',
+            {
+                'content-type': 'text/plain; charset=utf-8',
+                'location': url
+            }
+        )
+
+
+@implementer(IResponse)
 class Found(Response):
     """
-    Ok 302 HTTP Response
+    Ok 302 Found HTTP Response
 
     :param url: the url where we want to redirect the browser
     :type url: str
     """
-
-    implements(IResponse)
 
     def __init__(self, url):
         super(Found, self).__init__(
@@ -90,6 +127,27 @@ class Found(Response):
         )
 
 
+@implementer(IResponse)
+class SeeOther(Response):
+    """
+    Ok 303 See Other HTTP Response
+
+    :param url: the url where to find the information via GET
+    :type url: str
+    """
+
+    def __init__(self, url):
+        super(SeeOther, self).__init__(
+            http.SEE_OTHER,
+            '',
+            {
+                'content-type': 'text/plain; charset=utf8',
+                'location': url
+            }
+        )
+
+
+@implementer(IResponse)
 class BadRequest(Response):
     """
     BadRequest 400 HTTP Response
@@ -101,23 +159,21 @@ class BadRequest(Response):
     :type headers: dict or a list of dicts
     """
 
-    implements(IResponse)
-
     def __init__(self, subject='', headers={}):
         super(BadRequest, self).__init__(http.BAD_REQUEST, subject, headers)
 
 
+@implementer(IResponse)
 class Unauthorized(Response):
     """
     Unauthorized 401 HTTP Response
     """
 
-    implements(IResponse)
-
     def __init__(self, subject='Unauthorized', headers={}):
         super(Unauthorized, self).__init__(http.UNAUTHORIZED, subject, headers)
 
 
+@implementer(IResponse)
 class NotFound(Response):
     """
     Error 404 Not Found HTTP Response
@@ -129,8 +185,6 @@ class NotFound(Response):
     :type headers: dict or a list of dicts
     """
 
-    implements(IResponse)
-
     def __init__(self, subject, headers={}):
         if not subject:
             subject = 'Mamba resource not found'
@@ -138,6 +192,7 @@ class NotFound(Response):
         super(NotFound, self).__init__(http.NOT_FOUND, subject, headers)
 
 
+@implementer(IResponse)
 class Conflict(Response):
     """
     Error 409 Conflict found
@@ -148,8 +203,6 @@ class Conflict(Response):
     :param message: a customer user messahe for the response
     :type message: str
     """
-
-    implements(IResponse)
 
     def __init__(self, subject, value, message=''):
         super(Conflict, self).__init__(
@@ -165,6 +218,7 @@ class Conflict(Response):
         )
 
 
+@implementer(IResponse)
 class AlreadyExists(Conflict):
     """
     Error 409 Conflict found in POST
@@ -175,8 +229,6 @@ class AlreadyExists(Conflict):
     :param message: a customer user messahe for the response
     :type message: str
     """
-
-    implements(IResponse)
 
     def __init__(self, subject, value, message=''):
         super(AlreadyExists, self).__init__(
@@ -189,6 +241,7 @@ class AlreadyExists(Conflict):
         )
 
 
+@implementer(IResponse)
 class InternalServerError(Response):
     """
     Error 500 Internal Server Error
@@ -198,8 +251,6 @@ class InternalServerError(Response):
     :type message: str
     """
 
-    implements(IResponse)
-
     def __init__(self, message):
         super(InternalServerError, self).__init__(
             http.INTERNAL_SERVER_ERROR,
@@ -208,6 +259,7 @@ class InternalServerError(Response):
         )
 
 
+@implementer(IResponse)
 class NotImplemented(Response):
     """
     Error 501 Not Implemented
