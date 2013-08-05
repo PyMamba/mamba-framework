@@ -23,7 +23,7 @@ class ResponseTest(unittest.TestCase):
         self.assertEqual(result.code, http.CREATED)
 
     def test_response_moved_permanently_is_301(self):
-        result = response.MovedPermaneently('none')
+        result = response.MovedPermanently('none')
         self.assertEqual(result.code, http.MOVED_PERMANENTLY)
 
     def test_response_found_is_302(self):
