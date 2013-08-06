@@ -150,3 +150,11 @@ License
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 Have a look on [LICENSE](https://raw.github.com/DamnWidget/mamba/master/LICENSE) file to read the full license
+
+======
+Donate
+======
+
+[<img src="https://api.flattr.com/button/flattr-badge-large.png" />][0]
+
+[0]: https://flattr.com/submit/auto?user_id=damnwidget&url=https://github.com/DamnWidget/mamba&title=mamba&language=en_US&tags=frameworks,programming&category=software
