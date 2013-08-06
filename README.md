@@ -157,4 +157,4 @@ Donate
 
 [<img src="https://api.flattr.com/button/flattr-badge-large.png" />][0]
 
-[0]: https://flattr.com/submit/auto?user_id=damnwidget&url=https://github.com/DamnWidget/mamba&title=mamba&language=en_US&tags=frameworks,programming&category=software
+[0]: http://flattr.com/thing/1765363/
