@@ -1,6 +1,7 @@
 =====
 Mamba
 =====
+
 Mamba is a high-lvel Web Applications framework based on Twisted, Storm and Jinja2.
 
 <table>
@@ -8,6 +9,8 @@ Mamba is a high-lvel Web Applications framework based on Twisted, Storm and Jinj
     <td align="center"><strong>Author:</strong></td><td>Oscar Campos &lt;<a href="mailto:oscar.campos@member.fsf.org">oscar.campos@member.fsf.org</a>&gt;</td>
   </tr>
 </table>
+
+[![Downloads](https://pypip.in/d/mamba-framework/badge.png)](https://crate.io/packages/mamba-framework/)
 
 Minimum Dependencies
 ====================
