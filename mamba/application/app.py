@@ -120,7 +120,7 @@ class Mamba(borg.Borg):
         are not running in development mode
         """
 
-        if self.development is False and self.log_file is not None:
+        if self.development is False and self._log_file is not None:
             self.already_logging = True
             log.startLogging(DailyLogFile.fromFullPath(self.log_file))
 
@@ -137,8 +137,9 @@ class Mamba(borg.Borg):
             elif key == 'version':
                 setattr(self, '_ver', getattr(options, key))
             elif key == 'log_file':
-                log_file = 'logs/{}'.format(getattr(options, key))
-                setattr(self, '_log_file', log_file)
+                if getattr(options, key) is not None:
+                    log_file = 'logs/{}'.format(getattr(options, key))
+                    setattr(self, '_log_file', log_file)
             else:
                 setattr(self, key, getattr(options, key))
 
@@ -172,7 +173,7 @@ class Mamba(borg.Borg):
 
     @property
     def log_file(self):
-        return self._log_file
+        return self._log_file if self._log_file is not None else 'service.log'
 
     @log_file.setter
     def log_file(self, file):
