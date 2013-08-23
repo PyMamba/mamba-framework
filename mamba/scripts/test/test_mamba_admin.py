@@ -11,6 +11,7 @@ import sys
 import getpass
 import datetime
 from cStringIO import StringIO
+from contextlib import contextmanager
 
 from twisted.internet import utils, defer
 from twisted.trial import unittest
@@ -23,6 +24,10 @@ from mamba.scripts._model import ModelOptions, Model
 from mamba.scripts._controller import ControllerOptions, Controller
 from mamba.scripts._sql import (
     Sql, SqlConfigOptions, SqlCreateOptions, SqlDumpOptions, SqlResetOptions
+)
+from mamba.scripts._package import (
+    PackageOptions, PackageInstallOptions, PackagePackOptions,
+    PackageUninstallOptions
 )
 
 # set me as True if you want to skip slow command line tests
@@ -867,6 +872,28 @@ class ViewScriptTest(unittest.TestCase):
         os.chdir(currdir)
 
 
+class MambaAdminPackageInstallTest(unittest.TestCase):
+
+    def setUp(self):
+        self.config = PackageInstallOptions()
+        self.stdout = sys.stdout
+        self.capture = StringIO()
+        sys.stdout = self.capture
+
+    def test_wrong_number_of_args(self):
+        self.assertRaises(usage.UsageError, self.config.parseOptions, ['test'])
+
+    def test_use_outside_application_directory_fails(self):
+        _test_use_outside_application_directory_fails(self)
+
+    def test_user_and_global_cant_be_together(self):
+
+        with fake_project():
+            self.assertRaises(
+                usage.UsageError, self.config.parseOptions, ['-u', '-g']
+            )
+
+
 def _test_use_outside_application_directory_fails(self, dump_opt=False):
 
     def fake_exit(val):
@@ -887,3 +914,14 @@ def _test_use_outside_application_directory_fails(self, dump_opt=False):
             'application root directory and then run '
             'this command again' in self.capture.getvalue()
         )
+
+
+@contextmanager
+def fake_project():
+    """I just offer a fake project to get dirty with
+    """
+
+    currdir = os.getcwd()
+    os.chdir('../mamba/test/dummy_app')
+    yield
+    os.chdir(currdir)
