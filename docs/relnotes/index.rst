@@ -50,6 +50,8 @@ Bug Fixes
 * Added mandatory option parameter `development` to the application.json template.
 * Fixed memory leak in the routing system cache
 * Fixed bug that hides log_file being null in options
+* Fixed bug in package pack when using alternative names
+* Fixed bug in package pack when version string has more than two levels
 
 
 Changes

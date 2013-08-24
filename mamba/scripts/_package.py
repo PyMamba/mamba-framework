@@ -278,6 +278,8 @@ class PackagePackOptions(usage.Options):
                 mamba_services.config.Application(
                     'config/application.json').name.lower()
             )
+        else:
+            self['name'] = name
 
 
 class PackageOptions(usage.Options):
@@ -344,8 +346,9 @@ class Package(object):
         command = 'bdist_egg' if use_egg else 'sdist'
 
         try:
+            print(self.options.subOptions.opts)
             print('Packing {} application into {} format...'.format(
-                self.options.subOptions['name'],
+                self.options.subOptions.opts['name'],
                 'egg' if use_egg else 'source'
             ).ljust(73), end='')
             Packer().pack_application(

@@ -24,7 +24,7 @@ long_description = '%s\n\n%s' % (
 
 setup(
     name='''${application_name}''',
-    version=${version},
+    version='${version}',
     packages=find_packages(),
     include_package_data=True,
     description='''${description}''',
