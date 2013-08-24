@@ -62,9 +62,8 @@ class Interaction(object):
         print('\n{}'.format(prompt), end=' ')
         try:
             while True:
-                result = raw_input('[{}] '.format(
-                    '/'.join([colors[i](response[i])
-                    for i in range(len(response))])
+                result = raw_input('[{}] '.format('/'.join(
+                    [colors[i](response[i]) for i in range(len(response))])
                 ))
 
                 if result:

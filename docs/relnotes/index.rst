@@ -49,6 +49,8 @@ Bug Fixes
 * Adding dependency to fabric package as docs will not build without it
 * Added mandatory option parameter `development` to the application.json template.
 * Fixed memory leak in the routing system cache
+* Fixed bug that hides log_file being null in options
+
 
 Changes
 -------

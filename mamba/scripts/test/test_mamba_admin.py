@@ -25,10 +25,8 @@ from mamba.scripts._controller import ControllerOptions, Controller
 from mamba.scripts._sql import (
     Sql, SqlConfigOptions, SqlCreateOptions, SqlDumpOptions, SqlResetOptions
 )
-from mamba.scripts._package import (
-    PackageOptions, PackageInstallOptions, PackagePackOptions,
-    PackageUninstallOptions
-)
+from mamba.scripts._package import PackageInstallOptions, PackagePackOptions
+
 
 # set me as True if you want to skip slow command line tests
 # I dont think you want this set as True unless you are adding
@@ -297,21 +295,17 @@ class SqlCreateTest(unittest.TestCase):
         if result == 1:
             raise unittest.SkipTest('mamba framework is not installed yet')
 
-        currdir = os.getcwd()
-        os.chdir('../mamba/test/dummy_app/')
-
-        result = yield utils.getProcessOutput(
-            'python',
-            ['../../scripts/mamba_admin.py', 'sql', 'create', '--dump'],
-            os.environ
-        )
+        with fake_project():
+            result = yield utils.getProcessOutput(
+                'python',
+                ['../../scripts/mamba_admin.py', 'sql', 'create', '--dump'],
+                os.environ
+            )
 
         self.assertTrue('CREATE TABLE IF NOT EXISTS dummy' in result)
         self.assertTrue('PRIMARY KEY(id)' in result)
         self.assertTrue('name VARCHAR' in result)
         self.assertTrue('id INTEGER' in result)
-
-        os.chdir(currdir)
 
     @defer.inlineCallbacks
     def test_sql_create_file(self):
@@ -320,20 +314,17 @@ class SqlCreateTest(unittest.TestCase):
         if result == 1:
             raise unittest.SkipTest('mamba framework is not installed yet')
 
-        currdir = os.getcwd()
-        os.chdir('../mamba/test/dummy_app/')
-        yield utils.getProcessOutput(
-            'python',
-            ['../../scripts/mamba_admin.py', 'sql', 'create', 'test'],
-            os.environ
-        )
+        with fake_project():
+            yield utils.getProcessOutput(
+                'python',
+                ['../../scripts/mamba_admin.py', 'sql', 'create', 'test'],
+                os.environ
+            )
 
-        dump_file = filepath.FilePath('test.sql')
-        self.assertTrue(dump_file.exists())
-        self.assertTrue(dump_file.getsize() > 0)
-        dump_file.remove()
-
-        os.chdir(currdir)
+            dump_file = filepath.FilePath('test.sql')
+            self.assertTrue(dump_file.exists())
+            self.assertTrue(dump_file.getsize() > 0)
+            dump_file.remove()
 
     @defer.inlineCallbacks
     def test_sql_create_live(self):
@@ -342,26 +333,23 @@ class SqlCreateTest(unittest.TestCase):
         if result == 1:
             raise unittest.SkipTest('mamba framework is not installed yet')
 
-        currdir = os.getcwd()
-        os.chdir('../mamba/test/dummy_app/')
+        with fake_project():
+            cfg_file = filepath.FilePath('config/database.json')
+            cfg_file_content = cfg_file.open('r').read()
+            cfg_file_new = cfg_file_content.replace('dummy.db', 'dummy2.db')
+            cfg_file.open('w').write(cfg_file_new)
 
-        cfg_file = filepath.FilePath('config/database.json')
-        cfg_file_content = cfg_file.open('r').read()
-        cfg_file_new = cfg_file_content.replace('dummy.db', 'dummy2.db')
-        cfg_file.open('w').write(cfg_file_new)
+            yield utils.getProcessOutput(
+                'python', [
+                    '../../scripts/mamba_admin.py', 'sql', 'create', '-l'],
+                os.environ
+            )
 
-        yield utils.getProcessOutput(
-            'python', ['../../scripts/mamba_admin.py', 'sql', 'create', '-l'],
-            os.environ
-        )
+            db_file = filepath.FilePath('db/dummy2.db')
+            self.assertTrue(db_file.exists)
+            db_file.remove()
 
-        db_file = filepath.FilePath('db/dummy2.db')
-        self.assertTrue(db_file.exists)
-        db_file.remove()
-
-        cfg_file.open('w').write(cfg_file_content)
-
-        os.chdir(currdir)
+            cfg_file.open('w').write(cfg_file_content)
 
 
 class MambaAdminSqlDumpTest(unittest.TestCase):
@@ -404,20 +392,17 @@ class SqlDumpTest(unittest.TestCase):
         if result == 1:
             raise unittest.SkipTest('mamba framework is not installed yet')
 
-        currdir = os.getcwd()
-        os.chdir('../mamba/test/dummy_app')
-        result = yield utils.getProcessOutput(
-            'python', ['../../scripts/mamba_admin.py', 'sql', 'dump'],
-            os.environ
-        )
+        with fake_project():
+            result = yield utils.getProcessOutput(
+                'python', ['../../scripts/mamba_admin.py', 'sql', 'dump'],
+                os.environ
+            )
 
         self.assertTrue("INSERT INTO 'dummy'" in result)
         self.assertTrue("INSERT INTO 'stubing'" in result)
         self.assertTrue('Test row 1' in result)
         self.assertTrue('Test row 2' in result)
         self.assertTrue('Test row 3' in result)
-
-        os.chdir(currdir)
 
     @defer.inlineCallbacks
     def test_sql_dump_to_file(self):
@@ -427,19 +412,17 @@ class SqlDumpTest(unittest.TestCase):
         if result == 1:
             raise unittest.SkipTest('mamba framework is not installed yet')
 
-        currdir = os.getcwd()
-        os.chdir('../mamba/test/dummy_app')
-        yield utils.getProcessOutput(
-            'python', ['../../scripts/mamba_admin.py', 'sql', 'dump', 'test'],
-            os.environ
-        )
+        with fake_project():
+            yield utils.getProcessOutput(
+                'python', [
+                    '../../scripts/mamba_admin.py', 'sql', 'dump', 'test'],
+                os.environ
+            )
 
-        dump_file = filepath.FilePath('test.sql')
-        self.assertTrue(dump_file.exists())
-        self.assertTrue(dump_file.getsize() > 0)
-        dump_file.remove()
-
-        os.chdir(currdir)
+            dump_file = filepath.FilePath('test.sql')
+            self.assertTrue(dump_file.exists())
+            self.assertTrue(dump_file.getsize() > 0)
+            dump_file.remove()
 
 
 class MambaAdminSqlResetTest(unittest.TestCase):
@@ -471,23 +454,20 @@ class SqlResetTest(unittest.TestCase):
         if result == 1:
             raise unittest.SkipTest('mamba framework is not installed yet')
 
-        currdir = os.getcwd()
-        os.chdir('../mamba/test/dummy_app')
-        db_file = filepath.FilePath('db/dummy.db')
-        db_contents = db_file.open('rb').read()
-        result = yield utils.getProcessOutput(
-            'python',
-            ['../../scripts/mamba_admin.py', 'sql', 'reset', '-n'],
-            os.environ
-        )
+        with fake_project():
+            db_file = filepath.FilePath('db/dummy.db')
+            db_contents = db_file.open('rb').read()
+            result = yield utils.getProcessOutput(
+                'python',
+                ['../../scripts/mamba_admin.py', 'sql', 'reset', '-n'],
+                os.environ
+            )
 
-        self.assertEqual(
-            result,
-            'All the data in your database has been reset.\n')
+            self.assertEqual(
+                result,
+                'All the data in your database has been reset.\n')
 
-        db_file.open('wb').write(db_contents)
-
-        os.chdir(currdir)
+            db_file.open('wb').write(db_contents)
 
 
 class MambaAdminControllerTest(unittest.TestCase):
@@ -611,20 +591,16 @@ class ControllerScriptTest(unittest.TestCase):
     def test_write_file(self):
         Controller.process = lambda _: 0
 
-        currdir = os.getcwd()
-        os.chdir('../mamba/test/dummy_app/')
+        with fake_project():
+            self.config.parseOptions(['controller', 'test_controller'])
+            controller = Controller(self.config)
+            controller._write_controller()
+            controller_file = filepath.FilePath(
+                'application/controller/test_controller.py'
+            )
 
-        self.config.parseOptions(['controller', 'test_controller'])
-        controller = Controller(self.config)
-        controller._write_controller()
-        controller_file = filepath.FilePath(
-            'application/controller/test_controller.py'
-        )
-
-        self.assertTrue(controller_file.exists())
-        controller_file.remove()
-
-        os.chdir(currdir)
+            self.assertTrue(controller_file.exists())
+            controller_file.remove()
 
 
 class MambaAdminModelTest(unittest.TestCase):
@@ -733,20 +709,16 @@ class ModelScriptTest(unittest.TestCase):
     def test_write_file(self):
         Model.process = lambda _: 0
 
-        currdir = os.getcwd()
-        os.chdir('../mamba/test/dummy_app/')
+        with fake_project():
+            self.config.parseOptions(['model', 'test_model', 'test'])
+            model = Model(self.config)
+            model._write_model()
+            model_file = filepath.FilePath(
+                'application/model/test_model.py'
+            )
 
-        self.config.parseOptions(['model', 'test_model', 'test'])
-        model = Model(self.config)
-        model._write_model()
-        model_file = filepath.FilePath(
-            'application/model/test_model.py'
-        )
-
-        self.assertTrue(model_file.exists())
-        model_file.remove()
-
-        os.chdir(currdir)
+            self.assertTrue(model_file.exists())
+            model_file.remove()
 
 
 class MambaAdminViewTest(unittest.TestCase):
@@ -838,50 +810,48 @@ class ViewScriptTest(unittest.TestCase):
     def test_write_file(self):
         View.process = lambda _: 0
 
-        currdir = os.getcwd()
-        os.chdir('../mamba/test/dummy_app/')
+        with fake_project():
+            self.config.parseOptions(['view', 'test_view'])
+            view = View(self.config)
+            view._write_view()
+            view_file = filepath.FilePath(
+                'application/view/templates/test_view.html'
+            )
 
-        self.config.parseOptions(['view', 'test_view'])
-        view = View(self.config)
-        view._write_view()
-        view_file = filepath.FilePath(
-            'application/view/templates/test_view.html'
-        )
-
-        self.assertTrue(view_file.exists())
-        view_file.remove()
-
-        os.chdir(currdir)
+            self.assertTrue(view_file.exists())
+            view_file.remove()
 
     def test_write_file_with_controller(self):
         View.process = lambda _: 0
 
-        currdir = os.getcwd()
-        os.chdir('../mamba/test/dummy_app/')
+        with fake_project():
+            self.config.parseOptions(['view', 'test_view', 'dummy'])
+            view = View(self.config)
+            view._write_view()
+            view_file = filepath.FilePath(
+                'application/view/Dummy/test_view.html'
+            )
 
-        self.config.parseOptions(['view', 'test_view', 'dummy'])
-        view = View(self.config)
-        view._write_view()
-        view_file = filepath.FilePath(
-            'application/view/Dummy/test_view.html'
-        )
-
-        self.assertTrue(view_file.exists())
-        view_file.remove()
-
-        os.chdir(currdir)
+            self.assertTrue(view_file.exists())
+            view_file.remove()
 
 
 class MambaAdminPackageInstallTest(unittest.TestCase):
 
     def setUp(self):
         self.config = PackageInstallOptions()
-        self.stdout = sys.stdout
         self.capture = StringIO()
+        self.stdout = sys.stdout
         sys.stdout = self.capture
 
+    def tearDown(self):
+        sys.stdout = self.stdout
+
     def test_wrong_number_of_args(self):
-        self.assertRaises(usage.UsageError, self.config.parseOptions, ['test'])
+        self.assertRaises(
+            usage.UsageError, self.config.parseOptions, [
+                '-u', 'test', 'wrong', 'fail']
+        )
 
     def test_use_outside_application_directory_fails(self):
         _test_use_outside_application_directory_fails(self)
@@ -891,6 +861,180 @@ class MambaAdminPackageInstallTest(unittest.TestCase):
         with fake_project():
             self.assertRaises(
                 usage.UsageError, self.config.parseOptions, ['-u', '-g']
+            )
+
+    def test_invalid_JSON_entry_point(self):
+
+        with fake_project():
+            self.assertRaises(
+                usage.UsageError,
+                self.config.parseOptions, ['-u', '--entry_point=""']
+            )
+
+    def test_entry_point_not_a_dict(self):
+
+        with fake_project():
+            self.assertRaises(
+                usage.UsageError,
+                self.config.parseOptions, ['-u', '--entry_points=["fail"]']
+            )
+
+    def test_invalid_JSON_extra_directories(self):
+
+        with fake_project():
+            self.assertRaises(
+                usage.UsageError,
+                self.config.parseOptions, ['-u', '--extra_directories=fail']
+            )
+
+    def test_entry_point_not_a_list(self):
+
+        with fake_project():
+            self.assertRaises(
+                usage.UsageError,
+                self.config.parseOptions, ['-u', '--extra_directories="fail"']
+            )
+
+    def test_not_valid_rfc2822_email(self):
+
+        with fake_project():
+            sys.exit = lambda x: None
+            self.config.parseOptions(['-u', '--email=no@valid'])
+            self.assertEqual(
+                self.capture.getvalue(),
+                'error: the given email address no@valid is not a valid '
+                'RFC2822 email address, check http://www.rfc-editor.org/'
+                'rfc/rfc2822.txt for very extended details\n'
+            )
+
+    def test_when_no_author_get_user_executing(self):
+
+        with fake_project():
+            self.config.parseOptions(['-u'])
+            self.assertEqual(self.config['author'], getpass.getuser())
+
+    def test_default_email(self):
+
+        with fake_project():
+            self.config.parseOptions(['-u'])
+            self.assertEqual(
+                self.config['email'],
+                '{}@localhost'.format(getpass.getuser())
+            )
+
+    def test_default_name(self):
+
+        with fake_project():
+            self.config.parseOptions(['-u'])
+            self.assertEqual(self.config['name'], 'mamba-dummy')
+
+    def test_custom_name(self):
+
+        with fake_project():
+            self.config.parseOptions(['-u', 'test-name'])
+            self.assertEqual(self.config['name'], 'test-name')
+
+
+class MambaAdminPackagePackTest(unittest.TestCase):
+
+    def setUp(self):
+        self.config = PackagePackOptions()
+        self.stdout = sys.stdout
+        self.capture = StringIO()
+        sys.stdout = self.capture
+
+    def tearDown(self):
+        sys.stdout = self.stdout
+
+    def test_wrong_number_of_args(self):
+        self.assertRaises(
+            usage.UsageError, self.config.parseOptions, ['wrong', 'fail']
+        )
+
+    def test_use_outside_application_directory_fails(self):
+        _test_use_outside_application_directory_fails(self)
+
+    def test_egg_option(self):
+
+        with fake_project():
+            self.config.parseOptions(['-e'])
+            self.assertEqual(self.config['egg'], True)
+
+    def test_no_egg_options(self):
+
+        with fake_project():
+            self.config.parseOptions()
+            self.assertEqual(self.config['egg'], False)
+
+    def test_cfgdir_options(self):
+
+        with fake_project():
+            self.config.parseOptions(['-c'])
+            self.assertEqual(self.config['cfgdir'], True)
+
+    def test_no_cfgdir_options(self):
+
+        with fake_project():
+            self.config.parseOptions()
+            self.assertEqual(self.config['cfgdir'], False)
+
+    def test_invalid_JSON_entry_point(self):
+
+        with fake_project():
+            self.assertRaises(
+                usage.UsageError,
+                self.config.parseOptions, ['--entry_point=""']
+            )
+
+    def test_entry_point_not_a_dict(self):
+
+        with fake_project():
+            self.assertRaises(
+                usage.UsageError,
+                self.config.parseOptions, ['--entry_points=["fail"]']
+            )
+
+    def test_invalid_JSON_extra_directories(self):
+
+        with fake_project():
+            self.assertRaises(
+                usage.UsageError,
+                self.config.parseOptions, ['--extra_directories=fail']
+            )
+
+    def test_entry_point_not_a_list(self):
+
+        with fake_project():
+            self.assertRaises(
+                usage.UsageError,
+                self.config.parseOptions, ['--extra_directories="fail"']
+            )
+
+    def test_not_valid_rfc2822_email(self):
+
+        with fake_project():
+            sys.exit = lambda x: None
+            self.config.parseOptions(['--email=no@valid'])
+            self.assertEqual(
+                self.capture.getvalue(),
+                'error: the given email address no@valid is not a valid '
+                'RFC2822 email address, check http://www.rfc-editor.org/'
+                'rfc/rfc2822.txt for very extended details\n'
+            )
+
+    def test_when_no_author_get_user_executing(self):
+
+        with fake_project():
+            self.config.parseOptions()
+            self.assertEqual(self.config['author'], getpass.getuser())
+
+    def test_default_email(self):
+
+        with fake_project():
+            self.config.parseOptions()
+            self.assertEqual(
+                self.config['email'],
+                '{}@localhost'.format(getpass.getuser())
             )
 
 

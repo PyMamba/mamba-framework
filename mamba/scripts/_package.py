@@ -88,22 +88,24 @@ class PackageInstallOptions(usage.Options):
             try:
                 self['entry_points'] = json.loads(self['entry_points'])
             except ValueError:
-                raise usage.UsageError(
-                    'invalid JSON entry_points structure')
+                raise usage.UsageError('invalid JSON entry_points structure')
 
             if type(self['entry_points']) is not dict:
                 raise usage.UsageError(
-                    'the entry_points JSON string must be decoded as a dict')
+                    'the entry_points JSON string must be decoded as a dict'
+                )
         else:
             self['entry_points'] = {}
 
         if self['extra_directories'] is not None:
             try:
                 self['extra_directories'] = json.loads(
-                    self['extra_directories'])
+                    self['extra_directories']
+                )
             except ValueError:
                 raise usage.UsageError(
-                    'invalid JSON extra_directories structure')
+                    'invalid JSON extra_directories structure'
+                )
 
             if type(self['extra_directories']) is not list:
                 raise usage.UsageError(
