@@ -17,6 +17,7 @@ from twisted.internet import utils, defer
 from twisted.trial import unittest
 from twisted.python import usage, filepath
 
+from mamba.utils import config
 from mamba.scripts import mamba_admin, commons
 from mamba.scripts._project import Application
 from mamba.scripts._view import ViewOptions, View
@@ -25,7 +26,9 @@ from mamba.scripts._controller import ControllerOptions, Controller
 from mamba.scripts._sql import (
     Sql, SqlConfigOptions, SqlCreateOptions, SqlDumpOptions, SqlResetOptions
 )
-from mamba.scripts._package import PackageInstallOptions, PackagePackOptions
+from mamba.scripts._package import (
+    Packer, PackageInstallOptions, PackagePackOptions
+)
 
 
 # set me as True if you want to skip slow command line tests
@@ -1036,6 +1039,103 @@ class MambaAdminPackagePackTest(unittest.TestCase):
                 self.config['email'],
                 '{}@localhost'.format(getpass.getuser())
             )
+
+
+class PackagePackerTest(unittest.TestCase):
+
+    def setUp(self):
+        self.packer = Packer()
+        self.config = PackagePackOptions()
+
+    def tearDown(self):
+        with fake_project():
+            self.packer.do(['rm', 'README.rst'])
+            self.packer.do(['rm', 'LICENSE'])
+            self.packer.do(['rmdir', 'docs'])
+
+    def test_do(self):
+        self.packer.do(['touch', 'test_file.tmp'])
+        self.assertTrue(os.path.exists('test_file.tmp'))
+        self.packer.do(['rm', 'test_file.tmp'])
+        self.assertFalse(os.path.exists('test_file.tmp'))
+
+    def test_pack_fails_on_no_README_or_no_LICENSE(self):
+
+        with fake_project():
+            self.config.parseOptions()
+            self.assertRaises(
+                usage.UsageError,
+                self.packer.pack_application,
+                'sdist', self.config,
+                config.Application('config/application.json')
+            )
+
+    def test_pack_fails_on_no_docs_directory(self):
+
+        with self._generate_README_and_LICENSE():
+            self.config.parseOptions()
+            self.assertRaises(
+                usage.UsageError,
+                self.packer.pack_application,
+                'sdist', self.config,
+                config.Application('config/application.json')
+            )
+            self.assertTrue(os.path.exists('README.rst'))
+            self.assertTrue(os.path.exists('LICENSE'))
+            self.assertFalse(os.path.exists('docs'))
+
+    def test_pack_sdist(self):
+
+        with self._generate_docs():
+            self.config.parseOptions()
+            self.config['name'] = 'mamba-dummy'
+            self.packer.pack_application(
+                'sdist', self.config,
+                config.Application('config/application.json')
+            )
+            self.assertTrue(os.path.exists('mamba-dummy-0.1.2.tar.gz'))
+            self.packer.do(['rm', 'mamba-dummy-0.1.2.tar.gz'])
+
+    def test_pack_egg(self):
+
+        with self._generate_docs():
+            self.config.parseOptions()
+            self.config['name'] = 'mamba-dummy'
+            self.packer.pack_application(
+                'bdist_egg', self.config,
+                config.Application('config/application.json')
+            )
+            major, minor = sys.version_info[:2]
+            self.assertTrue(os.path.exists(
+                'mamba_dummy-0.1.2-py{}.{}.egg'.format(major, minor))
+            )
+            self.packer.do(
+                ['rm', 'mamba_dummy-0.1.2-py{}.{}.egg'.format(major, minor)]
+            )
+
+    def test_is_mamba_package_for_tar_file(self):
+
+        pass
+
+    @contextmanager
+    def _generate_README_and_LICENSE(self):
+
+        with fake_project():
+            self.packer.do(['touch', 'README.rst'])
+            self.packer.do(['touch', 'LICENSE'])
+            yield
+            self.packer.do(['rm', 'README.rst', 'LICENSE'])
+
+    @contextmanager
+    def _generate_docs(self):
+
+        if skip_command_line_tests is True:
+            raise unittest.SkipTest('skip_command_line_tests is set as True')
+
+        with self._generate_README_and_LICENSE():
+            self.packer.do(['mkdir', 'docs'])
+            yield
+            self.packer.do(['rmdir', 'docs'])
 
 
 def _test_use_outside_application_directory_fails(self, dump_opt=False):

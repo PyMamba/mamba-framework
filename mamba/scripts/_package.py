@@ -346,7 +346,6 @@ class Package(object):
         command = 'bdist_egg' if use_egg else 'sdist'
 
         try:
-            print(self.options.subOptions.opts)
             print('Packing {} application into {} format...'.format(
                 self.options.subOptions.opts['name'],
                 'egg' if use_egg else 'source'
