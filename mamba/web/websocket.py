@@ -306,7 +306,7 @@ class HyBi07Frame(object):
         start = 0
         frames = []
 
-        while  True:
+        while True:
             # is there are not at least two bytes in the buffer, bail
             if len(self.buf) - start < 2:
                 break

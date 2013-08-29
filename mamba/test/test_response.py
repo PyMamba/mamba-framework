@@ -22,6 +22,10 @@ class ResponseTest(unittest.TestCase):
         result = response.Created()
         self.assertEqual(result.code, http.CREATED)
 
+    def test_response_unknown_is_209(self):
+        result = response.Unknown()
+        self.assertEqual(result.code, 209)
+
     def test_response_moved_permanently_is_301(self):
         result = response.MovedPermanently('none')
         self.assertEqual(result.code, http.MOVED_PERMANENTLY)

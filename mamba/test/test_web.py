@@ -623,7 +623,7 @@ class RouterTest(unittest.TestCase):
         router = Router()
         router.install_routes(StubController())
 
-        self.assertTrue(len(router.routes['GET']) == 2)
+        self.assertTrue(len(router.routes['GET']) == 3)
 
         del router
         router = Router()
@@ -635,7 +635,7 @@ class RouterTest(unittest.TestCase):
         StubController.another_test = another_test
         router.install_routes(StubController())
 
-        self.assertTrue(len(router.routes['GET']) == 3)
+        self.assertTrue(len(router.routes['GET']) == 4)
 
     def test_install_router_fails_when_give_wrong_arguments(self):
 
@@ -649,7 +649,18 @@ class RouterTest(unittest.TestCase):
         router.install_routes(StubController())
 
         # only one of the routes should be installed
-        self.assertTrue(len(router.routes['GET']) == 2)
+        self.assertTrue(len(router.routes['GET']) == 3)
+
+    def test_dispatch_returns_unknown_209_on_no_return_from_method(self):
+
+        controller = StubController()
+        request = request_generator(['/209'], method='GET')
+        router = Router()
+        router.install_routes(controller)
+
+        self.assertIsInstance(
+            router.dispatch(controller, request).result, response.Unknown
+        )
 
 
 class TestRouteDispatcher(unittest.TestCase):
@@ -720,6 +731,10 @@ class StubController(object):
         val1 = yield 'Hello '
         val2 = yield 'Defer!'
         defer.returnValue(val1 + val2)
+
+    @decoroute('/209')
+    def unknown(self, request, **kwargs):
+        pass
 
 
 def routes_generator(retval, method='GET'):
