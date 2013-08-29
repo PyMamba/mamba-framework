@@ -12,8 +12,9 @@ Features
 --------
 
 * Added Created (201 HTTP) Response to predefined responses
+* Added Unknown (209 HTTP) Response to predefined responses (209 is unassigned)
 * Added Unauthorized (401 HTTP) Response to predefined responses
-* Added MovedPErmanently (301 HTTP) Response to predefined responses
+* Added MovedPermanently (301 HTTP) Response to predefined responses
 * Added SeeOther (303 HTTP) Response to predefined responses
 * Added decimal size and precission using size property for MySQL decimal fields definitions::
 
@@ -52,6 +53,7 @@ Bug Fixes
 * Fixed bug that hides log_file being null in options
 * Fixed bug in package pack when using alternative names
 * Fixed bug in package pack when version string has more than two levels
+* Fixed bug related with routed methods that does not return anything
 
 
 Changes
