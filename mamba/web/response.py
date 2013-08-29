@@ -85,6 +85,19 @@ class Created(Response):
 
 
 @implementer(IResponse)
+class Unknown(Response):
+    """
+    Ok Unknown status 209 HTTP Response
+
+    This HTTP code is not assigned, we will return this code when
+    an enrouted method does not return anything to the browser
+    """
+
+    def __init__(self):
+        super(Unknown, self).__init__(209, '', {})
+
+
+@implementer(IResponse)
 class MovedPermanently(Response):
     """
     Ok 301 Moved Permanently HTTP Response

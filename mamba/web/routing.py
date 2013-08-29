@@ -317,7 +317,7 @@ class Router(object):
         """
 
         if result is None:
-            return response.Response(209, None)
+            return response.Unknown()
 
         try:
             return self._prepare_response(result, request)
