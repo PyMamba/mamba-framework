@@ -7,6 +7,7 @@ from __future__ import print_function
 import os
 import sys
 import glob
+import time
 import signal
 import subprocess
 
@@ -63,7 +64,9 @@ class Options(usage.Options):
         ['start', None, StartOptions,
             'Start a mamba application (you should be in the app directory)'],
         ['stop', None, usage.Options,
-            'Stop a mamba application (you should be in the app directory)']
+            'Stop a mamba application (you should be in the app directory)'],
+        ['restart', None, usage.Options,
+            'Reatart a mamba application (you should be in the app directory)']
     ]
 
     optFlags = [
@@ -115,7 +118,7 @@ def handle_application_command(options):
     )
 
 
-def handle_start_command(options):
+def handle_start_command(options=None):
     """I handle the start command
     """
 
@@ -181,7 +184,7 @@ def handle_start_command(options):
 
     args.append(app_name)
 
-    if options.subOptions.opts['port']:
+    if options is not None and options.subOptions.opts['port']:
         args.append('--port={}'.format(options.subOptions.opts['port']))
 
     if mamba_services.config.Application().development is True:
@@ -228,6 +231,16 @@ def handle_stop_command():
         raise
 
 
+def handle_restart_command():
+    """I handle the restart command
+    """
+
+    handle_stop_command()
+    while os.path.exists('twistd.pid'):
+        time.sleep(0.1)
+    handle_start_command()
+
+
 def determine_platform_reactor(mamba_services):
     """Determine the reactor to use for the running platform
 
@@ -268,6 +281,9 @@ def run():
 
     if options.subCommand == 'stop':
         handle_stop_command()
+
+    if options.subCommand == 'restart':
+        handle_restart_command()
 
     if options.subCommand == 'sql':
         Sql(options.subOptions)
