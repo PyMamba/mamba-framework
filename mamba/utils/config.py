@@ -14,7 +14,7 @@
 import os
 import json
 
-from twisted.python import filepath, log
+from twisted.python import filepath
 
 from mamba.utils import borg, output
 
@@ -42,7 +42,7 @@ class BaseConfig(borg.Borg):
                     if self.loaded:
                         self.loaded = False
 
-                    log.err(
+                    print(
                         output.red(
                             '{}: Invalid config file {}, falling back to '
                             'default settings {}'.format(
@@ -166,9 +166,9 @@ class Database(BaseConfig):
     def __repr__(self):
         return 'config.Database(%s)' % (
             ', '.join(map(repr, [
-            self.uri, self.min_threads, self.max_threads,
-            self.auto_adjust_pool_size, self.create_table_behaviours,
-            self.drop_table_behaviours]))
+                self.uri, self.min_threads, self.max_threads,
+                self.auto_adjust_pool_size, self.create_table_behaviours,
+                self.drop_table_behaviours]))
         )
 
 

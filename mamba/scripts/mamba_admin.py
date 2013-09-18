@@ -137,7 +137,13 @@ def handle_start_command(options):
 
     if POSIX:
         app = mamba_services.config.Application()
-        if app.port <= 1024:
+        if app.port is None:
+            print(
+                'Your application configuration file does not define a valid '
+                'port. Is your configuration file valid JSON format?'
+            )
+            sys.exit(-1)
+        elif app.port <= 1024:
             if os.getuid() != 0:
                 print(
                     '[{e}]: This application is configured to use a reserved '
