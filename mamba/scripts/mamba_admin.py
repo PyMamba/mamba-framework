@@ -60,12 +60,6 @@ class Options(usage.Options):
         ['package', None, PackageOptions,
             'Pack or install a reusable mamba application. See reusability '
             'documentation for more details about this specific topic'],
-        # TODO: some day mamba will add entities and a good integrated test
-        # suite... I hope
-        # ['entity', None, None, 'Generate a new entity'],
-        # ['test', None, None,
-        #     'Test the mamba application (not the framework).'
-        #     'To test the framework itself you can use the --test option'],
         ['start', None, StartOptions,
             'Start a mamba application (you should be in the app directory)'],
         ['stop', None, usage.Options,
