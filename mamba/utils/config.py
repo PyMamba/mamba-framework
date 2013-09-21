@@ -205,7 +205,8 @@ class Application(BaseConfig):
             "description": "This is my cool application",
             "favicon": "favicon.ico",
             "platform_debug": false,
-            "development": true
+            "development": true,
+            "debug": false
         }
 
     If we want to force the mamba application to run under some specific
@@ -234,6 +235,7 @@ class Application(BaseConfig):
         self.log_file = None
         self.name = None
         self.port = None
+        self.debug = False
         self.doctype = 'html'
         self.content_type = 'text/html'
         self.description = None
