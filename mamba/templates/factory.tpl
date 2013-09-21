@@ -21,8 +21,9 @@ def MambaApplicationFactory(settings):
     application = service.MultiService()
     application.setName(settings.name)
 
-    # register settings through Mamba Borg
+    # register settings and multiservice through Mamba Borg
     app = Mamba(settings)
+    app.multi_services = application
 
     # create the root page
     root = Page(app)

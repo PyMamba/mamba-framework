@@ -10,6 +10,8 @@
 .. modelauthor:: ${author} <${author_email}>
 """
 
+# is better if you remove this star import and import just what you
+# really need from storm.properties, storm.references and storm.expr
 from storm.locals import *
 
 from mamba.application import model
