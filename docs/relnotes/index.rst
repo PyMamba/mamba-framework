@@ -37,6 +37,7 @@ Features
                 }
             }
         }
+* Added `restart` command to `mamba-admin` command line tool
 
 Bug Fixes
 ---------
@@ -54,6 +55,7 @@ Bug Fixes
 * Fixed bug in package pack when using alternative names
 * Fixed bug in package pack when version string has more than two levels
 * Fixed bug related with routed methods that does not return anything
+* Now mamba does not print a bogus and unrelated error message when there is some problem with the JSON config files
 
 
 Changes

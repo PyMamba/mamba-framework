@@ -421,7 +421,12 @@ To limit the given results we just slice the result:
     >>> [figther.name for figther in result.order_by(Figther.name)[:2]]
     [u'Bruce Lee', u'Chuck Norris']
 
-As you already noticed, this just operates at Python level and not at database level and sometimes this is not optim because we need to limit or order just in the SQL level. Storm adds the possibility to use SQL expressions in an agnostic database backend way to perform those operations:
+
+Those slices are translated to OFFSET and LIMIT in the underlaying database SQL query by Storm so this last operation is translated to something like this for MySQL/MariaDB:
+
+    SELECT figther.name FROM figthers LIMIT 2 OFFSET 0
+
+Storm adds the possibility to use SQL expressions in an agnostic database backend way to perform those operations as well:
 
 .. sourcecode:: python
 
