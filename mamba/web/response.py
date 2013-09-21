@@ -41,10 +41,6 @@ class Response(object):
 
         if code in (http.BAD_REQUEST, http.NOT_FOUND):
             log.msg(brown(self.subject), logLevel=logging.WARN)
-        elif code == http.OK:
-            pass
-        else:
-            log.err(self)
 
     def __repr__(self):
         return 'IResponse({})'.format(
