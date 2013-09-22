@@ -5,7 +5,6 @@
 from __future__ import print_function
 
 import os
-import re
 import sys
 import json
 import zipfile
@@ -26,6 +25,7 @@ from twisted.python import usage, filepath
 from mamba import copyright
 from mamba.scripts import commons
 from mamba._version import versions
+from mamba.utils.checkers import Checkers
 from mamba.utils.output import darkred, darkgreen
 
 # This is an auto-generated property, Do not edit it.
@@ -115,18 +115,11 @@ class PackageInstallOptions(usage.Options):
         else:
             self['extra_directories'] = []
 
-         # http://www.rfc-editor.org/rfc/rfc2822.txt
-        RFC2822 = re.compile(
-            r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*"
-            "+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9]"
-            ")?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
-        )
-
         if self['author'] is None:
             self['author'] = getpass.getuser()
 
         if self['email'] is not None:
-            if RFC2822.match(self['email']) is None:
+            if not Checkers.check_email(self['email']):
                 print(
                     'error: the given email address {} is not a valid RFC2822 '
                     'email address, '
@@ -240,18 +233,11 @@ class PackagePackOptions(usage.Options):
         else:
             self['extra_directories'] = []
 
-         # http://www.rfc-editor.org/rfc/rfc2822.txt
-        RFC2822 = re.compile(
-            r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*"
-            "+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9]"
-            ")?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
-        )
-
         if self['author'] is None:
             self['author'] = getpass.getuser()
 
         if self['email'] is not None:
-            if RFC2822.match(self['email']) is None:
+            if not Checkers.check_email(self['email']):
                 print(
                     'error: the given email address {} is not a valid RFC2822 '
                     'email address, '

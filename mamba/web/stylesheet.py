@@ -65,7 +65,7 @@ class Stylesheet(object):
                         )
                     )
 
-                res = '{}/{}'.format(self.prefix, self._fp.basename())
+                res = '/{}/{}'.format(self.prefix, self._fp.basename())
                 self.data = res
                 self.name = self._fp.basename()
             else:

@@ -20,6 +20,7 @@ import functools
 
 from twisted.python import filepath
 
+from mamba.utils.checkers import Checkers
 from mamba.utils.output import bold, darkgreen, darkred, create_color_func
 
 
@@ -121,8 +122,8 @@ class Interaction(object):
                     ))
 
                 response = raw_input('[{}] '.format(
-                    '/'.join([str(choices.index(choices[i]))
-                    for i in range(len(choices))])
+                    '/'.join([str(choices.index(choices[i])) for i in range(
+                        len(choices))])
                 ))
 
                 if response:
@@ -204,18 +205,11 @@ def post_options(self):
     """Post options processing
     """
 
-    # http://www.rfc-editor.org/rfc/rfc2822.txt
-    RFC2822 = re.compile(
-        r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*"
-        "+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9]"
-        ")?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
-    )
-
     if self['author'] is None:
         self['author'] = getpass.getuser()
 
     if self['email'] is not None:
-        if RFC2822.match(self['email']) is None:
+        if not Checkers.check_email(self['email']):
             print(
                 'error: the given email address {} is not a valid RFC2822 '
                 'email address, '

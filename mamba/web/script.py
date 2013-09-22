@@ -65,7 +65,7 @@ class Script(object):
                         'or Dart mamba file'.format(self.path)
                     )
 
-                res = '{}/{}'.format(self.prefix, self._fp.basename())
+                res = '/{}/{}'.format(self.prefix, self._fp.basename())
                 self.data = res
                 self.name = self._fp.basename()
                 self.type = ('text/javascript' if extension == '.js'

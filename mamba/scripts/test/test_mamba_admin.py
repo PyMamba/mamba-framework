@@ -41,9 +41,9 @@ class MambaAdminTest(unittest.TestCase):
 
     def test_subcommands(self):
 
-        config = mamba_admin.Options()
+        cfg = mamba_admin.Options()
 
-        subCommands = config.subCommands
+        subCommands = cfg.subCommands
         expectedOrder = [
             'application', 'sql', 'controller',
             'model', 'view', 'package', 'start', 'stop'
@@ -689,22 +689,19 @@ class ModelScriptTest(unittest.TestCase):
             '\n\n'
             '# -*- encoding: utf-8 -*-\n'
             '# -*- mamba-file-type: mamba-model -*-\n'
-            '# Copyright (c) {year} - {author} <{author}@localhost>\n\n'
-            '"""'
-            '\n'
+            '# Copyright (c) 2013 - damnwidget <damnwidget@localhost>\n\n"""\n'
             '.. model:: TestModel\n'
             '    :plarform: Linux\n'
             '    :synopsis: None\n\n'
-            '.. modelauthor:: {author} <{author}@localhost>\n'
+            '.. modelauthor:: damnwidget <damnwidget@localhost>\n'
             '"""\n\n'
-            'from storm.locals import *\n\n'
-            'from mamba.application import model\n\n\n'
-            'class TestModel(model.Model):\n'
-            '    """\n'
-            '    None\n'
-            '    """\n\n'
-            '    __storm_table__ = \'test\'\n\n'
-            '    id = Int(primary=True, unsigned=True)\n\n\n'.format(
+            '# is better if you remove this star import and import just what '
+            'you\n# really need from storm.properties, storm.references and '
+            'storm.expr\nfrom storm.locals import *\n\nfrom mamba.application '
+            'import model\n\n\n'
+            'class TestModel(model.Model):\n    '
+            '"""\n    None\n    """\n\n    __storm_table__ = \'test\'\n\n    '
+            'id = Int(primary=True, unsigned=True)\n\n\n'.format(
                 author=getpass.getuser(), year=datetime.datetime.now().year
             )
         )

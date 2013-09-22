@@ -12,6 +12,7 @@
 
 """
 
+import traceback
 from os.path import normpath
 
 from twisted.python import log
@@ -162,6 +163,8 @@ class Controller(resource.Resource, ControllerProvider):
             else:
                 request.write(result.subject)
                 request.finish()
+        except RuntimeError as error:
+            log.err(error)
         except Exception as error:
             log.err(error)
             request.setResponseCode(http.INTERNAL_SERVER_ERROR)
@@ -196,6 +199,8 @@ class Controller(resource.Resource, ControllerProvider):
         """
 
         result = self._router.dispatch(self, request)
+        if hasattr(result, 'cancel'):
+            request.notifyFinish().addErrback(lambda _, c: c.cancel(), result)
 
         result.addCallback(self.sendback, request)
         return server.NOT_DONE_YET
