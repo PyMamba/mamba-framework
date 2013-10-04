@@ -329,10 +329,7 @@ This will create a new file called ``contact.py`` in the ``application/controlle
     .. controllerauthor:: damnwidget <damnwidget@localhost>
     """
 
-    from zope.interface import implements
-
     from mamba.web.response import Ok
-    from mamba.core import interfaces
     from mamba.application import route
     from mamba.application import controller
 
@@ -342,9 +339,7 @@ This will create a new file called ``contact.py`` in the ``application/controlle
         Contact form for Dummy
         """
 
-        implements(interfaces.IController)
         name = 'Contact'
-        loaded = False
         __route__ = 'contact'
 
         def __init__(self):
@@ -401,12 +396,10 @@ Now we have to modify our controller a bit in order to make it use the new templ
     .. controllerauthor:: damnwidget <damnwidget@localhost>
     """
 
-    from zope.interface import implements
-
+    from mamba.core import templating
     from mamba.web.response import Ok
     from mamba.application import route
     from mamba.application import controller
-    from mamba.core import interfaces, templating
 
 
     class Contact(controller.Controller):
@@ -414,7 +407,6 @@ Now we have to modify our controller a bit in order to make it use the new templ
         Contact form for Dummy
         """
 
-        implements(interfaces.IController)
         name = 'Contact'
         loaded = False
         __route__ = 'contact'

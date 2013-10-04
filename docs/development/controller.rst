@@ -69,10 +69,7 @@ Will create a new controller python script on ``application/controller/webservic
     .. controllerauthor:: damnwidget <damnwidget@localhost>
     """
 
-    from zope.interface import implements
-
     from mamba.web.response import Ok
-    from mamba.core import interfaces
     from mamba.application import route
     from mamba.application import controller
 
@@ -82,7 +79,6 @@ Will create a new controller python script on ``application/controller/webservic
         None
         """
 
-        implements(interfaces.IController)
         name = 'Webservice'
         __route__ = 'api'
 
@@ -154,7 +150,6 @@ First of all we have to create a new view for the controller using the ``mamba-a
 
     class Main(controller.Controller):
 
-        implements(interfaces.IController)
         name = 'Main'
         __route__ = ''
 
@@ -182,7 +177,6 @@ Our last step is just make a small change in the ``root`` action in the controll
 
     class Main(controller.Controller):
 
-        implements(interfaces.IController)
         name = 'Main'
         __route__ = ''
 
@@ -209,7 +203,6 @@ Mamba is just |twisted| and |twisted| is an asynchornous network framework, we c
 .. sourcecode:: python
 
     from twisted.internet import defer
-    from zope.interface import implements
 
     from mamba.application import route
     from mamba.application.controller import Controller
@@ -223,7 +216,6 @@ Mamba is just |twisted| and |twisted| is an asynchornous network framework, we c
         Blog controller
         """
 
-        implements(interfaces.IController)
         name = 'Blog'
         __route__ = 'blog'
 
