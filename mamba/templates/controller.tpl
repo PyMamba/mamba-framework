@@ -10,10 +10,7 @@
 .. controllerauthor:: ${author} <${author_email}>
 """
 
-from zope.interface import implements
-
 from mamba.web.response import Ok
-from mamba.core import interfaces
 from mamba.application import route
 from mamba.application import controller
 
@@ -23,7 +20,6 @@ class ${controller_class}(controller.Controller):
     ${synopsis}
     """
 
-    implements(interfaces.IController)
     name = '${controller_class}'
     __route__ = '${register_path}'
 

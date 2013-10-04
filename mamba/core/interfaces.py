@@ -52,10 +52,10 @@ class IController(Interface):
         """
     )
 
-    desc = Attribute(
+    __route__ = Attribute(
         """
-        :param desc: Controller's description
-        :type desc: str
+        :param __route__: Controller's route
+        :type __route__: str
         """
     )
 

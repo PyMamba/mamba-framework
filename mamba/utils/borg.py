@@ -5,7 +5,7 @@
 """
 .. module:: borg
     :platform: Unix, Windows
-    :synopsys: Mamba implementation of Alex Martelli's Borg 'no-pattern'
+    :synopsis: Mamba implementation of Alex Martelli's Borg 'no-pattern'
 
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 

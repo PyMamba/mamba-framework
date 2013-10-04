@@ -12,18 +12,19 @@
 
 """
 
-import traceback
 from os.path import normpath
 
 from twisted.python import log
 from twisted.internet import reactor
 from twisted.web import http, server
+from zope.interface import implementer
 
 from mamba import plugin
 from mamba.web import routing
 from mamba.web import asyncjson
 from mamba.utils.output import bold
 from mamba.core import module, resource
+from mamba.core.interfaces import IController
 
 
 __all__ = [
@@ -49,6 +50,7 @@ class ControllerProvider:
     __metaclass__ = plugin.ExtensionPoint
 
 
+@implementer(IController)
 class Controller(resource.Resource, ControllerProvider):
     """
     Mamba Controller Class define a web accesible resource and its actions.
