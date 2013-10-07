@@ -19,36 +19,19 @@ from mamba.utils import config
 
 
 class NativeEnumVariable(variables.Variable):
-    __slots__ = ("_map", "_reverse_map")
+    __slots__ = ("_set")
 
-    def __init__(self, _map, _reverse_map, *args, **kwargs):
-        self._map = _map
-        self._reverse_map = _reverse_map
+    def __init__(self, *args, **kwargs):
+        self._set = kwargs.pop('set')
         variables.Variable.__init__(self, *args, **kwargs)
 
     def parse_set(self, value, from_db):
-        if from_db:
-            return value
+        if value not in self._set:
+            raise ValueError("Invalid enum value: {}".format(value))
 
-        try:
-            return self._map[value]
-        except KeyError:
-            try:
-                return self._reverse_map[value]
-            except KeyError:
-                raise ValueError("Invalid native enum value: %s" % repr(value))
+        return value
 
-    def parse_get(self, value, to_db):
-        if to_db:
-            return value
-
-        try:
-            return self._map[value]
-        except KeyError:
-            try:
-                return self._reverse_map[value]
-            except KeyError:
-                raise ValueError("Invalid enum value: %s" % repr(value))
+    parse_get = parse_set
 
 
 class NativeEnum(properties.SimpleProperty):
@@ -59,7 +42,7 @@ class NativeEnum(properties.SimpleProperty):
     For instance::
 
         class Class(Storm):
-            prop = Enum(map={"one": 1, "two": 2})
+            prop = NativeEnum(set={'one', 'two'})
 
         obj.prop = "one"
         assert obj.prop == "one"
@@ -68,14 +51,6 @@ class NativeEnum(properties.SimpleProperty):
     """
 
     variable_class = NativeEnumVariable
-
-    def __init__(self, name=None, primary=False, **kwargs):
-        _map = dict(kwargs.pop('map'))
-        reverse_map = dict((value, key) for key, value in _map.items())
-        kwargs['_map'] = _map
-        kwargs['_reverse_map'] = reverse_map
-
-        properties.SimpleProperty.__init__(self, name, primary, **kwargs)
 
 
 class CommonSQL(object):

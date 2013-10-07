@@ -203,14 +203,10 @@ class PostgreSQL(CommonSQL):
                 'Column {} is not an Enum column'.format(column)
             )
 
-        data = column._variable_kwargs.get('_reverse_map', {})
+        data = column._variable_kwargs.get('set', set())
         return 'CREATE TYPE {} AS ENUM {};\n'.format(
             'enum_{}'.format(column._detect_attr_name(self.model.__class__)),
-            '({})'.format(
-                ', '.join("'{}'".format(
-                    data[i]) for i in range(1, len(data) + 1)
-                )
-            )
+            '({})'.format(', '.join(["'{}'".format(i) for i in data]))
         )
 
     def detect_primary_key(self):

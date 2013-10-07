@@ -234,13 +234,11 @@ class MySQL(CommonSQL):
                 'Column {} is not an Enum column'.format(column)
             )
 
-        data = column._variable_kwargs.get('_reverse_map', {})
+        data = column._variable_kwargs.get('set', set())
 
         return '`{}` enum({})'.format(
             column._detect_attr_name(self.model.__class__),
-            ', '.join("'{}'".format(
-                data[i]) for i in range(1, len(data) + 1)
-            )
+            ', '.join("'{}'".format(i) for i in data)
         )
 
     def detect_primary_key(self):
