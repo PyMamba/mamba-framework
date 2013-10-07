@@ -222,6 +222,18 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('ENGINE=InnoDB' in script)
         self.assertTrue('DEFAULT CHARSET=utf8' in script)
 
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_and_native_enum(self):
+        dummy = DummyModelNativeEnum()
+        script = dummy.dump_table()
+        self.assertEqual(
+            "CREATE TABLE IF NOT EXISTS `dummy_enum` (\n"
+            "  `id` int,\n"
+            "  `mood` enum('sad', 'ok', 'happy'),\n"
+            "  PRIMARY KEY(`id`)\n\n) ENGINE=InnoDB DEFAULT CHARSET=utf8;\n",
+            script
+        )
+
     @common_config(engine='postgres:')
     def test_model_dump_table_with_postgres(self):
 
@@ -624,7 +636,7 @@ class DummyModelNativeEnum(Model):
 
     __storm_table__ = 'dummy_enum'
     id = Int(primary=True)
-    mood = NativeEnum(map={'sad': 1, 'ok': 2, 'happy': 3})
+    mood = NativeEnum(set={'sad', 'ok', 'happy'})
 
 
 class DummyModelArray(Model):

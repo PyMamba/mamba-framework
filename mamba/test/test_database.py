@@ -14,6 +14,7 @@ from twisted.python.threadpool import ThreadPool
 from mamba.utils import config
 from mamba.core import GNU_LINUX
 from mamba.enterprise import Database
+from mamba.enterprise.common import NativeEnum
 from mamba.application.model import ModelManager
 from mamba.enterprise.database import AdapterFactory
 
@@ -170,6 +171,25 @@ class DatabaseTest(unittest.TestCase):
         self.assertTrue('Test row 3' in sql)
 
         os.chdir(currdir)
+
+
+class NativeEnumTest(unittest.TestCase):
+
+    def test_enum(self):
+        column = NativeEnum(set={'foo', 'bar'}, default='foo')
+        self.assertEqual(column._variable_kwargs['set'], set(['foo', 'bar']))
+
+        class EnumTest(object):
+            __storm_table__ = 'testtable'
+            prop1 = NativeEnum(set={'foo', 'bar'}, default='foo', primary=True)
+
+        obj = EnumTest()
+        self.assertEqual(obj.prop1, 'foo')
+        obj.prop1 = 'bar'
+        self.assertEqual(obj.prop1, 'bar')
+
+        self.assertRaises(ValueError, setattr, obj, "prop1", "baz")
+        self.assertRaises(ValueError, setattr, obj, "prop1", 1)
 
 
 class AdapterFactoryTest(unittest.TestCase):
