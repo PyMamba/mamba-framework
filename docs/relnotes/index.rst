@@ -74,6 +74,7 @@ Changes
 * The mamba-admin application subcommand generates now a ``logs`` directory and logs files are created inside it
 * The mamba-admin application subcommand generates now a ``lib`` directory into the ``application`` directory in oreder to place code that doesn't fit the MVC pattern and 3rd party libraries
 * The ``@route`` decorator now accepts lists and tuples defining more than one HTTP method where to register the given action
+* The :class:`~mamba.enterprise.common.NativeEnum` type has been reimplemented as a ``set``. Implementation provided by Patrick O'Loughlin @paddyoloughlin on GitHub
 
 Documentation
 -------------
