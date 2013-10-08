@@ -21,17 +21,27 @@ from mamba.utils import config
 class NativeEnumVariable(variables.Variable):
     __slots__ = ("_set")
 
-    def __init__(self, *args, **kwargs):
-        self._set = kwargs.pop('set')
+    def __init__(self, _set, *args, **kwargs):
+        self._set = _set
         variables.Variable.__init__(self, *args, **kwargs)
 
     def parse_set(self, value, from_db):
+        if from_db:
+            return value
+
+        return self._parse_common(value)
+
+    def pase_get(self, value, to_db):
+        if to_db:
+            return value
+
+        return self._parse_common(value)
+
+    def _parse_common(self, value):
         if value not in self._set:
             raise ValueError("Invalid enum value: {}".format(value))
 
         return value
-
-    parse_get = parse_set
 
 
 class NativeEnum(properties.SimpleProperty):
@@ -51,6 +61,12 @@ class NativeEnum(properties.SimpleProperty):
     """
 
     variable_class = NativeEnumVariable
+
+    def __init__(self, name=None, primary=False, **kwargs):
+        _set = set(kwargs.pop('set'))
+        kwargs['_valid_set'] = _set
+
+        properties.SimpleProperty.__init__(self, name, primary, **kwargs)
 
 
 class CommonSQL(object):
