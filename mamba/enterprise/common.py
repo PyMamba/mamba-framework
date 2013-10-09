@@ -64,7 +64,7 @@ class NativeEnum(properties.SimpleProperty):
 
     def __init__(self, name=None, primary=False, **kwargs):
         _set = set(kwargs.pop('set'))
-        kwargs['_valid_set'] = _set
+        kwargs['_set'] = _set
 
         properties.SimpleProperty.__init__(self, name, primary, **kwargs)
 
