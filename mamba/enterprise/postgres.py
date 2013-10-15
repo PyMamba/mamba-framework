@@ -203,7 +203,7 @@ class PostgreSQL(CommonSQL):
                 'Column {} is not an Enum column'.format(column)
             )
 
-        data = column._variable_kwargs.get('set', set())
+        data = column._variable_kwargs.get('_set', set())
         return 'CREATE TYPE {} AS ENUM {};\n'.format(
             'enum_{}'.format(column._detect_attr_name(self.model.__class__)),
             '({})'.format(', '.join(["'{}'".format(i) for i in data]))

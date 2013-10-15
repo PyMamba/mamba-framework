@@ -177,7 +177,7 @@ class NativeEnumTest(unittest.TestCase):
 
     def test_enum(self):
         column = NativeEnum(set={'foo', 'bar'}, default='foo')
-        self.assertEqual(column._variable_kwargs['set'], set(['foo', 'bar']))
+        self.assertEqual(column._variable_kwargs['_set'], set(['foo', 'bar']))
 
         class EnumTest(object):
             __storm_table__ = 'testtable'

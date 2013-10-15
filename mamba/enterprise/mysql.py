@@ -234,7 +234,7 @@ class MySQL(CommonSQL):
                 'Column {} is not an Enum column'.format(column)
             )
 
-        data = column._variable_kwargs.get('set', set())
+        data = column._variable_kwargs.get('_set', set())
 
         return '`{}` enum({})'.format(
             column._detect_attr_name(self.model.__class__),

@@ -68,9 +68,10 @@ class SQLite(CommonSQL):
             column_type = 'VARCHAR'
         elif (column.variable_class is variables.IntVariable
                 or column.variable_class is variables.BoolVariable
-                or column.variable_class is variables.EnumVariable
-                or column.variable_class is NativeEnumVariable):
+                or column.variable_class is variables.EnumVariable):
             column_type = 'INTEGER'
+        elif column.variable_class is NativeEnumVariable:
+            column_type = 'VARCHAR'
         elif column.variable_class is variables.FloatVariable:
             column_type = 'REAL'
         elif (column.variable_class is variables.RawStrVariable
