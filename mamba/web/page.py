@@ -12,7 +12,6 @@
 
 from singledispatch import singledispatch
 
-from twisted.internet import reactor
 from twisted.web import static, server
 from twisted.python import log, filepath
 from twisted.python.logfile import DailyLogFile
@@ -232,6 +231,8 @@ class Page(resource.Resource):
         :param port: the port to listen
         :type port: number
         """
+        from twisted.internet import reactor
+
         factory = server.Site(self)
         reactor.listenTCP(port, factory)
         reactor.run()

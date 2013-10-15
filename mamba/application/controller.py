@@ -15,7 +15,6 @@
 from os.path import normpath
 
 from twisted.python import log
-from twisted.internet import reactor
 from twisted.web import http, server
 from zope.interface import implementer
 
@@ -223,6 +222,8 @@ class Controller(resource.Resource, ControllerProvider):
 
         You should never use this in production.
         """
+        from twisted.internet import reactor
+
         factory = server.Site(self)
         reactor.listenTCP(port, factory)
         reactor.run()
