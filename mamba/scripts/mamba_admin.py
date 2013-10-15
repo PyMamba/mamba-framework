@@ -249,7 +249,8 @@ def determine_platform_reactor(mamba_services):
     """
 
     cfg = config.Application('config/application.json')
-    if '.heroku' in os.environ['PYTHONHOME'] or cfg.auto_select_reactor:
+    python_home = os.environ.get('PYTHONHOME', '')
+    if '.heroku' in python_home or cfg.auto_select_reactor:
         return ''
 
     reactor = '--reactor={}'
