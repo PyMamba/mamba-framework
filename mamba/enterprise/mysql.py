@@ -200,9 +200,13 @@ class MySQL(CommonSQL):
         wrap_column = column._get_column(self.model.__class__)
         size = wrap_column.size
 
+        parsed_size = parse_decimal_size(size, column_name)
+        if type(parsed_size) is not tuple:
+            return parsed_size
+
         return '{}{}'.format(
             column_name.lower(), '({},{})'.format(
-                parse_decimal_size(size, column_name))
+                *parse_decimal_size(size, column_name))
         )
 
     def parse_column(self, column):
@@ -330,6 +334,9 @@ class MySQL(CommonSQL):
 
         if type(variable._value) is bool:
             variable._value = int(variable._value)
+
+        if variable._value is None:
+            variable._value = 'NULL'
 
         if (column.variable_class is variables.DateTimeVariable
                 or column.variable_class is variables.TimeVariable

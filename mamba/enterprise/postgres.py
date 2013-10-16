@@ -15,9 +15,10 @@ import sys
 import inspect
 from singledispatch import singledispatch
 
-from storm import properties
+from storm.expr import Undef
 from twisted.python import components
 from storm.references import Reference
+from storm import properties, variables
 
 from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL
@@ -246,8 +247,8 @@ class PostgreSQL(CommonSQL):
         enums = []
         query = 'CREATE TABLE {} (\n'.format((
             'IF NOT EXISTS {}'.format(self.model.__storm_table__) if (
-            config.Database().create_table_behaviours.get(
-                'create_table_if_not_exists'))
+                config.Database().create_table_behaviours.get(
+                    'create_table_if_not_exists'))
             else self.model.__storm_table__
         ))
         for i in range(len(self.model._storm_columns.keys())):
@@ -371,6 +372,34 @@ class PostgreSQL(CommonSQL):
         """Simple parse enum helper function
         """
         return 'enum_' + column._detect_attr_name(self.model.__class__)
+
+    def _default(self, column):
+        """
+        Get the default argument for a column (if any)
+
+        :param column: the Storm properties column to parse
+        :type column: :class:`storm.properties.Property`
+        """
+
+        property_column = column._get_column(self.model.__class__)
+        variable = property_column.variable_factory()
+
+        if type(variable._value) is bool:
+            variable._value = 'TRUE' if variable._value else 'FALSE'
+
+        if variable._value is None:
+            variable._value = 'NULL'
+
+        if (column.variable_class is variables.DateTimeVariable
+                or column.variable_class is variables.TimeVariable
+                or column.variable_class is variables.DateVariable):
+            if variable._value is not Undef:
+                variable._value = "'" + str(variable._value) + "'"
+
+        if variable._value is not Undef:
+            return ' default {}'.format(variable._value)
+
+        return ''
 
     @staticmethod
     def register():

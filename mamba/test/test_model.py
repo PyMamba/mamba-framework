@@ -7,6 +7,7 @@ Tests for mamba.application.model
 """
 
 import sys
+import datetime
 import tempfile
 import functools
 import transaction
@@ -18,7 +19,9 @@ from twisted.python import filepath
 from storm.exceptions import DatabaseModuleError
 from storm.twisted.testing import FakeThreadPool
 from twisted.internet.defer import inlineCallbacks
-from storm.locals import Int, Unicode, Reference, Enum, List
+from storm.locals import (
+    Int, Unicode, Reference, Enum, List, Bool, DateTime, Decimal
+)
 
 from mamba import Database
 from mamba.utils import config
@@ -201,6 +204,7 @@ class ModelTest(unittest.TestCase):
         self.assertTrue(len(store.find(DummyModel)) == 0)
 
     def test_model_dump_table(self):
+        config.Database('clean')
         dummy = DummyModel()
         script = dummy.dump_table()
 
@@ -229,6 +233,56 @@ class ModelTest(unittest.TestCase):
         self.assertTrue(
             'sad' in script and 'ok' in script and 'happy' in script
         )
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_and_bool_with_default_value(self):
+
+        dummy = DummyModelBool()
+        script = dummy.dump_table()
+        self.assertTrue('  `test` tinyint default 1' in script)
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_and_default_value_none(self):
+
+        dummy = DummyModelNone()
+        script = dummy.dump_table()
+        self.assertTrue('  `name` varchar(64) default NULL,' in script)
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_and_datetime_default(self):
+
+        dummy = DummyModelDatetime()
+        script = dummy.dump_table()
+        self.assertTrue(
+            "  `time` datetime default '2013-01-01 00:00:00'," in script)
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_and_decimal_with_float(self):
+
+        dummy = DummyModelDecimal()
+        script = dummy.dump_table()
+        self.assertTrue('  `money` decimal(10,2),' in script)
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_and_decimal_with_tuple(self):
+
+        dummy = DummyModelDecimal()
+        script = dummy.dump_table()
+        self.assertTrue('  `money2` decimal(10,2),' in script)
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_and_decimal_with_list(self):
+
+        dummy = DummyModelDecimal()
+        script = dummy.dump_table()
+        self.assertTrue('  `money3` decimal(10,2),' in script)
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_and_decimal_with_string(self):
+
+        dummy = DummyModelDecimal()
+        script = dummy.dump_table()
+        self.assertTrue('  `money4` decimal(10,2),' in script)
 
     @common_config(engine='postgres:')
     def test_model_dump_table_with_postgres(self):
@@ -268,6 +322,28 @@ class ModelTest(unittest.TestCase):
 
         self.assertTrue('this_array integer[3][3],' in script)
 
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_and_bool_with_default_value(self):
+
+        dummy = DummyModelBool()
+        script = dummy.dump_table()
+        self.assertTrue('  test bool default TRUE' in script)
+
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_and_default_value_none(self):
+
+        dummy = DummyModelNone()
+        script = dummy.dump_table()
+        self.assertTrue('  name varchar(64) default NULL,' in script)
+
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_and_datetime_default(self):
+
+        dummy = DummyModelDatetime()
+        script = dummy.dump_table()
+        self.assertTrue(
+            "  time timestamp default '2013-01-01 00:00:00'," in script)
+
     @inlineCallbacks
     def test_model_create_table(self):
         dummy = DummyModel()
@@ -288,6 +364,7 @@ class ModelTest(unittest.TestCase):
 
     @inlineCallbacks
     def test_model_create_and_delete_table(self):
+        config.Database('clean')
         dummy = DummyModelTwo()
 
         yield dummy.create_table()
@@ -315,6 +392,7 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(data[0][0], u'dummy')
 
     def test_get_uri(self):
+        config.Database('clean')
         dummy = DummyModel()
         self.assertEqual(dummy.get_uri().scheme, URI('sqlite:').scheme)
 
@@ -594,6 +672,41 @@ class DummyModelTwo(Model):
 
         if name is not None:
             self.name = unicode(name)
+
+
+class DummyModelBool(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_bool'
+    id = Int(primary=True, auto_increment=True, unsigned=True)
+    test = Bool(default=True)
+
+
+class DummyModelNone(Model):
+    """Dummy model for testing purposes"""
+
+    __storm_table__ = 'dummy_none'
+    id = Int(primary=True, auto_increment=True, unsigned=True)
+    name = Unicode(size=64, default=None)
+
+
+class DummyModelDatetime(Model):
+    """Dummy model for testing purposes"""
+
+    __storm_table__ = 'dummy_datetime'
+    id = Int(primary=True, auto_increment=True, unsigned=True)
+    time = DateTime(default=datetime.datetime(2013, 1, 1, 0, 0))
+
+
+class DummyModelDecimal(Model):
+    """Dummy model for testing purposes"""
+
+    __storm_table__ = 'dummy_decimal'
+    id = Int(primary=True, auto_increment=True, unsigned=True)
+    money = Decimal(size=10.2)
+    money2 = Decimal(size=(10, 2))
+    money3 = Decimal(size=[10, 2])
+    money4 = Decimal(size='10,2')
 
 
 class DummyModelCompound(Model):

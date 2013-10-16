@@ -172,6 +172,43 @@ class DatabaseTest(unittest.TestCase):
 
         os.chdir(currdir)
 
+    def test_database_reset(self):
+        mgr = self.get_commons_for_dump()
+
+        mgr.load('../mamba/test/dummy_app/application/model/dummy.py')
+        mgr.load('../mamba/test/dummy_app/application/model/stubing.py')
+        sql = self.database.reset(mgr)
+        self.assertTrue('DROP TABLE IF EXISTS dummy;' in sql)
+        self.assertTrue('DROP TABLE IF EXISTS stubing;' in sql)
+        self.assertTrue('CREATE TABLE dummy (' in sql)
+        self.assertTrue('CREATE TABLE stubing (' in sql)
+
+    def test_database_reset_mysql(self):
+        cfg = config.Database('../mamba/test/dummy_app/config/database.json')
+        cfg.uri = cfg.uri.replace('sqlite:', 'mysql://a:b@c/d')
+        mgr = self.get_commons_for_dump()
+
+        mgr.load('../mamba/test/dummy_app/application/model/dummy.py')
+        mgr.load('../mamba/test/dummy_app/application/model/stubing.py')
+        sql = self.database.reset(mgr)
+        self.assertTrue('DROP TABLE IF EXISTS `dummy`;' in sql)
+        self.assertTrue('DROP TABLE IF EXISTS `stubing`;' in sql)
+        self.assertTrue('CREATE TABLE `dummy` (' in sql)
+        self.assertTrue('CREATE TABLE `stubing` (' in sql)
+
+    def test_database_reset_postgres(self):
+        cfg = config.Database('../mamba/test/dummy_app/config/database.json')
+        cfg.uri = cfg.uri.replace('sqlite:', 'postgres://a:b@c/d')
+        mgr = self.get_commons_for_dump()
+
+        mgr.load('../mamba/test/dummy_app/application/model/dummy.py')
+        mgr.load('../mamba/test/dummy_app/application/model/stubing.py')
+        sql = self.database.reset(mgr)
+        self.assertTrue('DROP TABLE IF EXISTS dummy RESTRICT;' in sql)
+        self.assertTrue('DROP TABLE IF EXISTS stubing RESTRICT;' in sql)
+        self.assertTrue('CREATE TABLE dummy (' in sql)
+        self.assertTrue('CREATE TABLE stubing (' in sql)
+
 
 class NativeEnumTest(unittest.TestCase):
 
