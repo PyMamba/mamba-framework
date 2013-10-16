@@ -22,9 +22,8 @@ from mamba.enterprise.database import AdapterFactory
 class DatabaseTest(unittest.TestCase):
 
     def setUp(self):
-        config.Database().load(
-            '../mamba/test/application/config/database.json'
-        )
+        config.Database('../mamba/test/application/config/database.json')
+        config.Database().uri = "sqlite:///db/dummy.db"
         self.database = Database(self.get_pool(), True)
 
     def tearDown(self):
