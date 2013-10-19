@@ -33,6 +33,11 @@ class DatabaseTest(unittest.TestCase):
         self.assertEqual(config.Database().max_threads, 20)
 
     def test_database_fallback_if_previous_loaded_was_ok(self):
+        import sys
+        from cStringIO import StringIO
+        stdout = sys.stdout
+        sys.stdout = StringIO()
+
         bad_file = tempfile.NamedTemporaryFile(delete=False)
         bad_file.write('[}')
         bad_file.close()
@@ -45,6 +50,7 @@ class DatabaseTest(unittest.TestCase):
         self.assertEqual(config.Database().max_threads, 20)
 
         filepath.FilePath(bad_file.name).remove()
+        sys.stdout = stdout
 
     def test_database_dont_fallback_on_no_existent_when_valid_previous(self):
         config.Database('../mamba/test/dummy_app/config/database.json')
