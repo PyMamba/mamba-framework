@@ -7,6 +7,7 @@ Tests for mamba.utils.converter
 """
 
 import json
+import decimal
 
 from twisted.trial import unittest
 
@@ -76,3 +77,49 @@ class ConverterTest(unittest.TestCase):
         c3 = Collaborator2()
 
         self.assertEqual(Converter.serialize(c1), Converter.serialize(c3))
+
+    def test_convert_decimal(self):
+
+        class Collaborator:
+            data = decimal.Decimal('1.29')
+
+        self.assertEqual(Converter.serialize(Collaborator()), {'data': '1.29'})
+
+    def test_convert_multi_level(self):
+
+        class Collaborator:
+            name = 'C1'
+
+        class Collabortor2:
+            name = 'C2'
+            child = Collaborator()
+
+        class Collaborator3:
+            name = 'C3'
+            child = Collabortor2()
+
+        self.assertEqual(
+            Converter.serialize(Collaborator3()),
+            {'name': 'C3', 'child': {'name': 'C2', 'child': {'name': 'C1'}}}
+        )
+
+    def test_can_convert_non_static_properties_in_objects(self):
+
+        class Collaborator:
+            def __init__(self, name):
+                self.name = name
+
+        self.assertEqual(
+            Converter.serialize(Collaborator('C1')), {'name': 'C1'})
+
+        c2 = Collaborator('C2')
+        c2.size = 3
+        self.assertEqual(Converter.serialize(c2), {'name': 'C2', 'size': 3})
+        c3 = Collaborator('C3')
+        c3.collaborator = c2
+        c3.pene = decimal.Decimal('10.0')
+
+        self.assertEqual(Converter.serialize(c3), {
+            'collaborator': {
+                'name': 'C2', 'size': 3}, 'pene': '10.0', 'name': 'C3'
+        })

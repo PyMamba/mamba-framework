@@ -10,6 +10,7 @@
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 """
 
+import decimal
 import logging
 import collections
 
@@ -46,11 +47,20 @@ class Converter(object):
                         if getattr(obj, '__dict__', False):
                             for key, value in obj.__dict__.iteritems():
                                 if not key.startswith('_'):
+                                    value = Converter.fix_common(value)
+                                    if hasattr(value, '__class__'):
+                                        value = Converter.serialize(value)
                                     tmpdict.update({key: value})
                         else:
-                            for item in dir(obj):
-                                if not item.startswith('_'):
-                                    tmpdict.update({item: getattr(obj, item)})
+                            for item in [
+                                p for p in dir(obj) if not p.startswith('_')
+                            ]:
+                                data = Converter.fix_common(getattr(obj, item))
+
+                                if (data not in Converter.primitives
+                                        and data not in Converter.containers):
+                                    data = Converter.serialize(data)
+                                tmpdict.update({item: data})
 
                         return tmpdict
                 elif type(obj) is collections.Iterable:
@@ -63,3 +73,16 @@ class Converter(object):
             log.msg(error, logLevel=logging.WARN)
 
         return obj
+
+    @staticmethod
+    def fix_common(value):
+        """Fix commons uncommons
+        """
+
+        if type(value) is decimal.Decimal:
+            value = str(value)
+        elif value is None:
+            value = 'null'
+
+        return value
+
