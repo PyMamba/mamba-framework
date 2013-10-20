@@ -200,3 +200,8 @@ class ControllerManagerTest(unittest.TestCase):
         dummy2 = self.mgr.lookup('dummy').get('object')
 
         self.assertNotEqual(dummy, dummy2)
+
+    def test_lenght(self):
+        self.assertEqual(self.mgr.length(), 0)
+        self.load_manager()
+        self.assertEqual(self.mgr.length(), 1)

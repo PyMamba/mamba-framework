@@ -45,7 +45,7 @@ class PackagesManager(object):
         """Register packages found in the config file.
 
         Styles and Scripts are a bit special and we register the main
-        application ones here so we can just refer all of them from the
+        application ones here so we can  refer all of them from the
         :class:`~mamba.core.resource.Resource` subclasses and they will be
         auto imported in our templates
         """
@@ -62,7 +62,7 @@ class PackagesManager(object):
             path = os.path.dirname(os.path.normpath(module.__file__))
             self.packages[package] = {'path': path}
 
-            if data.get('autoimport', False) is True:
+            if data.get('autoimport', False):
                 self.packages[package].update({
                     'controller': ControllerManager(
                         '{}/controller'.format(path), package

@@ -630,6 +630,11 @@ class ModelManagerTest(unittest.TestCase):
 
         self.assertNotEqual(dummy, dummy2)
 
+    def test_lenght(self):
+        self.assertEqual(self.mgr.length(), 0)
+        self.load_manager()
+        self.assertEqual(self.mgr.length(), 1)
+
 
 class DummyInvalidModel(Model):
     """Dummy Model without primary key for testing purposes

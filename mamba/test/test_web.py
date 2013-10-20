@@ -20,11 +20,11 @@ from twisted.web.test.test_web import DummyRequest
 from twisted.internet.error import ProcessTerminated
 from doublex import Stub, ProxySpy, Spy, called, assert_that
 
-from mamba.core import GNU_LINUX
-from mamba.application import appstyles, controller, scripts
+from mamba.core import packages, GNU_LINUX
 from mamba.application import route as decoroute
+from mamba.application import appstyles, controller, scripts
 from mamba.web import stylesheet, page, asyncjson, response, script
-from mamba.web.routing import Route, Router, RouteDispatcher
+from mamba.web.routing import Route, Router, RouteDispatcher, RouterError
 
 from mamba.test.test_less import less_file
 from mamba.test.dummy_app.application.controller.dummy import DummyController
@@ -148,6 +148,29 @@ class AppStylesTest(unittest.TestCase):
         self.assertEqual(len(self.mgr.get_styles()), 1)
         self.assertEqual(self.mgr.get_styles().keys()[0], 'dummy.less')
 
+    def test_shared_packages_styles(self):
+
+        chdir(self.currdir)
+        sys.path.append('../mamba/test/dummy_app')
+        config_file = tempfile.NamedTemporaryFile(delete=False)
+        config_file.write(
+            '{'
+            '   "packages": {'
+            '       "fakeshared": {"autoimport": true, "use_scripts": true}'
+            '   }'
+            '}'
+        )
+        config_file.close()
+        mgr = appstyles.AppStyles(config_file_name=config_file.name)
+        mgr.setup()
+        self.assertEqual(len(mgr.managers), 2)
+        self.assertEqual(
+            mgr.managers[0]._styles_store,
+            '../mamba/test/dummy_app/fakeshared/view/stylesheets'
+        )
+        self.assertTrue('dummyshared.css' in mgr.managers[0]._stylesheets)
+        filepath.FilePath(config_file.name).remove()
+
 
 class ScriptTest(unittest.TestCase):
 
@@ -265,6 +288,29 @@ class AppScriptTest(unittest.TestCase):
         self.mgr.setup()
         self.assertEqual(len(self.mgr.get_scripts()), 1)
         self.assertEqual(self.mgr.get_scripts().keys()[0], 'dummy.js')
+
+    def test_shared_packages_scripts(self):
+
+        chdir(self.currdir)
+        sys.path.append('../mamba/test/dummy_app')
+        config_file = tempfile.NamedTemporaryFile(delete=False)
+        config_file.write(
+            '{'
+            '   "packages": {'
+            '       "fakeshared": {"autoimport": true, "use_scripts": true}'
+            '   }'
+            '}'
+        )
+        config_file.close()
+        mgr = scripts.AppScripts(config_file_name=config_file.name)
+        mgr.setup()
+        self.assertEqual(len(mgr.managers), 2)
+        self.assertEqual(
+            mgr.managers[0]._scripts_store,
+            '../mamba/test/dummy_app/fakeshared/view/scripts'
+        )
+        self.assertTrue('dummyshared.js' in mgr.managers[0]._scripts)
+        filepath.FilePath(config_file.name).remove()
 
 
 class AsyncJSONTest(unittest.TestCase):
@@ -403,6 +449,36 @@ class PageTest(unittest.TestCase):
             self.root.getChildWithDefault('dummy', DummyRequest([''])),
             mgr.lookup('dummy')['object']
         )
+
+    def test_page_register_shared_controllers(self):
+
+        config_file = tempfile.NamedTemporaryFile(delete=False)
+        config_file.write(
+            '{'
+            '   "packages": {'
+            '       "fakeshared": {"autoimport": true, "use_scripts": true}'
+            '   }'
+            '}'
+        )
+        config_file.close()
+        sys.path.append('../mamba/test/dummy_app')
+
+        manager = packages.PackagesManager(config_file=config_file.name)
+        if GNU_LINUX:
+            mgr = manager.packages['fakeshared']['controller']
+            self.addCleanup(mgr.notifier.loseConnection)
+            mgr = manager.packages['fakeshared']['model']
+            self.addCleanup(mgr.notifier.loseConnection)
+
+        self.root._shared_controllers_manager = manager
+        self.root.register_shared_controllers()
+
+        mgr = manager.packages['fakeshared']['controller']
+        self.assertIdentical(
+            self.root.getChildWithDefault('dummy', DummyRequest([''])),
+            mgr.lookup('dummyshared')['object']
+        )
+        filepath.FilePath(config_file.name).remove()
 
     def test_page_add_template_paths_string(self):
 
@@ -618,6 +694,17 @@ class RouterTest(unittest.TestCase):
         self.assertIsInstance(result, response.Ok)
         self.assertTrue('name' in controller.test2.route.callback_args)
 
+    def test_dispatch_returns_unknown_209_on_no_return_from_method(self):
+
+        controller = StubController()
+        request = request_generator(['/209'], method='GET')
+        router = Router()
+        router.install_routes(controller)
+
+        self.assertIsInstance(
+            router.dispatch(controller, request).result, response.Unknown
+        )
+
     def test_install_routes_register_route(self):
 
         router = Router()
@@ -628,12 +715,12 @@ class RouterTest(unittest.TestCase):
         del router
         router = Router()
 
-        @decoroute('/another_test')
-        def another_test(self, request, **kwargs):
-            return None
+        class MyStubController(StubController):
+            @decoroute('/another_test')
+            def another_test(self, request, **kwargs):
+                return None
 
-        StubController.another_test = another_test
-        router.install_routes(StubController())
+        router.install_routes(MyStubController())
 
         self.assertTrue(len(router.routes['GET']) == 4)
 
@@ -651,16 +738,105 @@ class RouterTest(unittest.TestCase):
         # only one of the routes should be installed
         self.assertTrue(len(router.routes['GET']) == 3)
 
-    def test_dispatch_returns_unknown_209_on_no_return_from_method(self):
+    def test_install_several_HTTP_methods_per_route_decorator(self):
 
-        controller = StubController()
-        request = request_generator(['/209'], method='GET')
         router = Router()
-        router.install_routes(controller)
 
-        self.assertIsInstance(
-            router.dispatch(controller, request).result, response.Unknown
+        class MyStubController(StubController):
+            @decoroute('/multimethod_test', method=['GET', 'POST'])
+            def multimethod_test(self, request, **kwargs):
+                return None
+
+        router.install_routes(MyStubController())
+
+        self.assertTrue(len(router.routes['GET']) == 4)
+        self.assertTrue(len(router.routes['POST']) == 1)
+        self.assertEqual(
+            router.routes['GET']['/multimethod_test'],
+            router.routes['POST']['/multimethod_test']
         )
+
+    def test_register_route(self):
+
+        router = Router()
+        ctl = StubController()
+        self.assertTrue(len(router.routes['GET']) == 0)
+        route = Route('GET', '/defer', ctl.deferred)
+        router.register_route(ctl, route, ctl.deferred)
+        self.assertTrue(len(router.routes['GET']) == 1)
+        self.assertTrue('/defer' in router.routes['GET'])
+        self.assertTrue('StubController' in router.routes['GET']['/defer'])
+
+    def test_register_route_raise_route_error_on_invalid_HTTP_method(self):
+
+        router = Router()
+        ctl = StubController()
+        route = Route('FAIL', '/defer', ctl.deferred)
+        self.assertRaises(
+            RouterError,
+            router.register_route, ctl, route, ctl.deferred
+        )
+
+    def test_route_decorator(self):
+
+        router = Router()
+        decorator = router.route('/decorator_test')
+
+        def test(self, request, **kwargs):
+            return None
+
+        decorated_func = decorator(test)
+        self.assertIsInstance(decorated_func.route, Route)
+        self.assertEqual(decorated_func.route.url, '/decorator_test')
+
+    def test_process_return_unknown_on_none_result(self):
+
+        router = Router()
+        self.assertIsInstance(router._process(None, None), response.Unknown)
+
+    def test_process_return_objects_json_converted(self):
+
+        router = Router()
+        request = request_generator('/test')
+
+        class FakeResult(object):
+            name = 'Test'
+            type = 'JSON'
+
+        resp = router._process(FakeResult(), request)
+        self.assertIsInstance(resp, response.Ok)
+        self.assertEqual(resp.subject, {'name': 'Test', 'type': 'JSON'})
+
+    def test_process_serialize_object_inside_objects(self):
+
+        import decimal
+
+        router = Router()
+        request = request_generator('/test')
+
+        class FakeData(object):
+            data = 'hdsihas8h9277t27gsj'
+            pepe = decimal.Decimal('10.0')
+
+        class FakeResult(object):
+            name = 'Test'
+            data = FakeData()
+
+        resp = router._process(FakeResult(), request)
+        self.assertIsInstance(resp, response.Ok)
+        self.assertEqual(resp.subject, {
+            'data': {'pepe': '10.0', 'data': 'hdsihas8h9277t27gsj'},
+            'name': 'Test'
+        })
+
+    def test_process_error(self):
+
+        router = Router()
+        request = request_generator('/test')
+
+        resp = router._process_error('fake_result', request)
+        self.assertIsInstance(resp, response.InternalServerError)
+        self.assertEqual(resp.code, 500)
 
 
 class TestRouteDispatcher(unittest.TestCase):

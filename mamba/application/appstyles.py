@@ -15,7 +15,7 @@ class AppStyles(object):
     seealso: :class:`~mamba.web.Stylesheet`
     """
 
-    def __init__(self):
+    def __init__(self, config_file_name='config/installed_packages.json'):
         """
         Initialize
         """
@@ -23,7 +23,7 @@ class AppStyles(object):
         self.managers = []
 
         # shared packages
-        config = InstalledPackages('config/installed_packages.json')
+        config = InstalledPackages(config_file_name)
         for package, data in config.packages.iteritems():
             if data.get('use_scripts', False) is False:
                 continue
