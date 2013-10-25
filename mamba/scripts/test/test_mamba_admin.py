@@ -298,6 +298,7 @@ class SqlCreateTest(unittest.TestCase):
         if result == 1:
             raise unittest.SkipTest('mamba framework is not installed yet')
 
+        sys.stdout = self.stdout
         with fake_project():
             result = yield utils.getProcessOutput(
                 'python',

@@ -204,7 +204,6 @@ class ModelTest(unittest.TestCase):
         self.assertTrue(len(store.find(DummyModel)) == 0)
 
     def test_model_dump_table(self):
-        config.Database('clean')
         dummy = DummyModel()
         script = dummy.dump_table()
 

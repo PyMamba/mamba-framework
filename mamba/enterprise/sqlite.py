@@ -121,7 +121,7 @@ class SQLite(CommonSQL):
         query = 'CREATE TABLE {} (\n'.format((
             'IF NOT EXISTS {}'.format(self.model.__storm_table__) if (
                 config.Database().create_table_behaviours.get(
-                    'create_if_not_exists'))
+                    'create_table_if_not_exists'))
             else self.model.__storm_table__
         ))
 
