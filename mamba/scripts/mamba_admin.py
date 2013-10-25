@@ -119,7 +119,7 @@ def handle_application_command(options):
     )
 
 
-def handle_start_command(options=None):
+def handle_start_command(options=None, dropin_cache_wa=False):
     """I handle the start command
     """
 
@@ -191,13 +191,31 @@ def handle_start_command(options=None):
     if mamba_services.config.Application().development is True:
         os.execlp('twistd', *args)
     else:
-        print('starting application {}...'.format(app_name).ljust(73), end='')
-        if subprocess.call(args) == 0:
-            print('[{}]'.format(darkgreen('Ok')))
-            sys.exit(0)
+        if not dropin_cache_wa:
+            print(
+                'starting application {}...'.format(app_name).ljust(73), end=''
+            )
+        proc = subprocess.Popen(
+            args, stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        out, err = proc.communicate()
+        if not err:
+            if 'exception' in out:
+                result = darkred('Fail')
+                exit_code = -1
+            elif 'already installed' in out:
+                return handle_start_command(options, True)
+            else:
+                result = darkgreen('Ok')
+                exit_code = 1
         else:
-            print('[{}]'.format(darkred('Fail')))
-            sys.exit(-1)
+            result = darkred('Fail')
+            exit_code = -1
+
+        print('[{}]'.format(result))
+        print(err if exit_code == -1 else out)
+        sys.exit(exit_code)
 
 
 def handle_stop_command():
