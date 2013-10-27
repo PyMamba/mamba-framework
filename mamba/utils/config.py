@@ -72,7 +72,7 @@ class Database(BaseConfig):
             'max_threads': 20,
             'auto_adjust_pool_size': false,
             'create_table_behaviours': {
-                'create_if_not_exists': true,
+                'create_table_if_not_exists': true,
                 'drop_table': false
             },
             'drop_table_behaviours': {
@@ -140,7 +140,7 @@ class Database(BaseConfig):
         self.max_threads = 20
         self.auto_adjust_pool_size = False
         self.create_table_behaviours = {
-            'create_if_not_exists': True,
+            'create_table_if_not_exists': True,
             'drop_table': False
         }
         self.drop_table_behaviours = {
@@ -242,6 +242,7 @@ class Application(BaseConfig):
         self.favicon = 'favicon.ico'
         self.platform_debug = False
         self.development = False
+        self.auto_select_reactor = False
 
 
 class InstalledPackages(BaseConfig):

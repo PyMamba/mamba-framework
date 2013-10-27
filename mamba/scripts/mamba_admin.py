@@ -16,9 +16,9 @@ from twisted.python import usage, filepath
 from storm import version as storm_version
 
 from mamba import version, license
-from mamba.core import GNU_LINUX, BSD, OSX, WINDOWS, POSIX
 from mamba import copyright as mamba_copyright
 from mamba.utils.output import darkgreen, darkred
+from mamba.core import GNU_LINUX, BSD, OSX, WINDOWS, POSIX
 
 from _sql import SqlOptions, Sql
 from commons import import_services

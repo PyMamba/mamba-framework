@@ -55,8 +55,8 @@ For MySQL and MariaDB databases
 
 The `MySQLdb <http://sf.net/projects/mysql-python>`_ driver should do the work for both database managers.
 
-For PostgreSQL databse
-~~~~~~~~~~~~~~~~~~~~~~
+For PostgreSQL database
+~~~~~~~~~~~~~~~~~~~~~~~
 
 The `psycopg2 <http://pypi.python.org/pypi/psycopg2>`_ driver is our target for PostgreSQL databases if we are using the CPython interpreter
 
