@@ -175,20 +175,23 @@ def handle_start_command(options=None, dropin_cache_wa=False):
         )
         sys.exit(-1)
 
-    args.append(determine_platform_reactor(mamba_services))
+    # determine if we are running in heroku
+    in_heroku = '.heroku' in os.environ.get('PYTHONHOME', '')
 
-    if mamba_services.config.Application().development is True:
-        args.append('--nodaemon')
-    else:
-        # redirect twistd log to syslog
-        args.append('--syslog')
+    args.append('--nodaemon')
+    if not in_heroku:
+        if not mamba_services.config.Application().auto_select_reactor:
+            args.append(determine_platform_reactor(mamba_services))
+        if not mamba_services.config.Application().development:
+            args.remove('--nodaemon')
+            args.append('--syslog')
 
     args.append(app_name)
 
     if options is not None and options.subOptions.opts['port']:
         args.append('--port={}'.format(options.subOptions.opts['port']))
 
-    if mamba_services.config.Application().development is True:
+    if in_heroku or mamba_services.config.Application().development:
         os.execlp('twistd', *args)
     else:
         if not dropin_cache_wa:
@@ -265,11 +268,6 @@ def determine_platform_reactor(mamba_services):
 
     If there is a configured reactor for this application, we force it
     """
-
-    cfg = config.Application('config/application.json')
-    python_home = os.environ.get('PYTHONHOME', '')
-    if '.heroku' in python_home or cfg.auto_select_reactor:
-        return ''
 
     reactor = '--reactor={}'
     if hasattr(mamba_services.config.Application(), 'reactor'):
