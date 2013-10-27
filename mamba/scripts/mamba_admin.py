@@ -15,7 +15,6 @@ from twisted import copyright
 from twisted.python import usage, filepath
 from storm import version as storm_version
 
-from mamba.utils import config
 from mamba import version, license
 from mamba.core import GNU_LINUX, BSD, OSX, WINDOWS, POSIX
 from mamba import copyright as mamba_copyright
