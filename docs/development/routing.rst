@@ -61,7 +61,7 @@ In mamba there is always a main static route tied to the web site root page that
 
 To create new static routes to other templates you only have to place a hyperlink in your HTML pointing to the new route and cretae a new template with the same name than the route in the ``application.view.templates`` directory. If for example your new route is ``http://localhost/about_us`` the template should be ``application/view/templates/about_us.html``.
 
-Static routes has one limitation, they can't be nested in path hyerarchies. So you can't define a static route that links to ``http://localhost/some_path/some_static_template``
+Static routes has one limitation, they can't be nested in path hierarchies. So you can't define a static route that links to ``http://localhost/some_path/some_static_template``
 
 That's because mamba doesn't know how to follow route to the ``some_path`` without a controller that define routes to do it.
 
@@ -107,17 +107,17 @@ Dynamic routes in the other hand, contains one or more *wildcards*:
 Wildcards
 ---------
 
-There are three type of wilcards on mamba:
+There are three type of wildcards on mamba:
 
-    1. **Int** wilcard, that matches digits and cast them to integers
+    1. **Int** wildcard, that matches digits and cast them to integers
     2. **Float** wildcard, that macthes a decimal number and converts it to float
     3. **untyped** wildcards, that matches whatever other type of argument as strings
 
-The wildcard consist in a name cnlosed in angle brackets for untype wildcars or a type followed by a colon and a name enclosed in angle brackets if we are going to define numeric arguments.
+The wildcard consist in a name enclosed in angle brackets for untype wildcars or a type followed by a colon and a name enclosed in angle brackets if we are going to define numeric arguments.
 
 .. sourcecode:: python
 
-    # untyped wilcard
+    # untyped wildcard
     @route('/run/<action>')
     def run(self, request, action, **kwargs):
         ...
@@ -132,7 +132,7 @@ The wildcard consist in a name cnlosed in angle brackets for untype wildcars or 
     def run(self, request, amount, **kwargs):
         ...
 
-Wildcards names should be unique for a given route and must be a valid python identifier because they are going to be used as keyword arguments in the request callback when the routing system disptach them.
+Wildcards names should be unique for a given route and must be a valid python identifier because they are going to be used as keyword arguments in the request callback when the routing system dispatch them.
 
 Following the latest examples, the route ``/run/<action>`` matches:
 
@@ -146,11 +146,11 @@ Following the latest examples, the route ``/run/<action>`` matches:
     /run            Doesn't match
     ==============  ===================
 
-If the decorated method does not define a posicional argument that match the wildcard name, we can always get it using the **kwargs** dictionary:
+If the decorated method does not define a positional argument that match the wildcard name, we can always get it using the **kwargs** dictionary:
 
 .. sourcecode:: python
 
-    @route('/run/<action>')
+    @route('/run')
     def run(self, request, **kwargs):
         return Ok(kwargs.get('action'))
 

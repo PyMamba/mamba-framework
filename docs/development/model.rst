@@ -94,14 +94,14 @@ Properties in deeper detail
 ===========================
 A property is a |storm| object that *maps* our classes properties with a related field in the database and perform several other operations as cache values among others. we have as many property types as we shown already in the table above.
 
-All property classes defined a class level property called ``variable_class`` that is an object that represents the value stored in the database as Python and is the part of the library that effectively *map* the Python representation of the value with the value itself as is stored in the database.
+All property classes define a class level property called ``variable_class`` that is an object that represents the value stored in the database as Python and is the part of the library that effectively *map* the Python representation of the value with the value itself as is stored in the database.
 
 Variables are responsible for set and get values on and from the underlying database backend and perform any special operation that is needed to convert the native database types into Python ones.
 
 Property constructor parameters
 -------------------------------
 
-The parameters that are accpeted depends in two factors:
+The parameters that are accepted depends in two factors:
 
     1. The type of the property
     2. The selected underlying database backend
@@ -112,11 +112,11 @@ All the options that we can pass to the constructor are optional and some of the
     * **primary**: if you set this parameter as ``True``, this attribute is being considered to map the primary key of the database table. You can create compound keys using the class level definition ``__storm_primary__`` attribute instead.
     * **default**: The default value for the property
     * **default_factory**: A factory which returns default values for the property. Mainly used when the default value is a mutable one.
-    * **validator**: A callable object that takes three arguments. The validator has to return the value that the property should be set to, if the validator raises an exception, then the property is not set at all. You can't use validators on references or reference sets but is can be used on a foreign id property to achieve the same result as having a validator on the reference itself. Don't worry if you don't understand this right now, it should be clear in next steps. The three arguments taken are:
+    * **validator**: A callable object that takes three arguments. The validator has to return the value that the property should be set to, if the validator raises an exception, then the property is not set at all. You can't use validators on references or reference sets but it can be used on a foreign id property to achieve the same result as having a validator on the reference itself. Don't worry if you don't understand this right now, it should be clear in next steps. The three arguments taken are:
         a. the object that the property is attached to
         b. the attribute name as a string
         c. the value that is being set
-    * **size** (*special behaviour*): The behaviour of this attribute differs depending on the database backend and the type of the property we are settings but mainly is sets the size of the field we are defining in the database.
+    * **size** (*special behaviour*): The behaviour of this attribute differs depending on the database backend and the type of the property we are settings but mainly it sets the size of the field we are defining in the database.
     * **unsigned** (*special behaviour*): The ``unsigned`` parameter has different behaviours depending in the database engine and the type as well. Basically, it sets a numeric field as unsigned, this is mainly used with *MySQL/MariaDB* database engines.
     * **auto_increment** (*special behaviour*): As his friends above, this parameters has special meanings depending on database engine and field type. It's used to set a column as auto increment (mainly primary keys id's).
     * **array** (*postgres only*): This parameter is used to define an array type for PostgreSQL databases. PostgreSQL allows table columnns to be defined as variable-length multidimensional arrays
@@ -144,7 +144,7 @@ To define a compound key we have to use the ``__storm_primary__`` class-level at
 Understanding size
 ------------------
 
-If we set the ``size`` parameter as ``True`` in an :class:`~storm.locals.Unicode` property, mamba will use it to specify the length of the varchar in the SQL representation. For example:
+If we set the ``size`` parameter in an :class:`~storm.locals.Unicode` property, mamba will use it to specify the length of the varchar in the SQL representation. For example:
 
 .. sourcecode:: python
 
@@ -215,7 +215,7 @@ Read a model instance (or row) from the database is as easy as using the ``read`
 
 Update is performed in the same easy way, we just modify our object and call the ``update`` method on it:
 
-..sourcecode:: python
+.. sourcecode:: python
 
     >>> dummy.name = u'Modified Dummy'
     >>> dummy.update()

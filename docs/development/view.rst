@@ -4,7 +4,7 @@
 The mamba view guide
 ====================
 
-Mamba uses |jinja2|_ as template engine. Jinja2 is a modern and designer friendly templating language for Python, modelled after Django's templates. If is fast, widely used and secure with optional sandboxed template execution environment.
+Mamba uses |jinja2|_ as template engine. Jinja2 is a modern and designer friendly templating language for Python, modelled after Django's templates. It is fast, widely used and secure with optional sandboxed template execution environment.
 
 Jinja2 Documentation
 ====================
@@ -24,7 +24,7 @@ Mamba define a default root template internally called ``root_page.html`` that i
 
 Files inside the ``stylesheets`` and ``scripts`` directory must define an special file header for make it able to being automatic loaded by the styles and scripts managers and inserted in all your templates. Those special file headers are::
 
-    /*!
+    /*
      * -*- mamba-file-type: mamba-css -*-
      */
 
@@ -101,7 +101,6 @@ The way that mamba controllers have to render our templates is just using the :c
         """Just a dummy example controller
         """
 
-        implements(interfaces.IController)
         name = 'Dummy'
         __route__ = 'dummy'
 
@@ -109,7 +108,7 @@ The way that mamba controllers have to render our templates is just using the :c
             super(DummyController, self).__init__()
             self.template = templating.Template(controller=self)
 
-When we pass ``self`` as the ``controller`` argument to the constructor we are telling mamba to look for templates also in the controller templates directory. Every template that is inside this directory hides whatever other template that is locates in the general templates directory (``application/view/templates``) that has the same name.
+When we pass ``self`` as the ``controller`` argument to the constructor we are telling mamba to look for templates also in the controller templates directory. Every template that is inside this directory hides whatever other template that is located in the general templates directory (``application/view/templates``) that has the same name.
 
 The controller templates directory
 ----------------------------------

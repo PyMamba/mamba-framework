@@ -22,7 +22,7 @@ A controller can define as many action and regular emthods as is needed and ever
     def root(self, request. **kwargs):
         """Just an action method for the root of the controller
         """
-        return Ok(sef.salutation)
+        return Ok(sef.salutation())
 
     def salutation(self):
         """Just a regular method used as helper for our controller class
@@ -140,7 +140,7 @@ Controller route Action route  Match
 Mamba's default root
 ====================
 
-Mamba defines internally a default root route that points always to the ``index.html`` template view. Sometimed we need a controller becomes the root of our application because we want to develop a full backend REST service or for whatever other reasson. When we do that, we are going to override all the mamba's auto insertion of mambaerized resources like CSS, LESS or JavaScript files.
+Mamba defines internally a default root route that points always to the ``index.html`` template view. Sometimes we need a controller becomes the root of our application because we want to develop a full backend REST service or for whatever other reasson. When we do that, we are going to override all the mamba's auto insertion of mambaerized resources like CSS, LESS or JavaScript files.
 
 If you are not going to use a frontend at all then you are just done, all is ok and you don't have to care about but if you are planning to use mamba's templating system then you have to create a new index to recover the default root functionallity.
 
@@ -193,7 +193,7 @@ Our last step is just make a small change in the ``root`` action in the controll
 
 .. note::
 
-    If you don't know what a *mambaerized resource file* is, we recomend you to read the :doc:`../getting_started` document and come back here when you read it
+    If you don't know what a *mambaerized resource file* is, we recommend you to read the :doc:`../getting_started` document and come back here when you read it
 
 Going asynchronous
 ==================
@@ -243,13 +243,14 @@ We just used the |twisted|'s ``@defer.inlineCallbacks`` decorator to yield resul
 Returning values from controller actions
 ========================================
 
-I'm pretty sure that the reader already notices that we use an ``Ok`` object as return from our controller actions. The :class:`~mamba.web.responses.Ok` class is one of the multiple built-in response objects that you can return from your application controllers.
+I'm pretty sure that the reader already noticed that we use an ``Ok`` object as return from our controller actions. The :class:`~mamba.web.responses.Ok` class is one of the multiple built-in response objects that you can return from your application controllers.
 
-Mamba defines 13 predefined types of response objects that set the content-type and other parameters of the HTTP response that our applications can return back to the web clients.
+Mamba defines 14 predefined types of response objects that set the content-type and other parameters of the HTTP response that our applications can return back to the web clients.
 
     * :class:`~mamba.web.response.Response` dummy base response object, we can use this object to create ad-hoc responses on demand. All the rest of responses inherits from this class
     * :class:`~mamba.web.response.Ok` - Ok 200 HTTP Response
     * :class:`~mamba.web.response.Created` - Ok 201 HTTP Response
+    * :class:`~mamba.web.response.Unknown` - Unknown 209 HTTP Response (this HTTP code is not defined, mamba returns that when a route just returns None)
     * :class:`~mamba.web.response.MovedPermanently` - Ok 301 HTTP Response
     * :class:`~mamba.web.response.Found` - Ok 302 HTTP Response
     * :class:`~mamba.web.response.SeeOther` - Ok 303 HTTP Response
