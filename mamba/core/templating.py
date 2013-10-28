@@ -103,6 +103,10 @@ class Template(object):
                 'application/view/{}'.format(controller.name)
             )
 
+            if controller.__class__.__base__.__name__ != 'Controller':
+                # this is an exthended packed controller
+                controller = controller.__class__.__base__()
+
             if 'application' not in controller.__module__:
                 # this controller is a packed shared controller
                 dum = controller.__module__.split('.', 1)[1].replace('.', '/')

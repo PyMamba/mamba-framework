@@ -168,19 +168,18 @@ class Page(resource.Resource):
             return
 
         for package in self._shared_controllers_manager.packages.values():
-            real_manager = package['controller']
+            static_data = filepath.FilePath(
+                '{}/static'.format(os.path.normpath(package['path']))
+            )
+            if static_data.exists():
+                self._assets.add_paths([static_data.path])
+
+            real_manager = package.get('controller')
+            if real_manager is None:
+                continue
 
             for controller in real_manager.get_controllers().values():
-                module = controller['module'].__file__
                 self._register_controller_module(controller, True)
-
-                static_data = filepath.FilePath(
-                    '{}/static'.format(os.path.normpath(
-                        os.path.dirname(module).split('controller')[0])
-                    )
-                )
-                if static_data.exists():
-                    self._assets.add_paths([static_data.path])
 
     def initialize_templating_system(self, template_paths, cache_size, loader):
         """Initialize the Jinja2 templating system for static HTML resources
