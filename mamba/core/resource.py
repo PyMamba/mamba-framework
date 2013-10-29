@@ -47,7 +47,8 @@ class Resource(TwistedResource):
                 'mamba_content': header.get_mamba_content(),
                 'media': header.get_favicon_content('assets'),
                 'styles': self._styles_manager.get_styles().values(),
-                'scripts': self._scripts_manager.get_scripts().values()
+                'scripts': self._scripts_manager.get_scripts().values(),
+                'lessjs': Application().lessjs
             }
         }
 

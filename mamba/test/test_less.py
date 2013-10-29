@@ -120,7 +120,7 @@ class LessCompilerTests(unittest.TestCase):
     @defer.inlineCallbacks
     def test_less_compile_fallbacks(self):
 
-        def _get_script(self, ignore):
+        def _get_script(self, path, ignore):
             return filepath.FilePath(self.stylesheet).getContent().decode(
                 'utf-8'
             )
@@ -162,7 +162,7 @@ class LessResourceTest(unittest.TestCase):
     def test_render(self):
         request = DummyRequest([self.fd.name])
 
-        def _get_script(self, ignore):
+        def _get_script(self, path, ignore):
             return filepath.FilePath(self.stylesheet).getContent().decode(
                 'utf-8'
             )

@@ -240,6 +240,7 @@ class Application(BaseConfig):
         self.content_type = 'text/html'
         self.description = None
         self.favicon = 'favicon.ico'
+        self.lessjs = False
         self.platform_debug = False
         self.development = False
         self.auto_select_reactor = False

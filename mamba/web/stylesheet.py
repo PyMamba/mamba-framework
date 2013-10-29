@@ -49,6 +49,7 @@ class Stylesheet(object):
         self.prefix = prefix
         self.name = ''
         self.data = ''
+        self.less = False
 
         self._fp = filepath.FilePath(self.path)
         if self._fp.exists():
@@ -64,6 +65,9 @@ class Stylesheet(object):
                             self.path
                         )
                     )
+
+                if filetype == 'mamba-less':
+                    self.less = True
 
                 res = '/{}/{}'.format(self.prefix, self._fp.basename())
                 self.data = res

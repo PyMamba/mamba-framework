@@ -7,6 +7,7 @@ Mamba less compiler
 """
 
 import os
+from functools import partial
 
 from twisted.internet import utils
 from twisted.python import filepath
@@ -21,12 +22,22 @@ class LessResource(resource.Resource):
     isLeaf = True
     less_exec = 'lessc'
 
+    def __init__(self, path=None):
+        self.path = path
+
     def render_GET(self, request):
         """
         Try to compile a LESS file and then serve it as CSS
         """
 
-        self.less_compiler = LessCompiler(request.postpath[0], self.less_exec)
+        if self.path is None:
+            self.less_compiler = LessCompiler(
+                request.postpath[0], exe=self.less_exec
+            )
+        else:
+            self.less_compiler = LessCompiler(
+                request.prepath[1], exe=self.less_exec, path=self.path
+            )
 
         # windows can't handle with non existrnt commands in CreateProcess
         # and raises an exception so we have to hack this here to support
@@ -60,25 +71,30 @@ class LessCompiler(object):
     adds the less.js JavaScript compiler to the page.
     """
 
-    def __init__(self, style, exe='lessc'):
+    def __init__(self, style, exe='lessc', path=None):
         super(LessCompiler, self).__init__()
         self.stylesheet = style
         self.exe = exe
+        self.path = path
 
     def compile(self):
         """
         Compile a LESS script
         """
 
+        style_path = self.stylesheet if self.path is None else self.path
+
         # windows can't handle with non existent commands in CreateProcess
         # and raise an exception so we have to hack this here to support
         # fallback on windows platforms
         try:
-            d = utils.getProcessOutput(self.exe, [self.stylesheet], os.environ)
-            d.addCallbacks(self._get_compiled, self._get_script)
+            d = utils.getProcessOutput(self.exe, [style_path], os.environ)
+            d.addCallbacks(
+                self._get_compiled, partial(self._get_script, style_path)
+            )
             return d
         except Exception:
-            return self._get_script(self.stylesheet)
+            return self._get_script(style_path)
 
     def _get_compiled(self, resp):
         """
@@ -87,17 +103,13 @@ class LessCompiler(object):
 
         return resp.decode('utf-8')
 
-    def _get_script(self, ignore):
+    def _get_script(self, style_path, ignore=None):
         """
         Return the LESS script and set Application use of LESS compiler
         script as True
         """
 
-        from mamba.application import app
-        mamba_app = app.Mamba()
-        mamba_app.lessjs = True
-
-        return filepath.FilePath(self.stylesheet).getContent().decode('utf-8')
+        return filepath.FilePath(style_path).getContent().decode('utf-8')
 
 
 __all__ = ["LessResource", "LessCompiler"]

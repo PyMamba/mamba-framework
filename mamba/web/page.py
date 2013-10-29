@@ -16,6 +16,7 @@ from twisted.web import static, server
 from twisted.python import log, filepath
 from twisted.python.logfile import DailyLogFile
 
+from mamba.utils.less import LessResource
 from mamba.core import templating, resource
 
 os = filepath.os
@@ -210,6 +211,12 @@ class Page(resource.Resource):
         """
 
         for name, style in self._styles_manager.get_styles().iteritems():
+            if style.less:
+                self.containers['styles'].putChild(
+                    name, LessResource(style.path)
+                )
+                continue
+
             self.containers['styles'].putChild(name, static.File(style.path))
 
     def insert_scripts(self):
