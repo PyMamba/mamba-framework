@@ -464,11 +464,10 @@ Storm offers a way to make values to be auto reloaded from the database when tou
 
     >>> steven.id = AutoReload
     print(steven.id)
-    4
 
 Steven has been autoflushed into the database. This is useful to making objects automatically flushed if neccesary.
 
-You cal also assign what in the |storm| project they call a "*lazy expression*" to any attribute. The expressions are flushed to the database when the attribute  is accessed or when the object is flushed to the database.
+You can also assign what in the |storm| project they call a "*lazy expression*" to any attribute. The expressions are flushed to the database when the attribute  is accessed or when the object is flushed to the database.
 
 .. sourcecode:: python
 

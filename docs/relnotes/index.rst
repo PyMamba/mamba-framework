@@ -39,6 +39,7 @@ Features
         }
 * Added `restart` command to `mamba-admin` command line tool
 * Added `checkers` package to `mamba.utils` for common checks on forms and applications
+* Added auto LESS resources compiling for mambaerized styleseets
 
 Bug Fixes
 ---------
