@@ -69,6 +69,9 @@ rst_prolog = """
 .. |repo| replace:: GitHub repository
 .. _repo: https://github.com/DamnWidget/mamba
 
+.. |less| replace:: LESS
+.. _less: http://lesscss.org/
+
 .. |relnotes| replace:: relnotes index
 .. _relnotes: https://github.com/DamnWidget/mamba/blob/master/docs/relnotes/index.rst
 

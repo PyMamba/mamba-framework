@@ -275,4 +275,33 @@ We can pass a template name as the first argument (or as template keyword argume
 
 If mamba can't find any template with that name then it raises a :class:`core.templating.NotConfigured` exception.
 
+Auto compiling LESS scripts
+===========================
+
+Mamba can auto-compile _less scripts if the `lessc` tool has been istalled on the system as its available to the user that is running the mamba application.
+In case that the `lessc` tool is not installed on the system, the raw contents of the less file are returned as fallback.
+
+To add a |less| resource to our applicatin we should just place the |less| file into the `application/view/stylesheets` directory with the following header:
+
+.. sourcecode:: css
+
+    /*
+     * -*- mamba-file-type: mamba-less -*-
+     */
+     ...
+
+Mamba will try to compile the |less| scripts that are placed in that directory and return it back as already ccompiled CSS contents to the browser in total transparent way.
+
+|less| auto-compilation when lessc is not available
+---------------------------------------------------
+
+In environments where `lessc` is not available, Heroku for example, we can set the configuration set `lessjs` in `config/application.json` with the exact file name of the `less.js` script that we want to use.
+Mamba will insert the |less| JavaScript version in the main layout for us.
+
+.. note ::
+
+    The full list of available `less.js` script versions can be found in GitHub: https://github.com/less/less.js/tree/master/dist
+
+
+
 |
