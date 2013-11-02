@@ -203,6 +203,16 @@ class ModelTest(unittest.TestCase):
         store = self.database.store()
         self.assertTrue(len(store.find(DummyModel)) == 0)
 
+    def test_model_afind(self):
+        dummy = yield DummyModel().find(name=u'Dummy').one()
+        self.assertEqual(dummy.id, 1)
+        self.assertEqual(dummy.name, u'Dummy')
+
+    def test_model_find(self):
+        dummy = DummyModel().find(name=u'Dummy').one()
+        self.assertEqual(dummy.id, 1)
+        self.assertEqual(dummy.name, u'Dummy')
+
     def test_model_dump_table(self):
         dummy = DummyModel()
         script = dummy.dump_table()

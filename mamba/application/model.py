@@ -187,6 +187,35 @@ class Model(ModelProvider):
         store.remove(self)
 
     @transact
+    def afind(self, *args, **kwargs):
+        """Find an object in the underlyinng database in asynchronous way
+
+        Some examples:
+
+            c = yield model.find(Customer.name == u"John")
+            c = yield model.find(name=u"John")
+            c = yield model.find((Customer, City), Customer.city_id == City.id)
+        """
+
+        return self.find(*args, **kwargs)
+
+    def find(self, *args, **kwargs):
+        """Find an object in the underlying database
+
+        Some examples:
+
+            model.find(Customer.name == u"John")
+            model.find(name=u"John")
+            model.find((Customer, City), Customer.city_id == City.id)
+        """
+
+        obj = self.__class__
+        if len(args) > 0 and (type(args[0]) == tuple or type(args[0]) == list):
+            obj = args[0]
+
+        return self.database.store().find(obj, *args, **kwargs)
+
+    @transact
     def create_table(self):
         """Create the table for this model in the underlying database system
         """
