@@ -61,6 +61,12 @@ class DatabaseTest(unittest.TestCase):
         self.assertTrue(config.Database().loaded)
         self.assertEqual(config.Database().min_threads, 5)
 
+    def test_database_write(self):
+        config.Database.write({})
+        config.Database('./config/database.json')
+        self.assertTrue(config.Database().loaded)
+
+
 
 class ApplicationTest(unittest.TestCase):
     """Fallback functionallity already tested on Database Tests
