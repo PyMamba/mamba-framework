@@ -12,12 +12,14 @@
 """
 
 import datetime
+import functools
 
 from storm import properties
 from storm.database import URI
 from storm.expr import Undef, Column
 from storm.zope.interfaces import IZStorm
 from storm.zope.zstorm import global_zstorm
+from storm.twisted.transact import Transactor
 from twisted.python.monkey import MonkeyPatcher
 from twisted.python.threadpool import ThreadPool
 from zope.component import provideUtility, getUtility
@@ -28,6 +30,7 @@ from mamba.enterprise.mysql import MySQL
 from mamba.enterprise.sqlite import SQLite
 from mamba.enterprise.common import CommonSQL
 from mamba.enterprise.postgres import PostgreSQL
+from twisted.internet.threads import deferToThreadPool
 
 
 class Database(object):
@@ -45,6 +48,7 @@ class Database(object):
         'DatabasePool'
     )
     zstorm_configured = False
+    transactor = Transactor(pool)
 
     def __init__(self, pool=None, testing=False):
         if pool is not None:
@@ -65,7 +69,8 @@ class Database(object):
         # MonkeyPatch Storm
         if not self.monkey_patched:
             monkey_patcher = MonkeyPatcher(
-                (properties, 'PropertyColumn', PropertyColumnMambaPatch)
+                (properties, 'PropertyColumn', PropertyColumnMambaPatch),
+                (Transactor, 'run', mamba_transactor_run)
             )
             monkey_patcher.patch()
             self.monkey_patched = True
@@ -79,8 +84,6 @@ class Database(object):
 
         if self.__testing is True:
             self.pool.start()
-        # else:
-        #     self._database = create_database(config.Database().uri)
 
         self.started = True
 
@@ -289,6 +292,26 @@ class PropertyColumnMambaPatch(Column):
         # function call on each access.
         for attr in ["__get__", "__set__", "__delete__"]:
             setattr(self, attr, getattr(prop, attr))
+
+
+def mamba_transactor_run(self, function, *args, **kwargs):
+    """
+    Monkeypatched version of the run method for storm transactor that
+    can run the given function in a thread or in the main thread.
+
+    If the named variable 'async' is set to False we don't run the
+    function in the ThreadPool but in the main thread.
+    """
+
+    run_asynchornous = kwargs.pop('async', True)
+    if run_asynchornous:
+        # Inline the reactor import here for sake of safeness, in case a
+        # custom reactor needs to be installed
+        from twisted.internet import reactor
+        return deferToThreadPool(
+            reactor, self._threadpool, self._wrap, function, *args, **kwargs)
+
+    return self._wrap(function, *args, **kwargs)
 
 
 __all__ = ['Database', 'AdapterFactory']

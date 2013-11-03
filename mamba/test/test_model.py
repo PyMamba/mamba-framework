@@ -121,29 +121,70 @@ class ModelTest(unittest.TestCase):
 
         return DummyModel().get_adapter()
 
+    def insert_dummy(self, name='Dummy'):
+
+        store = self.database.store()
+        store.execute('INSERT INTO dummy (name) VALUES (\'{}\')'.format(name))
+        store.commit()
+
+    def truncate_dummy(self):
+
+        store = self.database.store()
+        store.execute('DELETE FROM dummy')
+        store.commit()
+
+    @inlineCallbacks
     def test_model_create(self):
         dummy = DummyModel('Dummy')
-        dummy.create()
+        yield dummy.create()
+
+        self.assertEqual(dummy.id, 1)
+
+    def test_model_synchronous_create(self):
+        dummy = DummyModel('Dummy')
+        dummy.create(async=False)
 
         self.assertEqual(dummy.id, 1)
 
     @inlineCallbacks
     def test_model_read(self):
+        self.insert_dummy()
         dummy = yield DummyModel().read(1)
         self.assertEqual(dummy.id, 1)
         self.assertEqual(dummy.name, u'Dummy')
+        self.truncate_dummy()
+
+    def test_model_synchronous_read(self):
+        self.insert_dummy()
+        dummy = DummyModel().read(1, async=False)
+        self.assertEqual(dummy.id, 1)
+        self.assertEqual(dummy.name, u'Dummy')
+        self.truncate_dummy()
 
     @inlineCallbacks
     def test_model_read_copy(self):
+        self.insert_dummy()
         dummy = yield DummyModel().read(1)
         dummy2 = yield DummyModel().read(1, True)
 
         self.assertEqual(dummy.name, u'Dummy')
         self.assertEqual(dummy2.name, u'Dummy')
         self.assertNotEqual(dummy, dummy2)
+        self.truncate_dummy()
+
+    def test_model_read_synchronous_copy(self):
+        self.insert_dummy()
+        dummy = DummyModel().read(1, async=False)
+        dummy2 = DummyModel().read(1, True, async=False)
+
+        self.assertEqual(dummy.name, u'Dummy')
+        self.assertEqual(dummy2.name, u'Dummy')
+        self.assertNotEqual(dummy, dummy2)
+        self.truncate_dummy()
 
     @inlineCallbacks
     def test_model_update(self):
+        self.insert_dummy()
         dummy = yield DummyModel().read(1)
         dummy.name = u'Fellas'
         dummy.update()
@@ -152,9 +193,23 @@ class ModelTest(unittest.TestCase):
         dummy = yield DummyModel().read(1)
         self.assertEqual(dummy.id, 1)
         self.assertEqual(dummy.name, u'Fellas')
+        self.truncate_dummy()
+
+    def test_model_synchronous_update(self):
+        self.insert_dummy()
+        dummy = DummyModel().read(1, async=False)
+        dummy.name = u'Fellas'
+        dummy.update()
+
+        del(dummy)
+        dummy = DummyModel().read(1, async=False)
+        self.assertEqual(dummy.id, 1)
+        self.assertEqual(dummy.name, u'Fellas')
+        self.truncate_dummy()
 
     @inlineCallbacks
     def test_model_update_with_read_copy_behaviour(self):
+        self.insert_dummy()
         dummy = yield DummyModel().read(1, True)
         dummy.name = u'Dummy'
         dummy.update()
@@ -163,6 +218,19 @@ class ModelTest(unittest.TestCase):
         dummy2 = yield DummyModel().read(1, True)
         self.assertEqual(dummy2.id, 1)
         self.assertEqual(dummy2.name, u'Dummy')
+        self.truncate_dummy()
+
+    def test_model_update_with_read_copy_synchornous_behaviour(self):
+        self.insert_dummy()
+        dummy = DummyModel().read(1, True, async=False)
+        dummy.name = u'Dummy'
+        dummy.update()
+        del(dummy)
+
+        dummy2 = DummyModel().read(1, True, async=False)
+        self.assertEqual(dummy2.id, 1)
+        self.assertEqual(dummy2.name, u'Dummy')
+        self.truncate_dummy()
 
     @inlineCallbacks
     def test_model_update_with_compound_key(self):
@@ -172,13 +240,14 @@ class ModelTest(unittest.TestCase):
 
         dummy = yield DummyModelCompound().read((1, 1))
         dummy.name = u'Fellas'
-        dummy.update()
+        yield dummy.update()
 
         del(dummy)
         dummy = yield DummyModelCompound().read((1, 1))
         self.assertEqual(dummy.id, 1)
         self.assertEqual(dummy.dummy_id, 1)
         self.assertEqual(dummy.name, u'Fellas')
+        self.truncate_dummy()
 
     @inlineCallbacks
     def test_model_update_raise_exeption_on_invalid_schema(self):
@@ -196,22 +265,161 @@ class ModelTest(unittest.TestCase):
         except:
             raise
 
+    def test_model_update_synchronous_raise_exeption_on_invalid_schema(self):
+        dummy = DummyInvalidModel()
+        try:
+            dummy.name = u'Dummy'
+        except:
+            # catch storm.exceptions.ClassInfoError
+            pass
+
+        try:
+            dummy.update(async=False)
+        except InvalidModelSchema:
+            pass
+        except:
+            raise
+
+    @inlineCallbacks
     def test_model_delete(self):
         dummy = yield DummyModel().read(1)
+        yield dummy.delete()
+
+        store = self.database.store()
+        self.assertTrue(store.find(DummyModel).count() == 0)
+
+    def test_model_synchronous_delete(self):
+        dummy = DummyModel().read(1, async=False)
         dummy.delete()
 
         store = self.database.store()
-        self.assertTrue(len(store.find(DummyModel)) == 0)
+        self.assertTrue(store.find(DummyModel).count() == 0)
 
-    def test_model_afind(self):
-        dummy = yield DummyModel().find(name=u'Dummy').one()
-        self.assertEqual(dummy.id, 1)
-        self.assertEqual(dummy.name, u'Dummy')
-
+    @inlineCallbacks
     def test_model_find(self):
-        dummy = DummyModel().find(name=u'Dummy').one()
+        self.insert_dummy()
+        result = yield DummyModel().find(name=u'Dummy')
+        dummy = result.one()
         self.assertEqual(dummy.id, 1)
         self.assertEqual(dummy.name, u'Dummy')
+        self.truncate_dummy()
+
+    @inlineCallbacks
+    def test_model_find_no_instance(self):
+        self.insert_dummy()
+        result = yield DummyModel.find(name=u'Dummy')
+        dummy = result.one()
+        self.assertEqual(dummy.id, 1)
+        self.assertEqual(dummy.name, u'Dummy')
+        self.truncate_dummy()
+
+    def test_model_synchornous_find(self):
+        self.insert_dummy()
+        dummy = DummyModel().find(name=u'Dummy', async=False).one()
+        self.assertEqual(dummy.id, 1)
+        self.assertEqual(dummy.name, u'Dummy')
+        self.truncate_dummy()
+
+    def test_model_synchornous_find_no_instance(self):
+        self.insert_dummy()
+        dummy = DummyModel.find(name=u'Dummy', async=False).one()
+        self.assertEqual(dummy.id, 1)
+        self.assertEqual(dummy.name, u'Dummy')
+        self.truncate_dummy()
+
+    @inlineCallbacks
+    def test_model_all(self):
+        self.insert_dummy()
+        self.insert_dummy('Dummy2')
+        dummy = yield DummyModel().all()
+        self.assertEqual(dummy.count(), 2)
+        self.assertEqual(dummy[0].id, 1)
+        self.assertEqual(dummy[0].name, u'Dummy')
+        self.truncate_dummy()
+
+    @inlineCallbacks
+    def test_model_all_no_instance(self):
+        self.insert_dummy()
+        self.insert_dummy('Dummy2')
+        dummy = yield DummyModel.all()
+        self.assertEqual(dummy.count(), 2)
+        self.assertEqual(dummy[0].id, 1)
+        self.assertEqual(dummy[0].name, u'Dummy')
+        self.truncate_dummy()
+
+    def test_model_synchronous_all(self):
+        self.insert_dummy()
+        self.insert_dummy('Dummy2')
+        dummy = DummyModel().all(async=False)
+        self.assertEqual(dummy.count(), 2)
+        self.assertEqual(dummy[0].id, 1)
+        self.assertEqual(dummy[0].name, u'Dummy')
+        self.truncate_dummy()
+
+    def test_model_synchronous_all_no_instance(self):
+        self.insert_dummy()
+        self.insert_dummy('Dummy2')
+        dummy = DummyModel.all(async=False)
+        self.assertEqual(dummy.count(), 2)
+        self.assertEqual(dummy[0].id, 1)
+        self.assertEqual(dummy[0].name, u'Dummy')
+        self.truncate_dummy()
+
+    @inlineCallbacks
+    def test_model_all_order_by(self):
+        self.insert_dummy()
+        self.insert_dummy('OrderTest')
+        dummy = yield DummyModel().all(order_by=DummyModel.name)
+        self.assertEqual(dummy.count(), 2)
+        self.assertEqual(dummy[0].id, 1)
+        self.assertEqual(dummy[0].name, u'Dummy')
+        dummy = yield DummyModel().all(order_by=DummyModel.name, desc=True)
+        self.assertEqual(dummy.count(), 2)
+        self.assertEqual(dummy[0].id, 2)
+        self.assertEqual(dummy[0].name, u'OrderTest')
+        self.truncate_dummy()
+
+    @inlineCallbacks
+    def test_model_all_order_by_no_instance(self):
+        self.insert_dummy()
+        self.insert_dummy('OrderTest')
+        dummy = yield DummyModel.all(order_by=DummyModel.name)
+        self.assertEqual(dummy.count(), 2)
+        self.assertEqual(dummy[0].id, 1)
+        self.assertEqual(dummy[0].name, u'Dummy')
+        dummy = yield DummyModel.all(order_by=DummyModel.name, desc=True)
+        self.assertEqual(dummy.count(), 2)
+        self.assertEqual(dummy[0].id, 2)
+        self.assertEqual(dummy[0].name, u'OrderTest')
+        self.truncate_dummy()
+
+    def test_model_synchronous_all_order_by(self):
+        self.insert_dummy()
+        self.insert_dummy('OrderTest')
+        dummy = DummyModel().all(order_by=DummyModel.name, async=False)
+        self.assertEqual(dummy.count(), 2)
+        self.assertEqual(dummy[0].id, 1)
+        self.assertEqual(dummy[0].name, u'Dummy')
+        dummy = DummyModel().all(
+            order_by=DummyModel.name, desc=True, async=False)
+        self.assertEqual(dummy.count(), 2)
+        self.assertEqual(dummy[0].id, 2)
+        self.assertEqual(dummy[0].name, u'OrderTest')
+        self.truncate_dummy()
+
+    def test_model_synchronous_all_order_by_no_instance(self):
+        self.insert_dummy()
+        self.insert_dummy('OrderTest')
+        dummy = DummyModel.all(order_by=DummyModel.name, async=False)
+        self.assertEqual(dummy.count(), 2)
+        self.assertEqual(dummy[0].id, 1)
+        self.assertEqual(dummy[0].name, u'Dummy')
+        dummy = DummyModel.all(
+            order_by=DummyModel.name, desc=True, async=False)
+        self.assertEqual(dummy.count(), 2)
+        self.assertEqual(dummy[0].id, 2)
+        self.assertEqual(dummy[0].name, u'OrderTest')
+        self.truncate_dummy()
 
     def test_model_dump_table(self):
         dummy = DummyModel()
@@ -730,6 +938,7 @@ class DummyModelCompound(Model):
     __storm_primary__ = 'id', 'dummy_id'
     id = Int(unsigned=True)
     dummy_id = Int(unsigned=True)
+    name = Unicode()
 
     def __init__(self, id=None, dummy_id=None, name=None):
         super(DummyModelCompound, self).__init__()

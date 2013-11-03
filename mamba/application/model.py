@@ -14,6 +14,7 @@
 from os.path import normpath
 
 from storm.uri import URI
+from storm.expr import Desc
 from storm.properties import PropertyPublisherMeta
 from storm.twisted.transact import Transactor, transact
 
@@ -186,20 +187,8 @@ class Model(ModelProvider):
         store = self.database.store()
         store.remove(self)
 
-    @transact
-    def afind(self, *args, **kwargs):
-        """Find an object in the underlyinng database in asynchronous way
-
-        Some examples:
-
-            c = yield model.find(Customer.name == u"John")
-            c = yield model.find(name=u"John")
-            c = yield model.find((Customer, City), Customer.city_id == City.id)
-        """
-
-        return self.find(*args, **kwargs)
-
-    def find(self, *args, **kwargs):
+    @classmethod
+    def find(klass, *args, **kwargs):
         """Find an object in the underlying database
 
         Some examples:
@@ -209,11 +198,34 @@ class Model(ModelProvider):
             model.find((Customer, City), Customer.city_id == City.id)
         """
 
-        obj = self.__class__
+        obj = klass
         if len(args) > 0 and (type(args[0]) == tuple or type(args[0]) == list):
             obj = args[0]
 
-        return self.database.store().find(obj, *args, **kwargs)
+        return Transactor(klass.database.pool).run(
+            klass.database.store().find, obj, *args, **kwargs
+        )
+
+    @classmethod
+    def all(klass, order_by=None, desc=False, *args, **kwargs):
+        """Return back all the rows in the database for this model
+
+        :param order_by: order the resultset by the given field/property
+        :type order_by: model property
+        :param desc: if True, order the resultset by descending order
+        :type desc: bool
+        """
+
+        def inner_transaction():
+            store = klass.database.store()
+            data = store.find(klass)
+            if order_by is not None:
+                data.order_by(Desc(order_by) if desc else order_by)
+
+            return data
+
+        return Transactor(
+            klass.database.pool).run(inner_transaction, *args, **kwargs)
 
     @transact
     def create_table(self):
