@@ -12,7 +12,6 @@
 """
 
 import datetime
-import functools
 
 from storm import properties
 from storm.database import URI

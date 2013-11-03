@@ -298,7 +298,7 @@ class ModelTest(unittest.TestCase):
     @inlineCallbacks
     def test_model_find(self):
         self.insert_dummy()
-        result = yield DummyModel().find(name=u'Dummy')
+        result = yield DummyModel().find(DummyModel.name == u'Dummy')
         dummy = result.one()
         self.assertEqual(dummy.id, 1)
         self.assertEqual(dummy.name, u'Dummy')
