@@ -161,6 +161,10 @@ class Database(BaseConfig):
         config_file = filepath.FilePath(
             '{}/config/database.json'.format(filepath.abspath('.'))
         )
+
+        if not config_file.parent().exists():
+            config_file.parent().createDirectory()
+
         config_file.open('w').write(json.dumps(options, indent=4))
 
     def __repr__(self):

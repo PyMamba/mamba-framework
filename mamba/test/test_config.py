@@ -61,6 +61,39 @@ class DatabaseTest(unittest.TestCase):
         self.assertTrue(config.Database().loaded)
         self.assertEqual(config.Database().min_threads, 5)
 
+    def test_database_write(self):
+        import os
+        import json
+        currdir = os.getcwd()
+        os.mkdir('tmp')
+        os.chdir('./tmp')
+
+        data = {
+            'uri': 'sqlite:',
+            'min_threads': 5,
+            'max_threads': 20,
+            'auto_adjust_pool_size': False,
+            'create_table_behaviours': {
+                'create_table_if_not_exists': True,
+                'drop_table': False
+            },
+            'drop_table_behaviours': {
+                'drop_if_exists': True,
+                'restrict': True,
+                'cascade': False
+            }
+        }
+        config.Database().write(data)
+
+        os.chdir(currdir)
+        cfg_file = filepath.FilePath('./tmp/config/database.json')
+        self.assertTrue(cfg_file.exists())
+        self.assertEqual(json.loads(cfg_file.open('r').read()), data)
+
+        cfg_file.remove()
+        os.rmdir('tmp/config')
+        os.rmdir('tmp')
+
 
 class ApplicationTest(unittest.TestCase):
     """Fallback functionallity already tested on Database Tests
