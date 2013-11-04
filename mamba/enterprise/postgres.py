@@ -139,20 +139,27 @@ class PostgreSQL(CommonSQL):
             if type(attr.object) is Reference:
                 relation = attr.object._relation
                 keys = {
-                    'remote': relation.remote_key[0],
-                    'local': relation.local_key[0]
+                    'remote': relation.remote_key,
+                    'local': relation.local_key
                 }
                 remote_table = relation.remote_cls.__storm_table__
 
+                localkeys = ', '.join(
+                    '`{}`'.format(k.name) for k in keys.get('local')
+                )
+                remotekeys = ', '.join(
+                    '`{}`'.format(k.name) for k in keys.get('remote')
+                )
+
                 query = (
                     'ALTER TABLE {table} ADD '
-                    'CONSTRAINT {remote_table}_ind FOREIGN KEY ({localkey}) '
-                    'REFERENCES {remote_table}({id}) '
+                    'CONSTRAINT {remote_table}_ind FOREIGN KEY ({localkeys}) '
+                    'REFERENCES {remote_table}({remotekeys}) '
                     'ON UPDATE {on_update} ON DELETE {on_delete};\n'.format(
                         table=self.model.__storm_table__,
                         remote_table=remote_table,
-                        localkey=keys.get('local').name,
-                        id=keys.get('remote').name,
+                        localkeys=localkeys,
+                        remotekeys=remotekeys,
                         on_update=getattr(
                             self.model, '__on_update__', 'RESTRICT'),
                         on_delete=getattr(

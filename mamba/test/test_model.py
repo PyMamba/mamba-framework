@@ -114,9 +114,11 @@ class ModelTest(unittest.TestCase):
         self.database.store().reset()
         transaction.manager.free(transaction.get())
 
-    def get_adapter(self, reference=False):
+    def get_adapter(self, reference=False, compound=False):
 
-        if reference:
+        if reference and compound:
+            return DummyModelFive().get_adapter()
+        elif reference:
             return DummyModelThree().get_adapter()
 
         return DummyModel().get_adapter()
@@ -719,6 +721,21 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('ON UPDATE RESTRICT ON DELETE RESTRICT' in script)
 
     @common_config(engine='mysql:')
+    def test_mysql_reference_generates_compound_foreign_keys(self):
+
+        adapter = self.get_adapter(reference=True, compound=True)
+        script = adapter.create_table()
+
+        self.assertTrue(
+            'INDEX `dummy_four_ind` (`remote_id`, `remote_second_id`)' in script
+        )
+        self.assertTrue(
+            ('FOREIGN KEY (`remote_id`, `remote_second_id`) REFERENCES'
+                ' `dummy_four`(`id`, `second_id`)') in script
+        )
+        self.assertTrue('ON UPDATE RESTRICT ON DELETE RESTRICT' in script)
+
+    @common_config(engine='mysql:')
     def test_mysql_reference_in_cascade(self):
 
         DummyModelThree.__on_delete__ = 'CASCADE'
@@ -955,6 +972,28 @@ class DummyModelThree(Model):
     id = Int(primary=True)
     remote_id = Int()
     dummy_two = Reference(remote_id, DummyModelTwo.id)
+
+
+class DummyModelFour(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_four'
+    __storm_primary__ = 'id', 'second_id'
+    id = Int()
+    second_id = Int()
+
+
+class DummyModelFive(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_five'
+    id = Int(primary=True)
+    remote_id = Int()
+    remote_second_id = Int()
+    dummy_four = Reference(
+        (remote_id, remote_second_id),
+        (DummyModelFour.id, DummyModelFour.second_id)
+    )
 
 
 class DummyModelEnum(Model):
