@@ -144,12 +144,8 @@ class PostgreSQL(CommonSQL):
                 }
                 remote_table = relation.remote_cls.__storm_table__
 
-                localkeys = ', '.join(
-                    '`{}`'.format(k.name) for k in keys.get('local')
-                )
-                remotekeys = ', '.join(
-                    '`{}`'.format(k.name) for k in keys.get('remote')
-                )
+                localkeys = ', '.join(k.name for k in keys.get('local'))
+                remotekeys = ', '.join(k.name for k in keys.get('remote'))
 
                 query = (
                     'ALTER TABLE {table} ADD '

@@ -727,7 +727,8 @@ class ModelTest(unittest.TestCase):
         script = adapter.create_table()
 
         self.assertTrue(
-            'INDEX `dummy_four_ind` (`remote_id`, `remote_second_id`)' in script
+            ('INDEX `dummy_four_ind` '
+                '(`remote_id`, `remote_second_id`)') in script
         )
         self.assertTrue(
             ('FOREIGN KEY (`remote_id`, `remote_second_id`) REFERENCES'
@@ -760,6 +761,23 @@ class ModelTest(unittest.TestCase):
         self.assertTrue(
             'REFERENCES dummy_two(id) ON UPDATE RESTRICT ON DELETE RESTRICT'
             in script
+        )
+
+    @common_config(engine='postgres:')
+    def test_postgres_reference_generates_compound_foreign_keys(self):
+
+        adapter = self.get_adapter(reference=True, compound=True)
+        script = adapter.parse_references()
+
+        print script
+
+        self.assertTrue(
+            ('CONSTRAINT dummy_four_ind FOREIGN KEY '
+                '(remote_id, remote_second_id)') in script
+        )
+        self.assertTrue(
+            ('REFERENCES dummy_four(id, second_id) '
+                'ON UPDATE RESTRICT ON DELETE RESTRICT') in script
         )
 
     @common_config(engine='postgres:')
