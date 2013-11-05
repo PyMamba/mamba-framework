@@ -489,7 +489,6 @@ class WebSocketProtocol(ProtocolWrapper):
     def __init__(self, *args, **kwargs):
         ProtocolWrapper.__init__(self, *args, **kwargs)
         self.buf = ''
-        self.buf = ''
         self.codec = None
         self.location = '/'
         self.host = ''
