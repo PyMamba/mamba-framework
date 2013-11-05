@@ -573,7 +573,7 @@ class WebSocketProtocol(ProtocolWrapper):
 
         # kick pending frames
         if len(self.pending_frames) > 0:
-            self.send()
+            self._send()
 
     def handle_handshake(self):
         """
@@ -742,7 +742,7 @@ class WebSocketProtocol(ProtocolWrapper):
         self.pending_frames.extend(data)
         self._send()
 
-    def send(self, binary=False):
+    def _send(self, binary=False):
         """Send all pending frames
         """
 
