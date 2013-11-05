@@ -134,18 +134,25 @@ class MySQL(CommonSQL):
             if type(attr.object) is Reference:
                 relation = attr.object._relation
                 keys = {
-                    'remote': relation.remote_key[0],
-                    'local': relation.local_key[0]
+                    'remote': relation.remote_key,
+                    'local': relation.local_key
                 }
                 remote_table = relation.remote_cls.__storm_table__
 
+                localkeys = ', '.join(
+                    '`{}`'.format(k.name) for k in keys.get('local')
+                )
+                remotekeys = ', '.join(
+                    '`{}`'.format(k.name) for k in keys.get('remote')
+                )
+
                 query = (
-                    'INDEX `{remote_table}_ind` (`{localkey}`), FOREIGN KEY '
-                    '(`{localkey}`) REFERENCES `{remote_table}`(`{id}`) '
+                    'INDEX `{remote_table}_ind` ({localkeys}), FOREIGN KEY '
+                    '({localkeys}) REFERENCES `{remote_table}`({remotekeys}) '
                     'ON UPDATE {on_update} ON DELETE {on_delete}'.format(
                         remote_table=remote_table,
-                        localkey=keys.get('local').name,
-                        id=keys.get('remote').name,
+                        localkeys=localkeys,
+                        remotekeys=remotekeys,
                         on_update=getattr(
                             self.model, '__on_update__', 'RESTRICT'),
                         on_delete=getattr(
