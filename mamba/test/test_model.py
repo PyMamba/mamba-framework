@@ -769,8 +769,6 @@ class ModelTest(unittest.TestCase):
         adapter = self.get_adapter(reference=True, compound=True)
         script = adapter.parse_references()
 
-        print script
-
         self.assertTrue(
             ('CONSTRAINT dummy_four_ind FOREIGN KEY '
                 '(remote_id, remote_second_id)') in script
