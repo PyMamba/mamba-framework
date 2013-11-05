@@ -486,20 +486,19 @@ class WebSocketProtocol(ProtocolWrapper):
 
     """
 
-    buf = ''
-    codec = None
-    location = '/'
-    host = ''
-    origin = ''
-    version = None
-    state = HANDSHAKE
-    pending_frames = []
-    protocols = []
-    headers = {}
-
     def __init__(self, *args, **kwargs):
         ProtocolWrapper.__init__(self, *args, **kwargs)
         self.buf = ''
+        self.buf = ''
+        self.codec = None
+        self.location = '/'
+        self.host = ''
+        self.origin = ''
+        self.version = None
+        self.state = HANDSHAKE
+        self.pending_frames = []
+        self.protocols = []
+        self.headers = {}
 
     @property
     def secure(self):
