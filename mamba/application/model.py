@@ -15,13 +15,13 @@ from os.path import normpath
 
 from storm.uri import URI
 from storm.expr import Desc
+from storm.twisted.transact import Transactor
 from storm.properties import PropertyPublisherMeta
-from storm.twisted.transact import Transactor, transact
 
 from mamba import plugin
 from mamba.utils import config
 from mamba.core import interfaces, module
-from mamba.enterprise.database import Database, AdapterFactory
+from mamba.enterprise.database import Database, AdapterFactory, transact
 
 
 class MambaStorm(PropertyPublisherMeta, plugin.ExtensionPoint):

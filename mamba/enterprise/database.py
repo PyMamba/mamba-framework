@@ -12,6 +12,7 @@
 """
 
 import datetime
+import functools
 
 from storm import properties
 from storm.database import URI
@@ -52,6 +53,7 @@ class Database(object):
     def __init__(self, pool=None, testing=False):
         if pool is not None:
             self.pool = pool
+            self.transactor = Transactor(pool)
 
         self.started = False
         self.__testing = testing
@@ -313,4 +315,17 @@ def mamba_transactor_run(self, function, *args, **kwargs):
     return self._wrap(function, *args, **kwargs)
 
 
-__all__ = ['Database', 'AdapterFactory']
+def transact(method):
+    """Decorator that run the given method into the Transactor pool
+    """
+
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        try:
+            return self.transactor.run(method, self, *args, **kwargs)
+        except AttributeError:
+            return self.database.transactor.run(method, self, *args, **kwargs)
+    return wrapper
+
+
+__all__ = ['Database', 'AdapterFactory', 'transact']
