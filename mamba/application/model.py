@@ -41,7 +41,7 @@ class MambaStorm(PropertyPublisherMeta, plugin.ExtensionPoint):
 
         Mamba support for database dump and SQL Schema generation through
         Storm classes is possible because a monkeypatching and hack of
-        regular Storm behaviour, if you are nos using Storm base classes
+        regular Storm behaviour, if you are not using Storm base classes
         for your Reference's and ReferenceSet's you may experience weird
         behaviours like not all the object columns being displayed in your
         generated schema.

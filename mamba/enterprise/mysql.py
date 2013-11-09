@@ -252,6 +252,22 @@ class MySQL(CommonSQL):
             ', '.join("'{}'".format(i) for i in data)
         )
 
+    def get_storm_columns(self):
+        return self.model._storm_columns.items()
+
+    def get_primary_key_column(self):
+        for column, property_ in self.get_storm_columns():
+            if property_.primary == 1:
+                return column
+
+    def get_primary_key_names(self):
+        if not hasattr(self.model, '__storm_primary__'):
+            for column, property_ in self.get_storm_columns():
+                if property_.primary == 1:
+                    return (property_.name, )
+
+        return self.model.__storm_primary__
+
     def detect_primary_key(self):
         """
         Detect the primary key for the model and return it back with the
@@ -263,21 +279,19 @@ class MySQL(CommonSQL):
         :rtype: str
         :raises: MySQLMissingPrimaryKey on missing primary key
         """
+        primary_key = self.get_primary_key_names()
 
-        if not hasattr(self.model, '__storm_primary__'):
-            for column in self.model._storm_columns.values():
-                if column.primary == 1:
-                    return 'PRIMARY KEY(`{}`)'.format(column.name)
-
+        if primary_key is None:
             raise MySQLMissingPrimaryKey(
                 'MySQL based model {} is missing a primary key column'.format(
                     repr(self.model)
                 )
             )
+        
+        primary_key_str = ', '.join(['`{}`'.format(c) for c in primary_key])
 
-        return 'PRIMARY KEY {}'.format(
-            str(self.model.__storm_primary__).replace("'", "`")
-        )
+        return 'PRIMARY KEY({})'.format(primary_key_str)
+
 
     def create_table(self):
         """Return the MySQL syntax for create a table with this model
@@ -290,8 +304,14 @@ class MySQL(CommonSQL):
             else '`' + self.model.__storm_table__ + '`'
         ))
 
-        for i in range(len(self.model._storm_columns.keys())):
-            column = self.model._storm_columns.keys()[i]
+        primary_key = self.get_primary_key_column()
+        
+        if primary_key is not None:
+            query += '  {},\n'.format(self.parse_column(primary_key))
+
+        for column, property_ in self.get_storm_columns():
+            if property_.primary == 1:
+                continue
             if column.variable_class is not NativeEnumVariable:
                 query += '  {},\n'.format(self.parse_column(column))
             else:
