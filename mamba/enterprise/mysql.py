@@ -252,19 +252,41 @@ class MySQL(CommonSQL):
             ', '.join("'{}'".format(i) for i in data)
         )
 
+    def is_compound_key(self, name):
+        if hasattr(self.model, '__storm_primary__'):
+            return name in self.model.__storm_primary__
+
+        return False
+
     def get_storm_columns(self):
         return self.model._storm_columns.items()
 
-    def get_primary_key_column(self):
+    def get_single_primary_key(self):
         for column, property_ in self.get_storm_columns():
             if property_.primary == 1:
-                return column
+                return (column, property_)
+
+    def get_compound_primary_key(self):
+        primary_key_names = self.model.__storm_primary__
+        primary_key_list = []
+
+        for column, property_ in self.get_storm_columns():
+            if property_.name in primary_key_names:
+                primary_key_list.append(column)
+
+        return primary_key_list
+
+    def get_primary_key_columns(self):
+        """Return one or more primary key column(s)
+        """
+        if not hasattr(self.model, '__storm_primary__'):
+            return (self.get_single_primary_key()[0], )
+
+        return self.get_compound_primary_key()
 
     def get_primary_key_names(self):
         if not hasattr(self.model, '__storm_primary__'):
-            for column, property_ in self.get_storm_columns():
-                if property_.primary == 1:
-                    return (property_.name, )
+            return (self.get_single_primary_key()[1].name, )
 
         return self.model.__storm_primary__
 
@@ -304,13 +326,14 @@ class MySQL(CommonSQL):
             else '`' + self.model.__storm_table__ + '`'
         ))
 
-        primary_key = self.get_primary_key_column()
+        primary_keys = self.get_primary_key_columns()
         
-        if primary_key is not None:
-            query += '  {},\n'.format(self.parse_column(primary_key))
+        if primary_keys is not None:
+            for pk in primary_keys:
+                query += '  {},\n'.format(self.parse_column(pk))
 
         for column, property_ in self.get_storm_columns():
-            if property_.primary == 1:
+            if property_.primary == 1 or self.is_compound_key(property_.name):
                 continue
             if column.variable_class is not NativeEnumVariable:
                 query += '  {},\n'.format(self.parse_column(column))
