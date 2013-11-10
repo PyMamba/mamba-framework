@@ -446,6 +446,23 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('DEFAULT CHARSET=utf8' in script)
 
     @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_primary_key_is_first_field(self):
+
+        dummy = DummyModel()
+        script = dummy.dump_table()
+
+        self.assertTrue('`id` int UNSIGNED AUTO_INCREMENT' in script.split(',')[0])
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_compound_primary_key_are_firsts_field(self):
+
+        dummy = DummyModelSix()
+        script = dummy.dump_table()
+
+        self.assertTrue('`id` int' in script.split(',')[0])
+        self.assertTrue('`second_id` int' in script.split(',')[1])
+
+    @common_config(engine='mysql:')
     def test_model_dump_table_with_mysql_and_native_enum(self):
         dummy = DummyModelNativeEnum()
         script = dummy.dump_table()
@@ -1011,6 +1028,15 @@ class DummyModelFive(Model):
         (DummyModelFour.id, DummyModelFour.second_id)
     )
 
+class DummyModelSix(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_six'
+    __storm_primary__ = 'id', 'second_id'
+    id = Int()
+    second_id = Int()
+    third_id = Int()
+    fourth_id = Int()
 
 class DummyModelEnum(Model):
     """Dummy Model for testing purposes"""
