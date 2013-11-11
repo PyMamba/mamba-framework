@@ -213,6 +213,52 @@ class PostgreSQL(CommonSQL):
             '({})'.format(', '.join(["'{}'".format(i) for i in data]))
         )
 
+    def is_compound_key(self, name):
+        if hasattr(self.model, '__storm_primary__'):
+            return name in self.model.__storm_primary__
+
+        return False
+
+    def get_storm_columns(self):
+        return self.model._storm_columns.items()
+
+    def get_single_primary_key(self):
+        for column, property_ in self.get_storm_columns():
+            if property_.primary == 1:
+                return (column, property_)
+
+    def get_compound_primary_key(self):
+        primary_key_names = self.model.__storm_primary__
+        primary_key_list = []
+
+        for column, property_ in self.get_storm_columns():
+            if property_.name in primary_key_names:
+                primary_key_list.append(column)
+
+        primary_key_list.sort()
+
+        return primary_key_list
+
+    def get_primary_key_columns(self):
+        """Return one or more primary key column(s)
+        """
+        if not hasattr(self.model, '__storm_primary__'):
+            return (self.get_single_primary_key()[0], )
+
+        return self.get_compound_primary_key()
+
+    def get_primary_key_names(self):
+        """Return one or more primary key name(s)
+        """
+        if hasattr(self.model, '__storm_primary__'):
+            return self.model.__storm_primary__
+        else:
+            primary_key = self.get_single_primary_key()
+            if primary_key is not None:
+                return (primary_key[1].name, )
+
+        return None
+
     def detect_primary_key(self):
         """
         Detect the primary key for the model and return it back with the
@@ -225,23 +271,18 @@ class PostgreSQL(CommonSQL):
         :raises: PostgreSQLMissingPrimaryKey on missing primary key
         """
 
-        if not hasattr(self.model, '__storm_primary__'):
-            for column in self.model._storm_columns.values():
-                if column.primary == 1:
-                    return 'CONSTRAINT {} PRIMARY KEY({})'.format(
-                        self.model.__storm_table__ + '_pkey',
-                        column.name
-                    )
+        primary_key = self.get_primary_key_names()
 
+        if primary_key is None:
             raise PostgreSQLMissingPrimaryKey(
                 'PostgreSQL based model {} is missing a primary '
                 'key column'.format(repr(self.model))
             )
 
-        return 'CONSTRAINT {} PRIMARY KEY {}'.format(
-            self.model.__storm_table__ + '_pkey',
-            str(self.model.__storm_primary__)
-        )
+        constraint = '{}_pkey'.format(self.model.__storm_table__)
+        pkeys = ', '.join(primary_key)
+
+        return 'CONSTRAINT {} PRIMARY KEY({})'.format(constraint, pkeys)
 
     def create_table(self):
         """Return the PostgreSQL syntax for create a table with this model
@@ -254,8 +295,16 @@ class PostgreSQL(CommonSQL):
                     'create_table_if_not_exists'))
             else self.model.__storm_table__
         ))
-        for i in range(len(self.model._storm_columns.keys())):
-            column = self.model._storm_columns.keys()[i]
+
+        primary_keys = self.get_primary_key_columns()
+
+        if primary_keys is not None:
+            for pk in primary_keys:
+                query += '  {},\n'.format(self.parse_column(pk))
+
+        for column, property_ in self.get_storm_columns():
+            if property_.primary == 1 or self.is_compound_key(property_.name):
+                continue
             if column.variable_class is not NativeEnumVariable:
                 query += '  {},\n'.format(self.parse_column(column))
             else:

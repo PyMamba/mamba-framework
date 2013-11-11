@@ -259,6 +259,10 @@ class MySQL(CommonSQL):
         return False
 
     def get_storm_columns(self):
+        """Returns an iterator over storm _columns
+
+        :returns: A (column, property) iterator on storm columns.
+        """
         return self.model._storm_columns.items()
 
     def get_single_primary_key(self):
@@ -274,6 +278,8 @@ class MySQL(CommonSQL):
             if property_.name in primary_key_names:
                 primary_key_list.append(column)
 
+        primary_key_list.sort()
+
         return primary_key_list
 
     def get_primary_key_columns(self):
@@ -285,10 +291,16 @@ class MySQL(CommonSQL):
         return self.get_compound_primary_key()
 
     def get_primary_key_names(self):
-        if not hasattr(self.model, '__storm_primary__'):
-            return (self.get_single_primary_key()[1].name, )
+        """Return one or more primary key name(s)
+        """
+        if hasattr(self.model, '__storm_primary__'):
+            return self.model.__storm_primary__
+        else:
+            primary_key = self.get_single_primary_key()
+            if primary_key is not None:
+                return (primary_key[1].name, )
 
-        return self.model.__storm_primary__
+        return None
 
     def detect_primary_key(self):
         """
@@ -309,11 +321,10 @@ class MySQL(CommonSQL):
                     repr(self.model)
                 )
             )
-        
+
         primary_key_str = ', '.join(['`{}`'.format(c) for c in primary_key])
 
         return 'PRIMARY KEY({})'.format(primary_key_str)
-
 
     def create_table(self):
         """Return the MySQL syntax for create a table with this model
@@ -327,7 +338,7 @@ class MySQL(CommonSQL):
         ))
 
         primary_keys = self.get_primary_key_columns()
-        
+
         if primary_keys is not None:
             for pk in primary_keys:
                 query += '  {},\n'.format(self.parse_column(pk))

@@ -451,10 +451,12 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModel()
         script = dummy.dump_table()
 
-        self.assertTrue('`id` int UNSIGNED AUTO_INCREMENT' in script.split(',')[0])
+        self.assertTrue(
+            '`id` int UNSIGNED AUTO_INCREMENT' in script.split(',')[0]
+        )
 
     @common_config(engine='mysql:')
-    def test_model_dump_table_with_mysql_compound_primary_key_are_firsts_field(self):
+    def test_model_dump_table_with_mysql_compound_pk_are_firsts_field(self):
 
         dummy = DummyModelSix()
         script = dummy.dump_table()
