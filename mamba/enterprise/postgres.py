@@ -213,52 +213,6 @@ class PostgreSQL(CommonSQL):
             '({})'.format(', '.join(["'{}'".format(i) for i in data]))
         )
 
-    def is_compound_key(self, name):
-        if hasattr(self.model, '__storm_primary__'):
-            return name in self.model.__storm_primary__
-
-        return False
-
-    def get_storm_columns(self):
-        return self.model._storm_columns.items()
-
-    def get_single_primary_key(self):
-        for column, property_ in self.get_storm_columns():
-            if property_.primary == 1:
-                return (column, property_)
-
-    def get_compound_primary_key(self):
-        primary_key_names = self.model.__storm_primary__
-        primary_key_list = []
-
-        for column, property_ in self.get_storm_columns():
-            if property_.name in primary_key_names:
-                primary_key_list.append(column)
-
-        primary_key_list.sort()
-
-        return primary_key_list
-
-    def get_primary_key_columns(self):
-        """Return one or more primary key column(s)
-        """
-        if not hasattr(self.model, '__storm_primary__'):
-            return (self.get_single_primary_key()[0], )
-
-        return self.get_compound_primary_key()
-
-    def get_primary_key_names(self):
-        """Return one or more primary key name(s)
-        """
-        if hasattr(self.model, '__storm_primary__'):
-            return self.model.__storm_primary__
-        else:
-            primary_key = self.get_single_primary_key()
-            if primary_key is not None:
-                return (primary_key[1].name, )
-
-        return None
-
     def detect_primary_key(self):
         """
         Detect the primary key for the model and return it back with the
