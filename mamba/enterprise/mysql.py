@@ -263,21 +263,18 @@ class MySQL(CommonSQL):
         :rtype: str
         :raises: MySQLMissingPrimaryKey on missing primary key
         """
+        primary_key = self.get_primary_key_names()
 
-        if not hasattr(self.model, '__storm_primary__'):
-            for column in self.model._storm_columns.values():
-                if column.primary == 1:
-                    return 'PRIMARY KEY(`{}`)'.format(column.name)
-
+        if primary_key is None:
             raise MySQLMissingPrimaryKey(
                 'MySQL based model {} is missing a primary key column'.format(
                     repr(self.model)
                 )
             )
 
-        return 'PRIMARY KEY {}'.format(
-            str(self.model.__storm_primary__).replace("'", "`")
-        )
+        primary_key_str = ', '.join(['`{}`'.format(c) for c in primary_key])
+
+        return 'PRIMARY KEY({})'.format(primary_key_str)
 
     def create_table(self):
         """Return the MySQL syntax for create a table with this model
@@ -290,8 +287,15 @@ class MySQL(CommonSQL):
             else '`' + self.model.__storm_table__ + '`'
         ))
 
-        for i in range(len(self.model._storm_columns.keys())):
-            column = self.model._storm_columns.keys()[i]
+        primary_keys = self.get_primary_key_columns()
+
+        if primary_keys is not None:
+            for pk in primary_keys:
+                query += '  {},\n'.format(self.parse_column(pk))
+
+        for column, property_ in self.get_storm_columns():
+            if property_.primary == 1 or self.is_compound_key(property_.name):
+                continue
             if column.variable_class is not NativeEnumVariable:
                 query += '  {},\n'.format(self.parse_column(column))
             else:

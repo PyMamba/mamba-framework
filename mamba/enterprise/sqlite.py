@@ -99,20 +99,16 @@ class SQLite(CommonSQL):
         :raises: SQLiteMissingPrimaryKey on missing primary key
         """
 
-        if not hasattr(self.model, '__storm_primary__'):
-            for column in self.model._storm_columns.values():
-                if column.primary == 1:
-                    return 'PRIMARY KEY({})'.format(column.name)
+        primary_key = self.get_primary_key_names()
 
+        if primary_key is None:
             raise SQLiteMissingPrimaryKey(
                 'SQLite based model {} is missing a primary key column'.format(
                     repr(self.model)
                 )
             )
 
-        return 'PRIMARY KEY {}'.format(
-            str(self.model.__storm_primary__)
-        )
+        return 'PRIMARY KEY({})'.format(', '.join(primary_key))
 
     def create_table(self):
         """Return the SQLite syntax for create a table with this model
@@ -125,8 +121,15 @@ class SQLite(CommonSQL):
             else self.model.__storm_table__
         ))
 
-        for i in range(len(self.model._storm_columns.keys())):
-            column = self.model._storm_columns.keys()[i]
+        primary_keys = self.get_primary_key_columns()
+
+        if primary_keys is not None:
+            for pk in primary_keys:
+                query += '  {},\n'.format(self.parse_column(pk))
+
+        for column, property_ in self.get_storm_columns():
+            if property_.primary == 1 or self.is_compound_key(property_.name):
+                continue
             query += '  {},\n'.format(self.parse_column(column))
 
         query += '  {}\n);\n'.format(self.detect_primary_key())

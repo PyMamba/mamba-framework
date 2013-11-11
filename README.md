@@ -2,7 +2,7 @@
 Mamba
 =====
 
-Mamba is a high-lvel Web Applications framework based on Twisted, Storm and Jinja2.
+Mamba is a high-level Web Applications framework based on Twisted, Storm and Jinja2.
 
 <table>
   <tr>
@@ -41,12 +41,12 @@ There are other requirements in order to run the test suite or build the documen
 Build Status
 ============
 
-Mamba uses [buildbot](http://buildbot.net/ "BuildBot") as CI solution, at the moment we provide build tests for the following systems and Python implementations:
+Mamba uses [buildbot](http://buildbot.net/ "BuildBot") as CI solution. At the moment we provide build tests for the following systems and Python implementations:
 
 Known platforms where Mamba runs
 --------------------------------
-There is no reason to believe that mamba does not run under Microsoft Windows or Mac OS X operating systems but
-this was not tested and we have no `buildbot slaves` under those operating systems to check it out (any contribution should be welcome).
+There is no reason to believe that Mamba does not run under Microsoft Windows or Mac OS X operating systems but
+this was not tested and we have no `buildbot slaves` under those operating systems to check it out (any contribution is welcome).
 
 <table>
   <tr>
@@ -123,12 +123,12 @@ this was not tested and we have no `buildbot slaves` under those operating syste
   </tr>
 </table>
 
-If you want to know more about the mamba's buildbot you can check our [BuildBot Waterfall](http://buildbot.pymamba.com).
+If you want to know more about Mamba's buildbot you can check our [BuildBot Waterfall](http://buildbot.pymamba.com).
 
 Project Documentation
 =====================
-All the project documentation can be built using `Sphinx` and `make html` in the docs directory.
-You can also refer to the [Mamba Web Site](http://www.pymamba.com) where you can find all the project documentation.
+All the project's documentation can be built using `Sphinx` and `make html` in the docs directory.
+You can also refer to the [Mamba Web Site](http://www.pymamba.com) where you can find all the project's documentation.
 
 Additional Notes
 ================
@@ -152,7 +152,7 @@ License
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-Have a look on [LICENSE](https://raw.github.com/DamnWidget/mamba/master/LICENSE) file to read the full license
+Have a look at the [LICENSE](https://raw.github.com/DamnWidget/mamba/master/LICENSE) file to read the full license
 
 ======
 Donate
