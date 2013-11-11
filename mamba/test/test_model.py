@@ -534,6 +534,25 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('id serial' in script)
 
     @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_primary_key_is_first_field(self):
+
+        dummy = DummyModel()
+        script = dummy.dump_table()
+
+        self.assertTrue(
+            'id serial' in script.split(',')[0]
+        )
+
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_compound_pk_are_firsts_field(self):
+
+        dummy = DummyModelSix()
+        script = dummy.dump_table()
+
+        self.assertTrue('id int' in script.split(',')[0])
+        self.assertTrue('second_id int' in script.split(',')[1])
+
+    @common_config(engine='postgres:')
     def test_model_dump_table_with_postgres_and_enum(self):
 
         dummy = DummyModelEnum()
@@ -668,11 +687,32 @@ class ModelTest(unittest.TestCase):
         adapter = self.get_adapter()
         self.assertEqual(adapter.drop_table(), 'DROP TABLE IF EXISTS dummy')
 
+    @common_config(engine='sqlite:')
+    def test_model_dump_table_with_sqlite_primary_key_is_first_field(self):
+
+        dummy = DummyModel()
+        script = dummy.dump_table()
+
+        self.assertTrue(
+            'id INTEGER' in script.split(',')[0]
+        )
+
+    @common_config(engine='sqlite:')
+    def test_model_dump_table_with_sqlite_compound_pk_are_firsts_field(self):
+
+        dummy = DummyModelSix()
+        script = dummy.dump_table()
+
+        self.assertTrue('id INTEGER' in script.split(',')[0])
+        self.assertTrue('second_id INTEGER' in script.split(',')[1])
+
     @common_config(existance=False)
     def test_sqlite_drop_table_no_existance(self):
 
         adapter = self.get_adapter()
         self.assertEqual(adapter.drop_table(), 'DROP TABLE dummy')
+
+
 
     @common_config(engine='mysql:')
     def test_mysql_drop_table(self):
