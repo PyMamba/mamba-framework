@@ -280,6 +280,11 @@ class Model(ModelProvider):
 
         return uri
 
+    def on_schema(self):
+        """Checks if Mamba should take care of this model.
+        """
+        return getattr(self, '__mamba_schema__', True)
+
     def get_adapter(self):
         """Get a valid adapter for this model
         """
