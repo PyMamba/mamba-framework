@@ -712,8 +712,6 @@ class ModelTest(unittest.TestCase):
         adapter = self.get_adapter()
         self.assertEqual(adapter.drop_table(), 'DROP TABLE dummy')
 
-
-
     @common_config(engine='mysql:')
     def test_mysql_drop_table(self):
 
@@ -939,7 +937,7 @@ class ModelManagerTest(unittest.TestCase):
 
         self.assertNotEqual(dummy, dummy2)
 
-    def test_lenght(self):
+    def test_length(self):
         self.assertEqual(self.mgr.length(), 0)
         self.load_manager()
         self.assertEqual(self.mgr.length(), 1)
@@ -1070,6 +1068,7 @@ class DummyModelFive(Model):
         (DummyModelFour.id, DummyModelFour.second_id)
     )
 
+
 class DummyModelSix(Model):
     """Dummy Model for testing purposes"""
 
@@ -1079,6 +1078,7 @@ class DummyModelSix(Model):
     second_id = Int()
     third_id = Int()
     fourth_id = Int()
+
 
 class DummyModelEnum(Model):
     """Dummy Model for testing purposes"""

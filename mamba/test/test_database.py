@@ -152,6 +152,29 @@ class DatabaseTest(unittest.TestCase):
         self.flushLoggedErrors()
         self.database.store().reset()
 
+    def test_database_not_dump_mamba_schema_false(self):
+        mgr = self.get_commons_for_dump()
+
+        mgr.load('../mamba/test/dummy_app/application/model/dummy.py')
+        mgr.load('../mamba/test/dummy_app/application/model/stubing.py')
+        mgr.load(
+            '../mamba/test/dummy_app/application/model/dummy_not_on_schema.py'
+
+        )
+        sql = self.database.dump(mgr)
+        self.assertTrue('CREATE TABLE IF NOT EXISTS dummy (\n' in sql)
+        self.assertTrue('  name VARCHAR NOT NULL,\n' in sql)
+        self.assertTrue('  id INTEGER,\n' in sql)
+        self.assertTrue('  PRIMARY KEY(id)\n);\n\n' in sql)
+        self.assertTrue('CREATE TABLE IF NOT EXISTS stubing (\n' in sql)
+        self.assertTrue('  id INTEGER,\n' in sql)
+        self.assertTrue('  name VARCHAR NOT NULL,\n' in sql)
+        self.assertTrue('  PRIMARY KEY(id)\n);\n' in sql)
+        self.assertTrue('dummy_not_on_schema' not in sql)
+
+        self.flushLoggedErrors()
+        self.database.store().reset()
+
     def test_database_dump_data(self):
         config.Database('../mamba/test/dummy_app/config/database.json')
         mgr = self.get_commons_for_dump()
@@ -182,6 +205,21 @@ class DatabaseTest(unittest.TestCase):
         self.assertTrue('CREATE TABLE dummy (' in sql)
         self.assertTrue('CREATE TABLE stubing (' in sql)
 
+    def test_database_reset_mamba_schema_false(self):
+        mgr = self.get_commons_for_dump()
+
+        mgr.load('../mamba/test/dummy_app/application/model/dummy.py')
+        mgr.load('../mamba/test/dummy_app/application/model/stubing.py')
+        mgr.load(
+            '../mamba/test/dummy_app/application/model/dummy_not_on_schema.py'
+        )
+        sql = self.database.reset(mgr)
+        self.assertTrue('DROP TABLE IF EXISTS dummy;' in sql)
+        self.assertTrue('DROP TABLE IF EXISTS stubing;' in sql)
+        self.assertTrue('CREATE TABLE dummy (' in sql)
+        self.assertTrue('CREATE TABLE stubing (' in sql)
+        self.assertTrue('dummy_not_on_schema' not in sql)
+
     def test_database_reset_mysql(self):
         cfg = config.Database('../mamba/test/dummy_app/config/database.json')
         cfg.uri = cfg.uri.replace('sqlite:', 'mysql://a:b@c/d')
@@ -195,6 +233,23 @@ class DatabaseTest(unittest.TestCase):
         self.assertTrue('CREATE TABLE `dummy` (' in sql)
         self.assertTrue('CREATE TABLE `stubing` (' in sql)
 
+    def test_database_reset_mysql_mamba_schema_false(self):
+        cfg = config.Database('../mamba/test/dummy_app/config/database.json')
+        cfg.uri = cfg.uri.replace('sqlite:', 'mysql://a:b@c/d')
+        mgr = self.get_commons_for_dump()
+
+        mgr.load('../mamba/test/dummy_app/application/model/dummy.py')
+        mgr.load('../mamba/test/dummy_app/application/model/stubing.py')
+        mgr.load(
+            '../mamba/test/dummy_app/application/model/dummy_not_on_schema.py'
+        )
+        sql = self.database.reset(mgr)
+        self.assertTrue('DROP TABLE IF EXISTS `dummy`;' in sql)
+        self.assertTrue('DROP TABLE IF EXISTS `stubing`;' in sql)
+        self.assertTrue('CREATE TABLE `dummy` (' in sql)
+        self.assertTrue('CREATE TABLE `stubing` (' in sql)
+        self.assertTrue('dummy_not_on_schema' not in sql)
+
     def test_database_reset_postgres(self):
         cfg = config.Database('../mamba/test/dummy_app/config/database.json')
         cfg.uri = cfg.uri.replace('sqlite:', 'postgres://a:b@c/d')
@@ -207,6 +262,20 @@ class DatabaseTest(unittest.TestCase):
         self.assertTrue('DROP TABLE IF EXISTS stubing RESTRICT;' in sql)
         self.assertTrue('CREATE TABLE dummy (' in sql)
         self.assertTrue('CREATE TABLE stubing (' in sql)
+
+    def test_database_reset_postgres_mamba_schema_false(self):
+        cfg = config.Database('../mamba/test/dummy_app/config/database.json')
+        cfg.uri = cfg.uri.replace('sqlite:', 'postgres://a:b@c/d')
+        mgr = self.get_commons_for_dump()
+
+        mgr.load('../mamba/test/dummy_app/application/model/dummy.py')
+        mgr.load('../mamba/test/dummy_app/application/model/stubing.py')
+        sql = self.database.reset(mgr)
+        self.assertTrue('DROP TABLE IF EXISTS dummy RESTRICT;' in sql)
+        self.assertTrue('DROP TABLE IF EXISTS stubing RESTRICT;' in sql)
+        self.assertTrue('CREATE TABLE dummy (' in sql)
+        self.assertTrue('CREATE TABLE stubing (' in sql)
+        self.assertTrue('dummy_not_on_schema' not in sql)
 
 
 class NativeEnumTest(unittest.TestCase):

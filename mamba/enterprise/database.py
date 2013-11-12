@@ -166,6 +166,8 @@ class Database(object):
         if full is False:
             sql.append('')
             for model in model_manager.get_models().values():
+                if not model.get('object').on_schema():
+                    continue
                 if self.backend == 'postgres':
                     references.append(model.get('object').dump_references())
 
@@ -173,6 +175,10 @@ class Database(object):
         else:
             for model in model_manager.get_models().values():
                 model_object = model.get('object')
+
+                if not model_object.on_schema():
+                    continue
+
                 sql.append('--')
                 sql.append('-- Table structure for table {}'.format(
                     model_object.__storm_table__
@@ -217,6 +223,7 @@ class Database(object):
         sql = [
             model.get('object').dump_table()
             for model in model_manager.get_models().values()
+            if model.get('object').on_schema() is True
         ]
 
         return '\n'.join(sql)
