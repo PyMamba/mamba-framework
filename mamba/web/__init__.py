@@ -6,6 +6,8 @@ __doc__ = '''
 Subpackage containing the modules that implement web stuff for projects
 '''
 
+from twisted.web.server import NOT_DONE_YET
+
 from page import Page
 from routing import Router, Route, RouteDispatcher
 from script import Script, ScriptManager, ScriptError
@@ -29,5 +31,6 @@ __all__ = [
     'Script', 'ScriptManager', 'ScriptError',
     'Stylesheet', 'StylesheetError', 'InvalidFile', 'InvalidFileExtension',
     'FileDontExists',
-    'WebSocketError', 'WebSocketProtocol', 'WebSocketFactory'
+    'WebSocketError', 'WebSocketProtocol', 'WebSocketFactory',
+    'NOT_DONE_YET'
 ]
