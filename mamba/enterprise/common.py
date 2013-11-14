@@ -31,7 +31,7 @@ class NativeEnumVariable(variables.Variable):
 
         return self._parse_common(value)
 
-    def pase_get(self, value, to_db):
+    def parse_get(self, value, to_db):
         if to_db:
             return value
 
@@ -70,7 +70,7 @@ class NativeEnum(properties.SimpleProperty):
 
 
 class CommonSQL(object):
-    """I do nothing, my only purpse is serve as dummy object
+    """I do nothing, my only purpose is serve as dummy object
     """
 
     def insert_data(self):

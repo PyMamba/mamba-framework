@@ -284,6 +284,8 @@ class PropertyColumnMambaPatch(Column):
         # here we go!
         self.size = variable_kwargs.pop('size', Undef)
         self.unsigned = variable_kwargs.pop('unsigned', False)
+        self.index = variable_kwargs.pop('index', False)
+        self.unique = variable_kwargs.pop('unique', False)
         self.auto_increment = variable_kwargs.pop('auto_increment', False)
         self.array = variable_kwargs.pop('array', None)
 

@@ -465,6 +465,42 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('`second_id` int' in script.split(',')[1])
 
     @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_unique_field(self):
+
+        dummy = DummyModelSeven()
+        script = dummy.dump_table()
+
+        self.assertTrue('`id` int' in script)
+        self.assertTrue('`second_id` int' in script)
+
+        self.assertTrue('UNIQUE `second_id_uni` (`second_id`)' in script)
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_index_field(self):
+
+        dummy = DummyModelSeven()
+        script = dummy.dump_table()
+
+        self.assertTrue('`id` int' in script)
+        self.assertTrue('`second_id` int' in script)
+
+        self.assertTrue('INDEX `third_id_ind` (`third_id`)' in script)
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_unique_has_no_index_field(self):
+
+        dummy = DummyModelSeven()
+        script = dummy.dump_table()
+        print script
+
+        self.assertTrue('`id` int' in script)
+        self.assertTrue('`second_id` int' in script)
+
+        self.assertTrue('UNIQUE `fourth_id_uni` (`fourth_id`)' in script)
+
+        self.assertTrue('INDEX `fourth_id_ind` (`fourth_id`)' not in script)
+
+    @common_config(engine='mysql:')
     def test_model_dump_table_with_mysql_and_native_enum(self):
         dummy = DummyModelNativeEnum()
         script = dummy.dump_table()
@@ -771,7 +807,7 @@ class ModelTest(unittest.TestCase):
         adapter = self.get_adapter(reference=True)
         script = adapter.create_table()
 
-        self.assertTrue('INDEX `dummy_two_ind` (`remote_id`)' in script)
+        self.assertTrue('INDEX `dummy_two_fk_ind` (`remote_id`)' in script)
         self.assertTrue(
             'FOREIGN KEY (`remote_id`) REFERENCES `dummy_two`(`id`)' in script
         )
@@ -784,7 +820,7 @@ class ModelTest(unittest.TestCase):
         script = adapter.create_table()
 
         self.assertTrue(
-            ('INDEX `dummy_four_ind` '
+            ('INDEX `dummy_four_fk_ind` '
                 '(`remote_id`, `remote_second_id`)') in script
         )
         self.assertTrue(
@@ -1078,6 +1114,16 @@ class DummyModelSix(Model):
     second_id = Int()
     third_id = Int()
     fourth_id = Int()
+
+
+class DummyModelSeven(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_seven'
+    id = Int(primary=True)
+    second_id = Int(unique=True)
+    third_id = Int(index=True)
+    fourth_id = Int(index=True, unique=True)
 
 
 class DummyModelEnum(Model):
