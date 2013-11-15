@@ -132,8 +132,8 @@ class MySQL(CommonSQL):
 
         compound_query = []
         for compound in compound_indexes:
-            query = 'UNIQUE `{}`_cp_ind ({})'.format(
-                compound[0],
+            query = 'INDEX `{}_ind` ({})'.format(
+                '_'.join(compound),
                 ', '.join(['`{}`'.format(c) for c in compound])
             )
 
@@ -186,8 +186,8 @@ class MySQL(CommonSQL):
 
         compound_query = []
         for compound in compound_uniques:
-            query = 'UNIQUE `{}`_cp_uni ({})'.format(
-                compound[0],
+            query = 'UNIQUE `{}_uni` ({})'.format(
+                '_'.join(compound),
                 ', '.join(['`{}`'.format(c) for c in compound])
             )
 

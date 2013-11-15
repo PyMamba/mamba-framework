@@ -131,6 +131,7 @@ class Database(object):
         """
 
         references = []
+        indexes = []
         sql = [
             '--',
             '-- Mamba SQL dump {}'.format(version.short()),
@@ -171,6 +172,9 @@ class Database(object):
                 if self.backend == 'postgres':
                     references.append(model.get('object').dump_references())
 
+                    if model.get('object').dump_indexes():
+                        indexes.append(model.get('object').dump_indexes())
+
                 sql += [model.get('object').dump_table() + '\n']
         else:
             for model in model_manager.get_models().values():
@@ -194,6 +198,7 @@ class Database(object):
 
                 if self.backend == 'postgres':
                     references.append(model_object.dump_references())
+                    indexes.append(model_object.dump_indexes())
 
         if self.backend == 'mysql':
             sql += [
@@ -205,6 +210,9 @@ class Database(object):
 
         for reference in references:
             sql.append(reference)
+
+        for index in indexes:
+            sql.append(index)
 
         return '\n'.join(sql)
 

@@ -476,6 +476,34 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('UNIQUE `second_id_uni` (`second_id`)' in script)
 
     @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_compound_unique_field(self):
+
+        dummy = DummyModelEight()
+        script = dummy.dump_table()
+
+        self.assertTrue('`id` int' in script)
+        self.assertTrue('`second_id` int' in script)
+
+        self.assertTrue((
+            'UNIQUE `second_id_third_id_uni` '
+            '(`second_id`, `third_id`)') in script
+        )
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_compound_index_field(self):
+
+        dummy = DummyModelEight()
+        script = dummy.dump_table()
+
+        self.assertTrue('`id` int' in script)
+        self.assertTrue('`second_id` int' in script)
+
+        self.assertTrue((
+            'INDEX `second_id_fourth_id_ind` '
+            '(`second_id`, `fourth_id`)') in script
+        )
+
+    @common_config(engine='mysql:')
     def test_model_dump_table_with_mysql_index_field(self):
 
         dummy = DummyModelSeven()
@@ -491,7 +519,6 @@ class ModelTest(unittest.TestCase):
 
         dummy = DummyModelSeven()
         script = dummy.dump_table()
-        print script
 
         self.assertTrue('`id` int' in script)
         self.assertTrue('`second_id` int' in script)
@@ -568,6 +595,57 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('PRIMARY KEY(id)' in script)
         self.assertTrue('name varchar(64)' in script)
         self.assertTrue('id serial' in script)
+
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_unique_field(self):
+
+        dummy = DummyModelSeven()
+        script = dummy.dump_table()
+
+        self.assertTrue('id int' in script)
+        self.assertTrue('second_id int UNIQUE' in script)
+        self.assertTrue('fourth_id int UNIQUE' in script)
+
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_index_field(self):
+
+        dummy = DummyModelSeven()
+        script = dummy.dump_table() + dummy.dump_indexes()
+
+        self.assertTrue('id int' in script)
+        self.assertTrue('second_id int UNIQUE' in script)
+        self.assertTrue('fourth_id int UNIQUE' in script)
+
+        self.assertTrue(
+            'CREATE INDEX third_id_ind ON dummy_seven (third_id)' in script
+        )
+
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_compound_index_field(self):
+
+        dummy = DummyModelEight()
+        script = dummy.dump_table() + dummy.dump_indexes()
+
+        self.assertTrue('id int' in script)
+        self.assertTrue('second_id int,' in script)
+        self.assertTrue('fourth_id int,' in script)
+        self.assertTrue('UNIQUE (second_id, third_id)' in script)
+
+        self.assertTrue((
+            'CREATE INDEX second_id_fourth_id_ind ON'
+            ' dummy_eight (second_id, fourth_id)') in script
+        )
+
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_compound_unique_field(self):
+
+        dummy = DummyModelEight()
+        script = dummy.dump_table()
+
+        self.assertTrue('id int' in script)
+        self.assertTrue('second_id int,' in script)
+        self.assertTrue('fourth_id int,' in script)
+        self.assertTrue('UNIQUE (second_id, third_id)' in script)
 
     @common_config(engine='postgres:')
     def test_model_dump_table_with_postgres_primary_key_is_first_field(self):
@@ -1124,6 +1202,18 @@ class DummyModelSeven(Model):
     second_id = Int(unique=True)
     third_id = Int(index=True)
     fourth_id = Int(index=True, unique=True)
+
+
+class DummyModelEight(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_eight'
+    __mamba_unique__ = (('second_id', 'third_id'), )
+    __mamba_index__ = (('second_id', 'fourth_id'), )
+    id = Int(primary=True)
+    second_id = Int()
+    third_id = Int()
+    fourth_id = Int()
 
 
 class DummyModelEnum(Model):
