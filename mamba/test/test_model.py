@@ -629,7 +629,6 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('id int' in script)
         self.assertTrue('second_id int,' in script)
         self.assertTrue('fourth_id int,' in script)
-        self.assertTrue('UNIQUE (second_id, third_id)' in script)
 
         self.assertTrue((
             'CREATE INDEX second_id_fourth_id_ind ON'
@@ -810,6 +809,56 @@ class ModelTest(unittest.TestCase):
         self.assertTrue(
             'id INTEGER' in script.split(',')[0]
         )
+
+    @common_config(engine='sqlite:')
+    def test_model_dump_table_with_sqlite_unique_field(self):
+
+        dummy = DummyModelSeven()
+        script = dummy.dump_table()
+
+        self.assertTrue('id INTEGER,' in script)
+        self.assertTrue('second_id INTEGER UNIQUE,' in script)
+        self.assertTrue('fourth_id INTEGER UNIQUE,' in script)
+
+    @common_config(engine='sqlite:')
+    def test_model_dump_table_with_sqlite_index_field(self):
+
+        dummy = DummyModelSeven()
+        script = dummy.dump_table() + dummy.dump_indexes()
+
+        self.assertTrue('id INTEGER' in script)
+        self.assertTrue('second_id INTEGER UNIQUE' in script)
+        self.assertTrue('fourth_id INTEGER UNIQUE' in script)
+
+        self.assertTrue(
+            'CREATE INDEX third_id_ind ON dummy_seven (third_id)' in script
+        )
+
+    @common_config(engine='sqlite:')
+    def test_model_dump_table_with_sqlite_compound_index_field(self):
+
+        dummy = DummyModelEight()
+        script = dummy.dump_table() + dummy.dump_indexes()
+
+        self.assertTrue('id INTEGER' in script)
+        self.assertTrue('second_id INTEGER,' in script)
+        self.assertTrue('fourth_id INTEGER,' in script)
+
+        self.assertTrue((
+            'CREATE INDEX second_id_fourth_id_ind ON'
+            ' dummy_eight (second_id, fourth_id)') in script
+        )
+
+    @common_config(engine='sqlite:')
+    def test_model_dump_table_with_sqlite_compound_unique_field(self):
+
+        dummy = DummyModelEight()
+        script = dummy.dump_table()
+
+        self.assertTrue('id INTEGER,' in script)
+        self.assertTrue('second_id INTEGER,' in script)
+        self.assertTrue('fourth_id INTEGER,' in script)
+        self.assertTrue('UNIQUE (second_id, third_id)' in script)
 
     @common_config(engine='sqlite:')
     def test_model_dump_table_with_sqlite_compound_pk_are_firsts_field(self):

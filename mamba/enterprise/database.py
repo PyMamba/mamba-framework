@@ -172,6 +172,7 @@ class Database(object):
                 if self.backend == 'postgres':
                     references.append(model.get('object').dump_references())
 
+                if self.backend in ('postgres', 'sqlite'):
                     if model.get('object').dump_indexes():
                         indexes.append(model.get('object').dump_indexes())
 
@@ -198,7 +199,10 @@ class Database(object):
 
                 if self.backend == 'postgres':
                     references.append(model_object.dump_references())
-                    indexes.append(model_object.dump_indexes())
+
+                if self.backend in ('postgres', 'sqlite'):
+                    if model.get('object').dump_indexes():
+                        indexes.append(model_object.dump_indexes())
 
         if self.backend == 'mysql':
             sql += [

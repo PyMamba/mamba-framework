@@ -441,8 +441,11 @@ class PostgreSQL(CommonSQL):
         return 'enum_' + column._detect_attr_name(self.model.__class__)
 
     def _unique(self, column):
-        """Get the argument unique of the column.
-        In PostgreSQL, UNIQUE is a column parameter.
+        """
+        Parse the column to check if a column is Unique
+
+        :param column: the Storm properties column to parse
+        :type column: :class:`storm.properties.Property`
         """
         wrap_column = column._get_column(self.model.__class__)
         return ' UNIQUE' if wrap_column.unique else ''

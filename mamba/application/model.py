@@ -270,7 +270,7 @@ class Model(ModelProvider):
         return adapter.parse_references()
 
     def dump_indexes(self):
-        """Dump SQL indexes (used by PostgreSQL)
+        """Dump SQL indexes (used by PostgreSQL and SQLite)
         """
 
         adapter = self.get_adapter()

@@ -68,7 +68,7 @@ class MambaSQLAdapter:
         return self.original.parse_references()
 
     def parse_indexes(self):
-        """Return the SQL syntax to create indexes for PostgreSQL
+        """Return the SQL syntax to create indexes for PostgreSQL or SQLite
         """
 
         return self.original.parse_indexes()
