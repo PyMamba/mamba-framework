@@ -426,6 +426,7 @@ class RouteDispatcher(object):
             if 'application/json' in ct:
                 try:
                     data_json = json.loads(data)
+                    self.request.json = data_json
                 except ValueError:
                     data_json = {}
 
@@ -443,9 +444,10 @@ class RouteDispatcher(object):
                 if key not in route.callback_args:
                     route.callback_args.update({key: value[0]})
         elif data_json:
-            for key, value in data_json.iteritems():
-                if key not in route.callback_args:
-                    route.callback_args.update({key: value})
+            if type(data_json) is dict:
+                for key, value in data_json.iteritems():
+                    if key not in route.callback_args:
+                        route.callback_args.update({key: value})
 
     def __repr__(self):
         return 'RouteDispatcher({})'.format(', '.join(
