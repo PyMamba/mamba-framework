@@ -196,13 +196,12 @@ class CommonSQL(object):
 
     def get_compound_primary_key(self):
         primary_key_names = self.model.__storm_primary__
-        primary_key_list = []
+        primary_key_list = range(len(primary_key_names))
 
         for column, property_ in self.get_storm_columns():
             if property_.name in primary_key_names:
-                primary_key_list.append(column)
-
-        primary_key_list.sort()
+                position = primary_key_names.index(property_.name)
+                primary_key_list[position] = column
 
         return primary_key_list
 
