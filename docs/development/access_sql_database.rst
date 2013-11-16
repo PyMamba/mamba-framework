@@ -194,6 +194,14 @@ Some times we need to truncate all tables in our database, normally because deve
 
 The above command will reset all your data without any question, please, be careful with this command.
 
+Interactive Shell
+=================
+
+In case you want to login into the database interactive shell, you can just issue this command and Mamba will take care of authentication
+details for you::
+
+    $ mamba-admin sql shell
+
 Future plans
 ============
 

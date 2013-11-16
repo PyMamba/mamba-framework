@@ -9,9 +9,11 @@ import sys
 from cStringIO import StringIO
 
 from twisted.python import usage
+from storm.uri import URI
 
 from mamba import copyright
 from mamba.scripts import commons
+from mamba.scripts import _shell
 from mamba._version import versions
 from mamba.enterprise import database
 from mamba.test.test_model import DummyThreadPool
@@ -234,6 +236,16 @@ class SqlDumpOptions(usage.Options):
         sys.exit(0)
 
 
+class SqlShellOptions(usage.Options):
+    """Sql Shell options for mamba-admin tool
+    """
+    def opt_version(self):
+        """Show version information and exit
+        """
+        show_version()
+        sys.exit(0)
+
+
 class SqlResetOptions(usage.Options):
     """Sql Reset options for mamba-admin tool
     """
@@ -269,7 +281,9 @@ class SqlOptions(usage.Options):
             'Dump a database to the local file system'],
         ['reset', None, SqlResetOptions,
             'Reset the application database (this means all the data should '
-            'be deleted. Use with caution)']
+            'be deleted. Use with caution)'],
+        ['shell', None, SqlShellOptions,
+            'Fire an interactive shell using your database URI']
 
     ]
 
@@ -305,6 +319,8 @@ class Sql(object):
             self._handle_dump_command()
         elif self.options.subCommand == 'reset':
             self._handle_reset_command()
+        elif self.options.subCommand == 'shell':
+            self._handle_shell_command()
         else:
             print(self.options)
 
@@ -358,13 +374,27 @@ class Sql(object):
         }
 
         try:
-            print('Wriing databse config file...'.ljust(73), end='')
+            print('Writing databse config file...'.ljust(73), end='')
             mamba_services.config.Database.write(options)
             print('[{}]'.format(darkgreen('Ok')))
         except OSError:
             print('[{}]'.format(darkred('Fail')))
             raise
             sys.exit(-1)
+
+    def _handle_shell_command(self, mgr=None):
+        """This runs the shell for each of the databases supported.
+        """
+        mamba_services, db = self._prepare_model_db()
+
+        uri = URI(mamba_services.config.Database().uri)
+
+        if db.backend == 'mysql':
+            _shell.mysql(uri)
+        elif db.backend == 'postgres':
+            _shell.postgres(uri)
+        elif db.backend == 'sqlite':
+            _shell.sqlite(uri)
 
     def _handle_create_command(self, mgr=None):
         """Take care of SQL creation scripts using the application model
