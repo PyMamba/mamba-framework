@@ -175,6 +175,11 @@ And for create it in live in the database (this may delete all your previous dat
 
     $ mamba-admin sql create -l
 
+.. note::
+
+    If you don't want Mamba to generate SQL for a specific(s) table(s), you can set the class-level attribute ``__mamba_schema__`` to ``False``.
+    This will also prevent Mamba of dropping this table or truncating its data when you use the ``reset`` command.
+
 
 Dump SQL data from the database
 ===============================
