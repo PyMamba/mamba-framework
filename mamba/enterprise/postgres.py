@@ -220,7 +220,7 @@ class PostgreSQL(CommonSQL):
                 )
                 references.append(query)
 
-        return ', '.join(references)
+        return ''.join(references)
 
     def parse_column(self, column):
         """
