@@ -11,8 +11,8 @@
 """
 
 # it's better if you remove this star import and import just what you
-# really need from storm.properties, storm.references and storm.expr
-from storm.locals import *
+# really need from mamba.enterprise
+from mamba.enterprise import *
 
 from mamba.application import model
 

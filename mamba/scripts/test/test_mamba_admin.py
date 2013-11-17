@@ -695,13 +695,13 @@ class ModelScriptTest(unittest.TestCase):
             '    :synopsis: None\n\n'
             '.. modelauthor:: {author} <{author}@localhost>\n'
             '"""\n\n'
-            '# is better if you remove this star import and import just what '
-            'you\n# really need from storm.properties, storm.references and '
-            'storm.expr\nfrom storm.locals import *\n\nfrom mamba.application '
-            'import model\n\n\n'
+            '# it\'s better if you remove this star import and import just '
+            'what you\n# really need from mamba.enterprise\n'
+            'from mamba.enterprise import *\n\n'
+            'from mamba.application import model\n\n\n'
             'class TestModel(model.Model):\n    '
-            '"""\n    None\n    """\n\n    __storm_table__ = \'test\'\n\n    '
-            'id = Int(primary=True, unsigned=True)\n\n\n'.format(
+            '"""\n    None\n    """\n\n    __storm_table__ = \'test\'\n    \n'
+            '    id = Int(primary=True, unsigned=True)\n\n\n'.format(
                 author=getpass.getuser(), year=datetime.datetime.now().year
             )
         )
