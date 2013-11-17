@@ -41,6 +41,8 @@ class ModelOptions(usage.Options):
 
     optFlags = [
         ['dump', 'd', 'Dump the configuration to the standard output'],
+        ['noschema', 's',
+            'Set this if you don\'t want Mamba manaing this at schema-level'],
         ['noquestions', 'n',
             'When this option is set, mamba will NOT ask anything to the user '
             'that means ot will overwrite any other version of the model file '
@@ -191,9 +193,15 @@ class Model(object):
         else:
             classname = self.options.subOptions.opts['classname']
 
+        if self.options.subOptions.opts['noschema'] != 0:
+            class_properties = '__mamba_schema__ = False\n'
+        else:
+            class_properties = ''
+
         args = {
             'model_table': self.options.subOptions.opts['model_table'],
             'model_properties': self.model_properties,
+            'class_properties': class_properties,
             'year': datetime.datetime.now().year,
             'model_name': self.options.subOptions.opts['name'],
             'platforms': self.options.subOptions.opts['platforms'],
@@ -201,7 +209,7 @@ class Model(object):
             'author': self.options.subOptions.opts['author'],
             'author_email': self.options.subOptions.opts['email'],
             'synopsis': self.options.subOptions.opts['description'],
-            'model_class': classname
+            'model_class': classname,
         }
 
         return controller_template.safe_substitute(**args)
