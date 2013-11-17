@@ -926,6 +926,72 @@ class ModelTest(unittest.TestCase):
             "DROP TABLE IF EXISTS dummy CASCADE"
         )
 
+    @common_config(engine='sqlite:')
+    def test_sqlite_reference_generates_foreign_keys(self):
+
+        adapter = self.get_adapter(reference=True)
+        script = adapter.create_table()
+
+        self.assertTrue(
+            'FOREIGN KEY(remote_id) REFERENCES dummy_two(id)' in script)
+        self.assertTrue('ON DELETE NO ACTION ON UPDATE NO ACTION' in script)
+
+    @common_config(engine='sqlite:')
+    def test_sqlite_reference_generates_compound_foreign_keys(self):
+
+        adapter = self.get_adapter(reference=True, compound=True)
+        script = adapter.create_table()
+        self.assertTrue(
+            'FOREIGN KEY(remote_id, remote_second_id) REFERENCES '
+            'dummy_four(id, second_id) ON DELETE NO ACTION ON UPDATE NO ACTION'
+            in script
+        )
+
+    @common_config(engine='sqlite:')
+    def test_sqlite_rerefence_in_restrict(self):
+
+        DummyModelThree.__on_delete__ = 'RESTRICT'
+        DummyModelThree.__on_update__ = 'RESTRICT'
+
+        adapter = self.get_adapter(reference=True)
+        script = adapter.create_table()
+
+        self.assertTrue('ON DELETE RESTRICT ON UPDATE RESTRICT' in script)
+
+    @common_config(engine='sqlite:')
+    def test_sqlite_rerefence_in_cascade(self):
+
+        DummyModelThree.__on_delete__ = 'CASCADE'
+        DummyModelThree.__on_update__ = 'CASCADE'
+
+        adapter = self.get_adapter(reference=True)
+        script = adapter.create_table()
+
+        self.assertTrue('ON DELETE CASCADE ON UPDATE CASCADE' in script)
+
+    @common_config(engine='sqlite:')
+    def test_sqlite_rerefence_set_null(self):
+
+        DummyModelThree.__on_delete__ = 'SET NULL'
+        DummyModelThree.__on_update__ = 'SET NULL'
+
+        adapter = self.get_adapter(reference=True)
+        script = adapter.create_table()
+
+        self.assertTrue('ON DELETE SET NULL ON UPDATE SET NULL' in script)
+
+    @common_config(engine='sqlite:')
+    def test_sqlite_rerefence_set_default(self):
+
+        DummyModelThree.__on_delete__ = 'SET DEFAULT'
+        DummyModelThree.__on_update__ = 'SET DEFAULT'
+
+        adapter = self.get_adapter(reference=True)
+        script = adapter.create_table()
+
+        self.assertTrue(
+            'ON DELETE SET DEFAULT ON UPDATE SET DEFAULT' in script)
+
     @common_config(engine='mysql:')
     def test_mysql_reference_generates_foreign_keys(self):
 

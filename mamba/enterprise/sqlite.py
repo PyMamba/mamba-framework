@@ -11,8 +11,12 @@
 
 """
 
+import inspect
+from sqlite3 import sqlite_version_info
+
 from storm import properties
 from twisted.python import components
+from storm.references import Reference
 from singledispatch import singledispatch
 
 from mamba.utils import config
@@ -62,9 +66,69 @@ class SQLite(CommonSQL):
         self.parse = singledispatch(self.parse)
 
     def parse_references(self):
-        """Just skips because SQLite doen't know anything about foreign keys
         """
-        pass
+        Get all the :class:`storm.references.Reference` and create foreign
+        keys for the SQL creation script if the SQLite version is equal or
+        better than 3.6.19
+
+        If we are using references we should define our classes in a
+        correct way. If we have a model that have a relation of many
+        to one, we should define a many-to-one Storm relationship in
+        that object but we must create a one-to-many relation in the
+        related model. That means if for example we have a `Customer`
+        model and an `Adress` model and we need to relate them as
+        one Customer may have several addresses (in a real application
+        address may have a relation many-to-many with customer) we
+        should define a relation with `Reference` from Address to
+        Customer using a property like `Address.customer_id` and a
+        `ReferenceSet` from `Customer` to `Address` like:
+
+            Customer.addresses = ReferenceSet(Customer.id, Address.id)
+
+        In the case of many-to-many relationships, mamba create the
+        relation tables by itself so you dont need to take care of
+        yourself.
+
+        .. warning:
+
+            If you need a many2many relation you
+            should add a Reference for the compound primary key in the
+            relation table
+        """
+
+        if sqlite_version_info < (3, 6, 19):
+            return
+
+        references = []
+        for attr in inspect.classify_class_attrs(self.model.__class__):
+
+            if type(attr.object) is Reference:
+                relation = attr.object._relation
+                keys = {
+                    'remote': relation.remote_key,
+                    'local': relation.local_key
+                }
+                remote_table = relation.remote_cls.__storm_table__
+
+                localkeys = ', '.join(k.name for k in keys.get('local'))
+                remotekeys = ', '.join(k.name for k in keys.get('remote'))
+
+                query = (
+                    'FOREIGN KEY({localkeys}) REFERENCES {remote_table}('
+                    '{remotekeys}) ON DELETE {on_delete} ON UPDATE '
+                    '{on_update}'.format(
+                        remote_table=remote_table,
+                        localkeys=localkeys,
+                        remotekeys=remotekeys,
+                        on_update=getattr(
+                            self.model, '__on_update__', 'NO ACTION'),
+                        on_delete=getattr(
+                            self.model, '__on_delete__', 'NO ACTION')
+                    )
+                )
+                references.append(query)
+
+        return ', '.join(references)
 
     def parse_column(self, column):
         """
@@ -230,7 +294,12 @@ class SQLite(CommonSQL):
             '{},'.format(self.detect_uniques()) if self.detect_uniques()
             else ''
         )
-        query += '  {}\n);\n'.format(self.detect_primary_key())
+        query += '  {}'.format(self.detect_primary_key())
+        query += '{}'.format(
+            ', {}\n'.format(self.parse_references()) if self.parse_references()
+            else ''
+        )
+        query += '\n);\n'
 
         if (config.Database().create_table_behaviours.get('drop_table')
             and not config.Database().create_table_behaviours.get(

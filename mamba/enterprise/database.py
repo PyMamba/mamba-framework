@@ -13,6 +13,7 @@
 
 import datetime
 import functools
+from sqlite3 import sqlite_version_info
 
 from storm import properties
 from storm.database import URI
@@ -61,7 +62,11 @@ class Database(object):
         if not self.zstorm_configured:
             provideUtility(global_zstorm, IZStorm)
             zstorm = getUtility(IZStorm)
-            zstorm.set_default_uri('mamba', config.Database().uri)
+            if self.backend == 'sqlite' and sqlite_version_info >= (3, 6, 19):
+                uri = '{}?foreign_keys=1'.format(config.Database().uri)
+            else:
+                uri = config.Database().uri
+            zstorm.set_default_uri('mamba', uri)
 
         SQLite.register()
         MySQL.register()
