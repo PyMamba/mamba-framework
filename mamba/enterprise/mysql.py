@@ -108,9 +108,8 @@ class MySQL(CommonSQL):
 
             if index:
                 query = 'INDEX `{}_ind` (`{}`)'.format(
-                    property_.name,
-                    property_.name
-                    )
+                    property_.name, property_.name
+                )
                 single_query.append(query)
 
         return single_query
@@ -351,6 +350,9 @@ class MySQL(CommonSQL):
 
     def parse_enum(self, column):
         """Parse an enum column
+
+        :param column: the Storm properties column to parse
+        :type column: :class:`storm.properties`
         """
 
         if column.variable_class is not NativeEnumVariable:

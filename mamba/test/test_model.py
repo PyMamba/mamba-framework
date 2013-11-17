@@ -429,8 +429,8 @@ class ModelTest(unittest.TestCase):
 
         self.assertTrue('CREATE TABLE IF NOT EXISTS dummy' in script)
         self.assertTrue('PRIMARY KEY(id)' in script)
-        self.assertTrue('name VARCHAR' in script)
-        self.assertTrue('id INTEGER' in script)
+        self.assertTrue('name varchar' in script)
+        self.assertTrue('id integer' in script)
 
     @common_config(engine='mysql:')
     def test_model_dump_table_with_mysql(self):
@@ -806,9 +806,7 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModel()
         script = dummy.dump_table()
 
-        self.assertTrue(
-            'id INTEGER' in script.split(',')[0]
-        )
+        self.assertTrue('id integer' in script.split(',')[0])
 
     @common_config(engine='sqlite:')
     def test_model_dump_table_with_sqlite_unique_field(self):
@@ -816,9 +814,9 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelSeven()
         script = dummy.dump_table()
 
-        self.assertTrue('id INTEGER,' in script)
-        self.assertTrue('second_id INTEGER UNIQUE,' in script)
-        self.assertTrue('fourth_id INTEGER UNIQUE,' in script)
+        self.assertTrue('id integer,' in script)
+        self.assertTrue('second_id integer UNIQUE,' in script)
+        self.assertTrue('fourth_id integer UNIQUE,' in script)
 
     @common_config(engine='sqlite:')
     def test_model_dump_table_with_sqlite_index_field(self):
@@ -826,9 +824,9 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelSeven()
         script = dummy.dump_table() + dummy.dump_indexes()
 
-        self.assertTrue('id INTEGER' in script)
-        self.assertTrue('second_id INTEGER UNIQUE' in script)
-        self.assertTrue('fourth_id INTEGER UNIQUE' in script)
+        self.assertTrue('id integer' in script)
+        self.assertTrue('second_id integer UNIQUE' in script)
+        self.assertTrue('fourth_id integer UNIQUE' in script)
 
         self.assertTrue(
             'CREATE INDEX third_id_ind ON dummy_seven (third_id)' in script
@@ -840,9 +838,9 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelEight()
         script = dummy.dump_table() + dummy.dump_indexes()
 
-        self.assertTrue('id INTEGER' in script)
-        self.assertTrue('second_id INTEGER,' in script)
-        self.assertTrue('fourth_id INTEGER,' in script)
+        self.assertTrue('id integer' in script)
+        self.assertTrue('second_id integer,' in script)
+        self.assertTrue('fourth_id integer,' in script)
 
         self.assertTrue((
             'CREATE INDEX second_id_fourth_id_ind ON'
@@ -855,9 +853,9 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelEight()
         script = dummy.dump_table()
 
-        self.assertTrue('id INTEGER,' in script)
-        self.assertTrue('second_id INTEGER,' in script)
-        self.assertTrue('fourth_id INTEGER,' in script)
+        self.assertTrue('id integer,' in script)
+        self.assertTrue('second_id integer,' in script)
+        self.assertTrue('fourth_id integer,' in script)
         self.assertTrue('UNIQUE (second_id, third_id)' in script)
 
     @common_config(engine='sqlite:')
@@ -866,8 +864,8 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelSix()
         script = dummy.dump_table()
 
-        self.assertTrue('id INTEGER' in script.split(',')[0])
-        self.assertTrue('second_id INTEGER' in script.split(',')[1])
+        self.assertTrue('id integer' in script.split(',')[0])
+        self.assertTrue('second_id integer' in script.split(',')[1])
 
     @common_config(existance=False)
     def test_sqlite_drop_table_no_existance(self):

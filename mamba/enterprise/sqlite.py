@@ -11,13 +11,14 @@
 
 """
 
-from storm import variables
+from storm import properties
 from twisted.python import components
+from singledispatch import singledispatch
 
 from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL
 from mamba.core.adapters import MambaSQLAdapter
-from mamba.enterprise.common import CommonSQL, NativeEnumVariable
+from mamba.enterprise.common import CommonSQL, NativeEnum
 
 
 class SQLiteError(Exception):
@@ -41,6 +42,25 @@ class SQLite(CommonSQL):
     def __init__(self, model):
         self.model = model
 
+        self._columns_mapping = {
+            properties.Enum: 'integer',
+            properties.Bool: 'integer',
+            properties.Int: 'integer',
+            properties.RawStr: 'blob',
+            properties.Pickle: 'blob',
+            properties.JSON: 'blob',
+            properties.Float: 'real',
+            properties.Unicode: 'varchar',
+            properties.DateVariable: 'varchar',
+            properties.DateTimeVariable: 'varchar',
+            properties.TimeVariable: 'varchar',
+            properties.TimeDeltaVariable: 'varchar',
+            properties.ListVariable: 'varchar',
+            NativeEnum: 'varchar'
+        }
+
+        self.parse = singledispatch(self.parse)
+
     def parse_references(self):
         """Just skips because SQLite doen't know anything about foreign keys
         """
@@ -52,43 +72,26 @@ class SQLite(CommonSQL):
         if we pass a column of type :class:`storm.variable.IntVariable` with
         name `amount` we get back:
 
-            amount INTEGER
+            amount integer
 
         :param column: the Storm properties column to parse
         :type column: :class:`storm.properties`
         """
 
-        if (column.variable_class is variables.UnicodeVariable
-                or column.variable_class is variables.DecimalVariable
-                or column.variable_class is variables.DateVariable
-                or column.variable_class is variables.DateTimeVariable
-                or column.variable_class is variables.TimeVariable
-                or column.variable_class is variables.TimeDeltaVariable
-                or column.variable_class is variables.ListVariable):
-            column_type = 'VARCHAR'
-        elif (column.variable_class is variables.IntVariable
-                or column.variable_class is variables.BoolVariable
-                or column.variable_class is variables.EnumVariable):
-            column_type = 'INTEGER'
-        elif column.variable_class is NativeEnumVariable:
-            column_type = 'VARCHAR'
-        elif column.variable_class is variables.FloatVariable:
-            column_type = 'REAL'
-        elif (column.variable_class is variables.RawStrVariable
-                or column.variable_class is variables.PickleVariable
-                or column.variable_class is variables.JSONVariable):
-            column_type = 'BLOB'
-        else:
-            column_type = 'TEXT'  # fallback to TEXT (tears are comming)
-
         column_type = '{} {}{}{}{}'.format(
             column._detect_attr_name(self.model.__class__),
-            column_type,
+            self.parse(column),
             self._null_allowed(column),
             self._default(column),
-            self._unique(column),
+            self._unique(column)
         )
         return column_type
+
+    def parse(self, column):
+        """This funciton is just a fallback to text (tears are comming)
+        """
+
+        return self._columns_mapping.get(column.__class__, 'text')
 
     def _unique(self, column):
         """
