@@ -58,9 +58,6 @@ this was not tested and we have no `buildbot slaves` under those operating syste
       <strong>Ubuntu 10.04</strong>
     </td>
     <td align="center">
-      <strong>Gentoo</strong>
-    </td>
-    <td align="center">
       <strong>Gentoo 2013</strong>
     </td>
     <td align="center">
@@ -81,9 +78,6 @@ this was not tested and we have no `buildbot slaves` under those operating syste
         <img align="center" src="http://buildbot.pymamba.com/png?builder=Ubuntu-10.04-CPython2.7.4&size=large" />
     </td>
     <td align="center">
-        <img align="center" src="http://buildbot.pymamba.com/png?builder=Gentoo-x86_64_python2.7&size=large" />
-    </td>
-    <td align="center">
         <img align="center" src="http://buildbot.pymamba.com/png?builder=Gentoo-2013-Python2.7&size=large" />
     </td>
     <td align="center">
@@ -102,9 +96,6 @@ this was not tested and we have no `buildbot slaves` under those operating syste
     </td>
     <td align="center">
         <img src="http://buildbot.pymamba.com/png?builder=Ubuntu-10.04-pypy1.9&size=large" />
-    </td>
-    <td align="center">
-        <img align="Center" src="http://buildbot.pymamba.com/png?builder=Gentoo-x86_64_pypy&size=large" />
     </td>
     <td align="center">
         <img align="center" src="http://buildbot.pymamba.com/png?builder=Gentoo-2013-PyPy2.0&size=large" />
