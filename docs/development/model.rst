@@ -81,7 +81,7 @@ In mamba we define our databse schema just creating new Python classes like the 
 +------------+-----------+---------------------+-------------------------------------------+-------------------------------------------------------+
 | Enum       | str       | INT                 | INT                                       | INT                                                   |
 +------------+-----------+---------------------+-------------------------------------------+-------------------------------------------------------+
-| NativeEnum | str, int  | INTEGER             | ENUM                                      | ENUM                                                  |
+| NativeEnum | str       | VARCHAR             | ENUM                                      | ENUM                                                  |
 +------------+-----------+---------------------+-------------------------------------------+-------------------------------------------------------+
 
 All those properties except **NativeEnum** are common |storm| properties. The **NativeEnum** property class is just a convenience class that we created to support legacy already designed databases that uses native Enum types and the scenario where we can't change this because the databse is used by other applications that we can't modify to switch to Int type.
@@ -266,8 +266,22 @@ Finally the delete operation is not different, we just call the ``delete`` metho
 
 .. note::
 
-    In mamba **CRUD** operations are executed as |twisted| transactions in the model object if we don't override the methods to have a different behaviour.
+    In mamba **CRUD** operations are executed as |twisted| transactions in the model object if we don't override the methods to have a different behaviour or add the ``async=False`` named param to the call.
 
+
+Other model operations for your convenience
+-------------------------------------------
+
+Mamba supports the ``find`` and ``all`` methods at class level (you don't need an instance of the model) for your convenience.
+
+.. sourcecode:: python
+
+    >>> [c.name for c in Customer.all()]
+    >>> [c.name for c in Customer.find(Customer.age >= 30)]
+
+.. note::
+
+    The find method accepts the same arguments and options than the regular |storm| ``store.find`` but you don't have to define the model to look for as is automatically added for you.
 
 
 References
