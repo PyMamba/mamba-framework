@@ -53,6 +53,11 @@ Features
         customer = Customer.find(name=u'Pam', async=False)
         customer = Customer().read(1, async=False)
 * Added several unit tests
+* Added support for FOREIGN KEYS in SQLite version >= 3.6.19
+* Added UNIQUE and INDEX for single and compound SQLite, MySQL/MariaDB and PostgreSQL fields
+* Added support to dont add some tables to the generated schema using ``__mamba_schema__ = False`` option
+* Added ``--noschema`` option in ``mamba-admin sql`` command line options
+* Added shell to ``mamba-admin sql`` command line tool
 
 
 Bug Fixes
@@ -77,6 +82,7 @@ Bug Fixes
 * decimal.Decimal values are now corretly serialized on :class:`~mamba.utils.Converter`
 * Fixed some model tests that weren't working
 * When `mamba-admin sql configure` ran in a validmamba app directory that does not contains a `config` directory, it crashed, fixed
+* Fixed bug in PostgreSQL schema generation for FOREIGN KEYS
 
 
 Changes
@@ -95,6 +101,7 @@ Changes
 * The ``@route`` decorator now accepts lists and tuples defining more than one HTTP method where to register the given action
 * The :class:`~mamba.enterprise.common.NativeEnum` type has been reimplemented as a ``set``. Implementation provided by Patrick O'Loughlin @paddyoloughlin on GitHub
 * Added new find and afind methods to model object to find in syncrhonous or asynchronous way respectively
+* Storm.locals imports moved to ``mamba.entreprise`` package
 
 Documentation
 -------------
