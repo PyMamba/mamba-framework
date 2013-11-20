@@ -93,6 +93,118 @@ class MySQL(CommonSQL):
             # component already registered
             pass
 
+    def get_single_indexes(self):
+        """Goes through every field looking for an index parameter.
+        """
+        single_query = []
+        for column, property_ in self.get_storm_columns():
+            wrap_column = column._get_column(self.model.__class__)
+            index = wrap_column.index
+            unique = wrap_column.unique
+
+            if unique:
+                # We already have a index for this column, so move on.
+                continue
+
+            if index:
+                query = 'INDEX `{}_ind` (`{}`)'.format(
+                    property_.name, property_.name
+                )
+                single_query.append(query)
+
+        return single_query
+
+    def get_compound_indexes(self):
+        """Checks if the model has an __mamba_index__ property.
+        If so, we create a compound index with the fields specified inside
+        __mamba_index__. This variable must be a tuple of tuples.
+
+        Example: (
+            ('field1', 'field2'),
+            ('field3', 'field4', 'field5')
+        )
+        """
+        compound_indexes = getattr(self.model, '__mamba_index__', None)
+
+        if compound_indexes is None:
+            return []
+
+        compound_query = []
+        for compound in compound_indexes:
+            query = 'INDEX `{}_ind` ({})'.format(
+                '_'.join(compound),
+                ', '.join(['`{}`'.format(c) for c in compound])
+            )
+
+            compound_query.append(query)
+
+        return compound_query
+
+    def detect_indexes(self):
+        """
+        Go through all the fields defined in the model and create a index
+        constraint if the index property is set on the field.
+        """
+        indexes = []
+        indexes.extend(self.get_single_indexes())
+        indexes.extend(self.get_compound_indexes())
+
+        return ', '.join(indexes)
+
+    def get_single_uniques(self):
+        """Goes through every field looking for an unique parameter.
+        """
+        single_query = []
+        for column, property_ in self.get_storm_columns():
+            wrap_column = column._get_column(self.model.__class__)
+            unique = wrap_column.unique
+
+            if unique:
+                query = 'UNIQUE `{}_uni` (`{}`)'.format(
+                    property_.name,
+                    property_.name
+                    )
+                single_query.append(query)
+
+        return single_query
+
+    def get_compound_uniques(self):
+        """Checks if the model has an __mamba_unique__ property.
+        If so, we create a compound unique with the fields specified inside
+        __mamba_unique__. This variable must be a tuple of tuples.
+
+        Example: (
+            ('field1', 'field2'),
+            ('field3', 'field4', 'field5')
+        )
+        """
+        compound_uniques = getattr(self.model, '__mamba_unique__', None)
+
+        if compound_uniques is None:
+            return []
+
+        compound_query = []
+        for compound in compound_uniques:
+            query = 'UNIQUE `{}_uni` ({})'.format(
+                '_'.join(compound),
+                ', '.join(['`{}`'.format(c) for c in compound])
+            )
+
+            compound_query.append(query)
+
+        return compound_query
+
+    def detect_uniques(self):
+        """
+        Go through all the fields defined in the model and create a unique
+        key if the unique property is set on the field.
+        """
+        uniques = []
+        uniques.extend(self.get_single_uniques())
+        uniques.extend(self.get_compound_uniques())
+
+        return ', '.join(uniques)
+
     def parse_references(self):
         """
         Get all the :class:`storm.references.Reference` and create foreign
@@ -147,7 +259,7 @@ class MySQL(CommonSQL):
                 )
 
                 query = (
-                    'INDEX `{remote_table}_ind` ({localkeys}), FOREIGN KEY '
+                    'INDEX `{remote_table}_fk_ind` ({localkeys}), FOREIGN KEY '
                     '({localkeys}) REFERENCES `{remote_table}`({remotekeys}) '
                     'ON UPDATE {on_update} ON DELETE {on_delete}'.format(
                         remote_table=remote_table,
@@ -238,6 +350,9 @@ class MySQL(CommonSQL):
 
     def parse_enum(self, column):
         """Parse an enum column
+
+        :param column: the Storm properties column to parse
+        :type column: :class:`storm.properties`
         """
 
         if column.variable_class is not NativeEnumVariable:
@@ -302,6 +417,14 @@ class MySQL(CommonSQL):
                 query += '  {},\n'.format(self.parse_enum(column))
 
         query += '  {}\n'.format(self.detect_primary_key())
+        query += '{}'.format(
+            ', {}'.format(self.detect_uniques()) if self.detect_uniques()
+            else ''
+        )
+        query += '{}'.format(
+            ', {}'.format(self.detect_indexes()) if self.detect_indexes()
+            else ''
+        )
         query += '{}'.format(
             ', {}'.format(self.parse_references()) if self.parse_references()
             else ''

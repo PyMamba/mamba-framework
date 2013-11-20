@@ -103,6 +103,62 @@ class PostgreSQL(CommonSQL):
         self.parse.register(properties.List, self._parse_list)
         self.parse.register(NativeEnum, self._parse_enum)
 
+    def parse_indexes(self):
+        indexes = []
+        indexes.extend(self.get_single_indexes())
+        indexes.extend(self.get_compound_indexes())
+
+        return '\n'.join(indexes)
+
+    def get_single_indexes(self):
+        indexes = []
+
+        for column, property_ in self.get_storm_columns():
+            wrap_column = column._get_column(self.model.__class__)
+
+            if not wrap_column.index:
+                continue
+
+            query = (
+                'CREATE INDEX {}_ind ON {} ({});'.format(
+                    property_.name,
+                    self.model.__storm_table__,
+                    property_.name
+                )
+            )
+            indexes.append(query)
+
+        return indexes
+
+    def get_compound_indexes(self):
+        """Checks if the model has an __mamba_index__ property.
+        If so, we create a compound index with the fields specified inside
+        __mamba_index__. This variable must be a tuple of tuples.
+
+        Example: (
+            ('field1', 'field2'),
+            ('field3', 'field4', 'field5')
+        )
+        """
+        compound_indexes = getattr(self.model, '__mamba_index__', None)
+
+        if compound_indexes is None:
+            return []
+
+        compound_query = []
+        for compound in compound_indexes:
+            query = (
+                'CREATE INDEX {}_ind ON {} ({});'.format(
+                    '_'.join(compound),
+                    self.model.__storm_table__,
+                    ', '.join([c for c in compound])
+                )
+            )
+
+            compound_query.append(query)
+
+        return compound_query
+
     def parse_references(self):
         """
         Get all the :class:`storm.references.Reference` and create foreign
@@ -164,7 +220,7 @@ class PostgreSQL(CommonSQL):
                 )
                 references.append(query)
 
-        return ', '.join(references)
+        return ''.join(references)
 
     def parse_column(self, column):
         """
@@ -178,11 +234,12 @@ class PostgreSQL(CommonSQL):
         :type column: :class:`storm.properties`
         """
 
-        column_type = '{} {}{}{}'.format(
+        column_type = '{} {}{}{}{}'.format(
             column._detect_attr_name(self.model.__class__),
             self.parse(column),
             self._null_allowed(column),
-            self._default(column)
+            self._default(column),
+            self._unique(column)
         )
         return column_type
 
@@ -265,6 +322,10 @@ class PostgreSQL(CommonSQL):
                 enums.append(self.parse_enum(column))
                 query += '  {},\n'.format(self.parse_column(column))
 
+        query += '{}'.format(
+            '{},'.format(self.detect_uniques()) if self.detect_uniques()
+            else ''
+        )
         query += '  {}\n);\n'.format(self.detect_primary_key())
         query = ''.join(enums) + query
 
@@ -378,6 +439,40 @@ class PostgreSQL(CommonSQL):
         """Simple parse enum helper function
         """
         return 'enum_' + column._detect_attr_name(self.model.__class__)
+
+    def _unique(self, column):
+        """
+        Parse the column to check if a column is Unique
+
+        :param column: the Storm properties column to parse
+        :type column: :class:`storm.properties.Property`
+        """
+        wrap_column = column._get_column(self.model.__class__)
+        return ' UNIQUE' if wrap_column.unique else ''
+
+    def detect_uniques(self):
+        """Checks if the model has an __mamba_unique__ property.
+        If so, we create a compound unique with the fields specified inside
+        __mamba_unique__. This variable must be a tuple of tuples.
+
+        Example: (
+            ('field1', 'field2'),
+            ('field3', 'field4', 'field5')
+        )
+        """
+        compound_uniques = getattr(self.model, '__mamba_unique__', None)
+
+        if compound_uniques is None:
+            return ''
+
+        compound_query = []
+        for compound in compound_uniques:
+            query = 'UNIQUE ({})'.format(
+                ', '.join(compound)
+            )
+            compound_query.append(query)
+
+        return ', '.join(compound_query)
 
     def _default(self, column):
         """

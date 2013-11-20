@@ -81,7 +81,7 @@ In mamba we define our databse schema just creating new Python classes like the 
 +------------+-----------+---------------------+-------------------------------------------+-------------------------------------------------------+
 | Enum       | str       | INT                 | INT                                       | INT                                                   |
 +------------+-----------+---------------------+-------------------------------------------+-------------------------------------------------------+
-| NativeEnum | str, int  | INTEGER             | ENUM                                      | ENUM                                                  |
+| NativeEnum | str       | VARCHAR             | ENUM                                      | ENUM                                                  |
 +------------+-----------+---------------------+-------------------------------------------+-------------------------------------------------------+
 
 All those properties except **NativeEnum** are common |storm| properties. The **NativeEnum** property class is just a convenience class that we created to support legacy already designed databases that uses native Enum types and the scenario where we can't change this because the databse is used by other applications that we can't modify to switch to Int type.
@@ -117,6 +117,8 @@ All the options that we can pass to the constructor are optional and some of the
         b. the attribute name as a string
         c. the value that is being set
     * **size** (*special behaviour*): The behaviour of this attribute differs depending on the database backend and the type of the property we are settings but mainly it sets the size of the field we are defining in the database.
+    * **index**: If set to true, Mamba will create an index for that field.
+    * **unique**: If set to true, Mamba will create an unique index for that field.
     * **unsigned** (*special behaviour*): The ``unsigned`` parameter has different behaviours depending in the database engine and the type as well. Basically, it sets a numeric field as unsigned, this is mainly used with *MySQL/MariaDB* database engines.
     * **auto_increment** (*special behaviour*): As his friends above, this parameters has special meanings depending on database engine and field type. It's used to set a column as auto increment (mainly primary keys id's).
     * **array** (*postgres only*): This parameter is used to define an array type for PostgreSQL databases. PostgreSQL allows table columnns to be defined as variable-length multidimensional arrays
@@ -137,6 +139,42 @@ To define a compound key we have to use the ``__storm_primary__`` class-level at
 
         __storm_table__ = 'dummy'
         __storm_primary__ = 'id', 'status'
+
+        id = Int()
+        status = Int()
+
+Defining an unique for multiple columns
+----------------------
+
+To define a compound unique we have to use the ``__mamba_unique__`` class-level attribute and set it as a tuple of tuples with the names of the properties that composes the compound unique index:
+
+.. sourcecode:: python
+
+    from storm.locals import Int
+    from mamba.application import model
+
+    class Dummy(model.Model):
+
+        __storm_table__ = 'dummy'
+        __mamba_unique__ = (('id', 'status'), )
+
+        id = Int()
+        status = Int()
+
+Defining an index for multiple columns
+----------------------
+
+To define a compound index we have to use the ``__mamba_index__`` class-level attribute and set it as a tuple of tuples with the names of the properties that composes the compound index:
+
+.. sourcecode:: python
+
+    from storm.locals import Int
+    from mamba.application import model
+
+    class Dummy(model.Model):
+
+        __storm_table__ = 'dummy'
+        __mamba_index__ = (('id', 'status'), )
 
         id = Int()
         status = Int()
@@ -228,8 +266,22 @@ Finally the delete operation is not different, we just call the ``delete`` metho
 
 .. note::
 
-    In mamba **CRUD** operations are executed as |twisted| transactions in the model object if we don't override the methods to have a different behaviour.
+    In mamba **CRUD** operations are executed as |twisted| transactions in the model object if we don't override the methods to have a different behaviour or add the ``async=False`` named param to the call.
 
+
+Other model operations for your convenience
+-------------------------------------------
+
+Mamba supports the ``find`` and ``all`` methods at class level (you don't need an instance of the model) for your convenience.
+
+.. sourcecode:: python
+
+    >>> [c.name for c in Customer.all()]
+    >>> [c.name for c in Customer.find(Customer.age >= 30)]
+
+.. note::
+
+    The find method accepts the same arguments and options than the regular |storm| ``store.find`` but you don't have to define the model to look for as is automatically added for you.
 
 
 References

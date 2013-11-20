@@ -429,8 +429,8 @@ class ModelTest(unittest.TestCase):
 
         self.assertTrue('CREATE TABLE IF NOT EXISTS dummy' in script)
         self.assertTrue('PRIMARY KEY(id)' in script)
-        self.assertTrue('name VARCHAR' in script)
-        self.assertTrue('id INTEGER' in script)
+        self.assertTrue('name varchar' in script)
+        self.assertTrue('id integer' in script)
 
     @common_config(engine='mysql:')
     def test_model_dump_table_with_mysql(self):
@@ -463,6 +463,69 @@ class ModelTest(unittest.TestCase):
 
         self.assertTrue('`id` int' in script.split(',')[0])
         self.assertTrue('`second_id` int' in script.split(',')[1])
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_unique_field(self):
+
+        dummy = DummyModelSeven()
+        script = dummy.dump_table()
+
+        self.assertTrue('`id` int' in script)
+        self.assertTrue('`second_id` int' in script)
+
+        self.assertTrue('UNIQUE `second_id_uni` (`second_id`)' in script)
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_compound_unique_field(self):
+
+        dummy = DummyModelEight()
+        script = dummy.dump_table()
+
+        self.assertTrue('`id` int' in script)
+        self.assertTrue('`second_id` int' in script)
+
+        self.assertTrue((
+            'UNIQUE `second_id_third_id_uni` '
+            '(`second_id`, `third_id`)') in script
+        )
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_compound_index_field(self):
+
+        dummy = DummyModelEight()
+        script = dummy.dump_table()
+
+        self.assertTrue('`id` int' in script)
+        self.assertTrue('`second_id` int' in script)
+
+        self.assertTrue((
+            'INDEX `second_id_fourth_id_ind` '
+            '(`second_id`, `fourth_id`)') in script
+        )
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_index_field(self):
+
+        dummy = DummyModelSeven()
+        script = dummy.dump_table()
+
+        self.assertTrue('`id` int' in script)
+        self.assertTrue('`second_id` int' in script)
+
+        self.assertTrue('INDEX `third_id_ind` (`third_id`)' in script)
+
+    @common_config(engine='mysql:')
+    def test_model_dump_table_with_mysql_unique_has_no_index_field(self):
+
+        dummy = DummyModelSeven()
+        script = dummy.dump_table()
+
+        self.assertTrue('`id` int' in script)
+        self.assertTrue('`second_id` int' in script)
+
+        self.assertTrue('UNIQUE `fourth_id_uni` (`fourth_id`)' in script)
+
+        self.assertTrue('INDEX `fourth_id_ind` (`fourth_id`)' not in script)
 
     @common_config(engine='mysql:')
     def test_model_dump_table_with_mysql_and_native_enum(self):
@@ -532,6 +595,56 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('PRIMARY KEY(id)' in script)
         self.assertTrue('name varchar(64)' in script)
         self.assertTrue('id serial' in script)
+
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_unique_field(self):
+
+        dummy = DummyModelSeven()
+        script = dummy.dump_table()
+
+        self.assertTrue('id int' in script)
+        self.assertTrue('second_id int UNIQUE' in script)
+        self.assertTrue('fourth_id int UNIQUE' in script)
+
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_index_field(self):
+
+        dummy = DummyModelSeven()
+        script = dummy.dump_table() + dummy.dump_indexes()
+
+        self.assertTrue('id int' in script)
+        self.assertTrue('second_id int UNIQUE' in script)
+        self.assertTrue('fourth_id int UNIQUE' in script)
+
+        self.assertTrue(
+            'CREATE INDEX third_id_ind ON dummy_seven (third_id)' in script
+        )
+
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_compound_index_field(self):
+
+        dummy = DummyModelEight()
+        script = dummy.dump_table() + dummy.dump_indexes()
+
+        self.assertTrue('id int' in script)
+        self.assertTrue('second_id int,' in script)
+        self.assertTrue('fourth_id int,' in script)
+
+        self.assertTrue((
+            'CREATE INDEX second_id_fourth_id_ind ON'
+            ' dummy_eight (second_id, fourth_id)') in script
+        )
+
+    @common_config(engine='postgres:')
+    def test_model_dump_table_with_postgres_compound_unique_field(self):
+
+        dummy = DummyModelEight()
+        script = dummy.dump_table()
+
+        self.assertTrue('id int' in script)
+        self.assertTrue('second_id int,' in script)
+        self.assertTrue('fourth_id int,' in script)
+        self.assertTrue('UNIQUE (second_id, third_id)' in script)
 
     @common_config(engine='postgres:')
     def test_model_dump_table_with_postgres_primary_key_is_first_field(self):
@@ -693,9 +806,57 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModel()
         script = dummy.dump_table()
 
+        self.assertTrue('id integer' in script.split(',')[0])
+
+    @common_config(engine='sqlite:')
+    def test_model_dump_table_with_sqlite_unique_field(self):
+
+        dummy = DummyModelSeven()
+        script = dummy.dump_table()
+
+        self.assertTrue('id integer,' in script)
+        self.assertTrue('second_id integer UNIQUE,' in script)
+        self.assertTrue('fourth_id integer UNIQUE,' in script)
+
+    @common_config(engine='sqlite:')
+    def test_model_dump_table_with_sqlite_index_field(self):
+
+        dummy = DummyModelSeven()
+        script = dummy.dump_table() + dummy.dump_indexes()
+
+        self.assertTrue('id integer' in script)
+        self.assertTrue('second_id integer UNIQUE' in script)
+        self.assertTrue('fourth_id integer UNIQUE' in script)
+
         self.assertTrue(
-            'id INTEGER' in script.split(',')[0]
+            'CREATE INDEX third_id_ind ON dummy_seven (third_id)' in script
         )
+
+    @common_config(engine='sqlite:')
+    def test_model_dump_table_with_sqlite_compound_index_field(self):
+
+        dummy = DummyModelEight()
+        script = dummy.dump_table() + dummy.dump_indexes()
+
+        self.assertTrue('id integer' in script)
+        self.assertTrue('second_id integer,' in script)
+        self.assertTrue('fourth_id integer,' in script)
+
+        self.assertTrue((
+            'CREATE INDEX second_id_fourth_id_ind ON'
+            ' dummy_eight (second_id, fourth_id)') in script
+        )
+
+    @common_config(engine='sqlite:')
+    def test_model_dump_table_with_sqlite_compound_unique_field(self):
+
+        dummy = DummyModelEight()
+        script = dummy.dump_table()
+
+        self.assertTrue('id integer,' in script)
+        self.assertTrue('second_id integer,' in script)
+        self.assertTrue('fourth_id integer,' in script)
+        self.assertTrue('UNIQUE (second_id, third_id)' in script)
 
     @common_config(engine='sqlite:')
     def test_model_dump_table_with_sqlite_compound_pk_are_firsts_field(self):
@@ -703,8 +864,8 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelSix()
         script = dummy.dump_table()
 
-        self.assertTrue('id INTEGER' in script.split(',')[0])
-        self.assertTrue('second_id INTEGER' in script.split(',')[1])
+        self.assertTrue('id integer' in script.split(',')[0])
+        self.assertTrue('second_id integer' in script.split(',')[1])
 
     @common_config(existance=False)
     def test_sqlite_drop_table_no_existance(self):
@@ -765,13 +926,79 @@ class ModelTest(unittest.TestCase):
             "DROP TABLE IF EXISTS dummy CASCADE"
         )
 
+    @common_config(engine='sqlite:')
+    def test_sqlite_reference_generates_foreign_keys(self):
+
+        adapter = self.get_adapter(reference=True)
+        script = adapter.create_table()
+
+        self.assertTrue(
+            'FOREIGN KEY(remote_id) REFERENCES dummy_two(id)' in script)
+        self.assertTrue('ON DELETE NO ACTION ON UPDATE NO ACTION' in script)
+
+    @common_config(engine='sqlite:')
+    def test_sqlite_reference_generates_compound_foreign_keys(self):
+
+        adapter = self.get_adapter(reference=True, compound=True)
+        script = adapter.create_table()
+        self.assertTrue(
+            'FOREIGN KEY(remote_id, remote_second_id) REFERENCES '
+            'dummy_four(id, second_id) ON DELETE NO ACTION ON UPDATE NO ACTION'
+            in script
+        )
+
+    @common_config(engine='sqlite:')
+    def test_sqlite_rerefence_in_restrict(self):
+
+        DummyModelThree.__on_delete__ = 'RESTRICT'
+        DummyModelThree.__on_update__ = 'RESTRICT'
+
+        adapter = self.get_adapter(reference=True)
+        script = adapter.create_table()
+
+        self.assertTrue('ON DELETE RESTRICT ON UPDATE RESTRICT' in script)
+
+    @common_config(engine='sqlite:')
+    def test_sqlite_rerefence_in_cascade(self):
+
+        DummyModelThree.__on_delete__ = 'CASCADE'
+        DummyModelThree.__on_update__ = 'CASCADE'
+
+        adapter = self.get_adapter(reference=True)
+        script = adapter.create_table()
+
+        self.assertTrue('ON DELETE CASCADE ON UPDATE CASCADE' in script)
+
+    @common_config(engine='sqlite:')
+    def test_sqlite_rerefence_set_null(self):
+
+        DummyModelThree.__on_delete__ = 'SET NULL'
+        DummyModelThree.__on_update__ = 'SET NULL'
+
+        adapter = self.get_adapter(reference=True)
+        script = adapter.create_table()
+
+        self.assertTrue('ON DELETE SET NULL ON UPDATE SET NULL' in script)
+
+    @common_config(engine='sqlite:')
+    def test_sqlite_rerefence_set_default(self):
+
+        DummyModelThree.__on_delete__ = 'SET DEFAULT'
+        DummyModelThree.__on_update__ = 'SET DEFAULT'
+
+        adapter = self.get_adapter(reference=True)
+        script = adapter.create_table()
+
+        self.assertTrue(
+            'ON DELETE SET DEFAULT ON UPDATE SET DEFAULT' in script)
+
     @common_config(engine='mysql:')
     def test_mysql_reference_generates_foreign_keys(self):
 
         adapter = self.get_adapter(reference=True)
         script = adapter.create_table()
 
-        self.assertTrue('INDEX `dummy_two_ind` (`remote_id`)' in script)
+        self.assertTrue('INDEX `dummy_two_fk_ind` (`remote_id`)' in script)
         self.assertTrue(
             'FOREIGN KEY (`remote_id`) REFERENCES `dummy_two`(`id`)' in script
         )
@@ -784,7 +1011,7 @@ class ModelTest(unittest.TestCase):
         script = adapter.create_table()
 
         self.assertTrue(
-            ('INDEX `dummy_four_ind` '
+            ('INDEX `dummy_four_fk_ind` '
                 '(`remote_id`, `remote_second_id`)') in script
         )
         self.assertTrue(
@@ -1075,6 +1302,28 @@ class DummyModelSix(Model):
     __storm_table__ = 'dummy_six'
     __storm_primary__ = 'id', 'second_id'
     id = Int()
+    second_id = Int()
+    third_id = Int()
+    fourth_id = Int()
+
+
+class DummyModelSeven(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_seven'
+    id = Int(primary=True)
+    second_id = Int(unique=True)
+    third_id = Int(index=True)
+    fourth_id = Int(index=True, unique=True)
+
+
+class DummyModelEight(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_eight'
+    __mamba_unique__ = (('second_id', 'third_id'), )
+    __mamba_index__ = (('second_id', 'fourth_id'), )
+    id = Int(primary=True)
     second_id = Int()
     third_id = Int()
     fourth_id = Int()

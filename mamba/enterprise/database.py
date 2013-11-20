@@ -13,6 +13,7 @@
 
 import datetime
 import functools
+from sqlite3 import sqlite_version_info
 
 from storm import properties
 from storm.database import URI
@@ -61,7 +62,11 @@ class Database(object):
         if not self.zstorm_configured:
             provideUtility(global_zstorm, IZStorm)
             zstorm = getUtility(IZStorm)
-            zstorm.set_default_uri('mamba', config.Database().uri)
+            if self.backend == 'sqlite' and sqlite_version_info >= (3, 6, 19):
+                uri = '{}?foreign_keys=1'.format(config.Database().uri)
+            else:
+                uri = config.Database().uri
+            zstorm.set_default_uri('mamba', uri)
 
         SQLite.register()
         MySQL.register()
@@ -131,6 +136,7 @@ class Database(object):
         """
 
         references = []
+        indexes = []
         sql = [
             '--',
             '-- Mamba SQL dump {}'.format(version.short()),
@@ -171,6 +177,10 @@ class Database(object):
                 if self.backend == 'postgres':
                     references.append(model.get('object').dump_references())
 
+                if self.backend in ('postgres', 'sqlite'):
+                    if model.get('object').dump_indexes():
+                        indexes.append(model.get('object').dump_indexes())
+
                 sql += [model.get('object').dump_table() + '\n']
         else:
             for model in model_manager.get_models().values():
@@ -195,6 +205,10 @@ class Database(object):
                 if self.backend == 'postgres':
                     references.append(model_object.dump_references())
 
+                if self.backend in ('postgres', 'sqlite'):
+                    if model.get('object').dump_indexes():
+                        indexes.append(model_object.dump_indexes())
+
         if self.backend == 'mysql':
             sql += [
                 '--',
@@ -205,6 +219,9 @@ class Database(object):
 
         for reference in references:
             sql.append(reference)
+
+        for index in indexes:
+            sql.append(index)
 
         return '\n'.join(sql)
 
@@ -284,6 +301,8 @@ class PropertyColumnMambaPatch(Column):
         # here we go!
         self.size = variable_kwargs.pop('size', Undef)
         self.unsigned = variable_kwargs.pop('unsigned', False)
+        self.index = variable_kwargs.pop('index', False)
+        self.unique = variable_kwargs.pop('unique', False)
         self.auto_increment = variable_kwargs.pop('auto_increment', False)
         self.array = variable_kwargs.pop('array', None)
 

@@ -31,7 +31,7 @@ class NativeEnumVariable(variables.Variable):
 
         return self._parse_common(value)
 
-    def pase_get(self, value, to_db):
+    def parse_get(self, value, to_db):
         if to_db:
             return value
 
@@ -70,7 +70,7 @@ class NativeEnum(properties.SimpleProperty):
 
 
 class CommonSQL(object):
-    """I do nothing, my only purpse is serve as dummy object
+    """I do nothing, my only purpose is serve as dummy object
     """
 
     def insert_data(self):
@@ -112,6 +112,55 @@ class CommonSQL(object):
             ))
 
         return query
+
+    def is_compound_key(self, name):
+        """Detects if given name is part of a compound primary key
+
+        :returns: `bool`
+        """
+        if hasattr(self.model, '__storm_primary__'):
+            return name in self.model.__storm_primary__
+
+        return False
+
+    def get_storm_columns(self):
+        return self.model._storm_columns.items()
+
+    def get_single_primary_key(self):
+        for column, property_ in self.get_storm_columns():
+            if property_.primary == 1:
+                return (column, property_)
+
+    def get_compound_primary_key(self):
+        primary_key_names = self.model.__storm_primary__
+        primary_key_list = range(len(primary_key_names))
+
+        for column, property_ in self.get_storm_columns():
+            if property_.name in primary_key_names:
+                position = primary_key_names.index(property_.name)
+                primary_key_list[position] = column
+
+        return primary_key_list
+
+    def get_primary_key_columns(self):
+        """Return one or more primary key column(s)
+        """
+        if not hasattr(self.model, '__storm_primary__'):
+            return (self.get_single_primary_key()[0], )
+
+        return self.get_compound_primary_key()
+
+    def get_primary_key_names(self):
+        """Return one or more primary key name(s)
+        """
+        if hasattr(self.model, '__storm_primary__'):
+            return self.model.__storm_primary__
+        else:
+            primary_key = self.get_single_primary_key()
+            if primary_key is not None:
+                return (primary_key[1].name, )
+
+        return None
 
     def _parse_float(self, column):
         """
@@ -175,53 +224,3 @@ class CommonSQL(object):
             return ' default {}'.format(variable._value)
 
         return ''
-
-    def is_compound_key(self, name):
-        """Detects if given name is part of a compound primary key
-
-        :returns: `bool`
-        """
-        if hasattr(self.model, '__storm_primary__'):
-            return name in self.model.__storm_primary__
-
-        return False
-
-    def get_storm_columns(self):
-        return self.model._storm_columns.items()
-
-    def get_single_primary_key(self):
-        for column, property_ in self.get_storm_columns():
-            if property_.primary == 1:
-                return (column, property_)
-
-    def get_compound_primary_key(self):
-        primary_key_names = self.model.__storm_primary__
-        primary_key_list = []
-
-        for column, property_ in self.get_storm_columns():
-            if property_.name in primary_key_names:
-                primary_key_list.append(column)
-
-        primary_key_list.sort()
-
-        return primary_key_list
-
-    def get_primary_key_columns(self):
-        """Return one or more primary key column(s)
-        """
-        if not hasattr(self.model, '__storm_primary__'):
-            return (self.get_single_primary_key()[0], )
-
-        return self.get_compound_primary_key()
-
-    def get_primary_key_names(self):
-        """Return one or more primary key name(s)
-        """
-        if hasattr(self.model, '__storm_primary__'):
-            return self.model.__storm_primary__
-        else:
-            primary_key = self.get_single_primary_key()
-            if primary_key is not None:
-                return (primary_key[1].name, )
-
-        return None

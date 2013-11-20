@@ -175,6 +175,11 @@ And for create it in live in the database (this may delete all your previous dat
 
     $ mamba-admin sql create -l
 
+.. note::
+
+    If you don't want Mamba to generate SQL for a specific(s) table(s), you can set the class-level attribute ``__mamba_schema__`` to ``False``.
+    This will also prevent Mamba of dropping this table or truncating its data when you use the ``reset`` command.
+
 
 Dump SQL data from the database
 ===============================
@@ -194,6 +199,14 @@ Some times we need to truncate all tables in our database, normally because deve
 
 The above command will reset all your data without any question, please, be careful with this command.
 
+Interactive Shell
+=================
+
+In case you want to login into the database interactive shell, you can just issue this command and Mamba will take care of authentication
+details for you::
+
+    $ mamba-admin sql shell
+
 Future plans
 ============
 
@@ -203,7 +216,7 @@ For next releases, a live database migration tool is intended to be added to the
 The Mamba |storm| - |twisted| integration
 =========================================
 
-Mamba uses the |storm|'s |twisted| ``@transact`` integration added in |storm| v0.19. It also creates a ``ThreadPool`` service on initialization time so you don't have to take care of do it yourself. The *transact* system is quite simple:
+Mamba uses a custom modified version of the |storm|'s |twisted| ``@transact`` integration added in |storm| v0.19. It also creates a ``ThreadPool`` service on initialization time so you don't have to take care of do it yourself. The *transact* system is quite simple:
 
     Any model method that is decorated with the ``@transact`` decorator is executed in a separate thread into the mamba database thread pool and returns a |twisted| `deferred <http://twistedmatrix.com/documents/current/core/howto/defer-intro.html>`_ object. Any method that is not decorated by ``@transact`` is just using regular storm features and it can't run asynchronous.
 
@@ -214,6 +227,8 @@ Using the *transact* system has advantages and disadvantages:
 The transact mechanism can be dangerous in environments where serialization or sinchronization of the data is a requirement because using the ``@transact`` decorated methods can end in unexpected race conditions.
 
 The developer should think about what she needs and use ``@transact`` or not following what the application or the feature or system that is being implemented needs to fit.
+
+Some mamba model operations runs with ``@transact`` decorated method by default (for example, create, find, read, delete or update) if you need to run those methods in synchronous way you can add the named parameter ``async=False`` to it's call, just like ``customer.update(async=False)``. That is pretty common for calls to those methods from methods that are already decorated by the ``@transact`` decorator.
 
 Howto use Storm in mamba models?
 ================================
