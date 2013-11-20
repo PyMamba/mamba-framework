@@ -244,25 +244,25 @@ Of course we can define references between models (and between tables by extensi
 
     from application.model.dojo import Dojo
 
-    class Figther(model.Model):
+    class Fighter(model.Model):
 
-        __storm_table__ = 'figther'
+        __storm_table__ = 'fighter'
 
         id = Int(primary=True, auto_increment=True, unsigned=True)
         dojo_id = Int(unsigned=True)
         dojo = Reference(dojo_id, Dojo.id)
 
-In the previous example we defined a ``Figther`` class that define a many-to-one reference with the ``Dojo`` class imported from the dojo model. As this reference has been set we can use the following code to refer to the figther's dojo in our application:
+In the previous example we defined a ``Fighter`` class that define a many-to-one reference with the ``Dojo`` class imported from the dojo model. As this reference has been set we can use the following code to refer to the fighter's dojo in our application:
 
 .. sourcecode:: python
 
-    >>> figther = Figther().read(1)
-    >>> print(figther.dojo.id)
+    >>> fighter = Fighter().read(1)
+    >>> print(fighter.dojo.id)
     1
-    >>> print(figther.dojo.name)
+    >>> print(fighter.dojo.name)
     u'SuperDojo'
 
-Many-to-many relationships are a bit more complex than the last example. Let's continue with our previous figther example to draw this operation:
+Many-to-many relationships are a bit more complex than the last example. Let's continue with our previous fighter example to draw this operation:
 
 .. sourcecode:: python
 
@@ -274,9 +274,9 @@ Many-to-many relationships are a bit more complex than the last example. Let's c
     from application.model.tournament import Tournament
 
 
-    class Figther(model.Model):
+    class Fighter(model.Model):
 
-        __storm_table__ = 'figther'
+        __storm_table__ = 'fighter'
 
         id = Int(primary=True, auto_increment=True, unsigned=True)
         name = Unicode(size=128)
@@ -287,54 +287,54 @@ Many-to-many relationships are a bit more complex than the last example. Let's c
             self.name = name
 
 
-    class TournamentFigther(model.Model):
+    class TournamentFighter(model.Model):
 
-        __storm_table__ = 'tournament_figther'
-        __storm_primary__ = 'tournament_id', 'figther_id'
+        __storm_table__ = 'tournament_fighter'
+        __storm_primary__ = 'tournament_id', 'fighter_id'
 
         tournament_id = Int(unsigned=True)
-        figther_id = Int(unsigned=True)
+        fighter_id = Int(unsigned=True)
 
 .. note::
 
     Tournament and Dojo definition classes has been avoided to maintain the simplicity of the example
 
-In the above example we defined a ``TournamentFigther`` class to reference tournaments and figthers in a many-to-many relationship. We defined a compound primary key with the ``tournament_id`` and ``figther_id`` fields. To make the relationship real we have to add a ``ReferenceSet``:
+In the above example we defined a ``TournamentFighter`` class to reference tournaments and fighters in a many-to-many relationship. We defined a compound primary key with the ``tournament_id`` and ``fighter_id`` fields. To make the relationship real we have to add a ``ReferenceSet``:
 
 .. sourcecode:: python
 
-    Tournament.figthers = ReferenceSet(
-        Tournament.id, TournamentFigther.tournament_id,
-        TournamentFigther.figther_id, Figther.id
+    Tournament.fighters = ReferenceSet(
+        Tournament.id, TournamentFighter.tournament_id,
+        TournamentFighter.fighter_id, Fighter.id
     )
 
 We can also add the definition to the ``Tournament`` class definition directly but in that case we have to use special inheritance that we didn't see yet, we will cover it later in this chapter. Since the reference set is created we can use it as follows:
 
 .. sourcecode:: python
 
-    >>> chuck = Figther(u'Chuck Norris')
-    >>> bruce = Figther(u'Bruce Lee')
+    >>> chuck = Fighter(u'Chuck Norris')
+    >>> bruce = Fighter(u'Bruce Lee')
 
     >>> kung_fu_masters = Tournament(u'Kung Fu Masters Tournament')
-    >>> kung_fu_masters.figthers.add(chuck)
-    >>> kung_fu_masters.figthers.add(bruce)
+    >>> kung_fu_masters.fighters.add(chuck)
+    >>> kung_fu_masters.fighters.add(bruce)
 
-    >>> kung_fu_masters.figthers.count()
+    >>> kung_fu_masters.fighters.count()
     2
 
-    >>> store.get(TournamentFigthers, (kung_fu_masters.id, chuck.id))
-    <TournamentFigther object at 0x...>
+    >>> store.get(TournamentFighters, (kung_fu_masters.id, chuck.id))
+    <TournamentFighter object at 0x...>
 
-    >>> [figther.name for figther in kung_fu_masters.figthers]
+    >>> [fighter.name for fighter in kung_fu_masters.fighters]
     [u'Chuck Norris', u'Bruce Lee']
 
-We can also create a reversed relationship between figthers and tournaments to know in which tournaments is a person figthing on:
+We can also create a reversed relationship between fighters and tournaments to know in which tournaments is a person figthing on:
 
 .. sourcecode:: python
 
-    >>> Figther.tournaments = ReferenceSet(
-        Figther.id, TournamentFigther.figther_id,
-        TournamentFigther.tournament_id, Tournament.id
+    >>> Fighter.tournaments = ReferenceSet(
+        Fighter.id, TournamentFighter.fighter_id,
+        TournamentFighter.tournament_id, Tournament.id
     )
 
     >>> [tournament.name for tournament in chuck.tournaments]
@@ -343,16 +343,16 @@ We can also create a reversed relationship between figthers and tournaments to k
 SQL Subselects
 ==============
 
-Sometimes we need to use subselects to retrieve some data, for example we may want to get all the figthers that are not actually figthing in any tournament:
+Sometimes we need to use subselects to retrieve some data, for example we may want to get all the fighters that are not actually figthing in any tournament:
 
 .. sourcecode:: python
 
-    >>> yip_man = Figther(u'Yip Man')
+    >>> yip_man = Fighter(u'Yip Man')
     >>> store.add(yip_man)
 
-    >>> [figther.name for figther in store.find(
-            Figther, Not(Figther.id.is_in(Select(
-                TournamentFigther.figther_id, distinct=True))
+    >>> [fighter.name for fighter in store.find(
+            Fighter, Not(Fighter.id.is_in(Select(
+                TournamentFighter.fighter_id, distinct=True))
             )
     )]
     [u'Yip Man']
@@ -361,8 +361,8 @@ You can of course split this operation in two steps for improve readability:
 
 .. sourcecode:: python
 
-    >>> subselect = Select(TournamentFigther.figther_id, distinct=True)
-    >>> result = store.find(Figther, Not(Figther.id.is_in(subselect)))
+    >>> subselect = Select(TournamentFighter.fighter_id, distinct=True)
+    >>> result = store.find(Fighter, Not(Fighter.id.is_in(subselect)))
 
 
 SQL Joins
@@ -373,7 +373,7 @@ We can perform implicit or explicit joins. An implicit join that use the data in
 .. sourcecode:: python
 
     >>> resutl = store.find(
-        Dojo, Figther.dojo_id == Dojo.id, Figther.name.like(u'%Lee')
+        Dojo, Fighter.dojo_id == Dojo.id, Fighter.name.like(u'%Lee')
     )
 
     >>> [dojo.name for dojo in result]
@@ -383,8 +383,8 @@ The same query using explicit joins should look like:
 
 .. sourcecode:: python
 
-    >>> join = [Dojo, Join(Figther, Figther.dojo_id == Dojo.id)]
-    >>> result = store.using(*join).find(Dojo, Figther.name.like(u'%Lee'))
+    >>> join = [Dojo, Join(Fighter, Fighter.dojo_id == Dojo.id)]
+    >>> result = store.using(*join).find(Dojo, Fighter.name.like(u'%Lee'))
 
     >>> [dojo.name for dojo in result]
     [u'Bruce Lee awesome Dojo']
@@ -394,8 +394,8 @@ Or more compact syntax as:
 .. sourcecode:: python
 
     >>> [dojo.name for dojo in store.using(
-            Dojo, Join(Figther, Figther.dojo_id == Dojo.id)
-        ).find(Dojo, Figther.name.like(u'%Lee'))]
+            Dojo, Join(Fighter, Fighter.dojo_id == Dojo.id)
+        ).find(Dojo, Fighter.name.like(u'%Lee'))]
     [u'Bruce Lee awesome Dojo']
 
 Common SQL operations
@@ -405,32 +405,32 @@ Two common operations with SQL are just ordering and limiting results, you can a
 
 .. sourcecode:: python
 
-    >>> result = store.find(Figther)
-    >>> [figther.name for figther in result.order_by(Figther.name)]
+    >>> result = store.find(Fighter)
+    >>> [fighter.name for fighter in result.order_by(Fighter.name)]
     [u'Bruce Lee', u'Chuck Norris', u'Yip Man']
 
-    >>> [figther.name for figther in result.order_by(Desc(Figther.name))]
+    >>> [fighter.name for fighter in result.order_by(Desc(Fighter.name))]
     [u'Yip Man', u'Chuck Norris', u'Bruce Lee']
 
-In the example above we get all the records from the figthers database and order them by name and then order them by name in descendent way. As you can see Chuck Norris is always inmutable but that is just because he is Chuck Norris.
+In the example above we get all the records from the fighters database and order them by name and then order them by name in descendent way. As you can see Chuck Norris is always inmutable but that is just because he is Chuck Norris.
 
 To limit the given results we just slice the result:
 
 .. sourcecode:: python
 
-    >>> [figther.name for figther in result.order_by(Figther.name)[:2]]
+    >>> [fighter.name for fighter in result.order_by(Fighter.name)[:2]]
     [u'Bruce Lee', u'Chuck Norris']
 
 
 Those slices are translated to OFFSET and LIMIT in the underlaying database SQL query by Storm so this last operation is translated to something like this for MySQL/MariaDB:
 
-    SELECT figther.name FROM figthers LIMIT 2 OFFSET 0
+    SELECT fighter.name FROM fighters LIMIT 2 OFFSET 0
 
 Storm adds the possibility to use SQL expressions in an agnostic database backend way to perform those operations as well:
 
 .. sourcecode:: python
 
-    >>> result = store.execute(Select(Figther.name, order_by=Desc(Figther.name), limit=2))
+    >>> result = store.execute(Select(Fighter.name, order_by=Desc(Fighter.name), limit=2))
     >>> result.get_all()
     [(u'Yip Man',), (u'Chuck Norris',)]
 
@@ -442,11 +442,11 @@ Sometimes is useful that we get more than one object from the underlying databas
 .. sourcecode:: python
 
     >>> result = store.find(
-        (Dojo, Figther),
-        Figther.dojo_id == Dojo.id, Figther.name.like(u'Bruce %')
+        (Dojo, Fighter),
+        Fighter.dojo_id == Dojo.id, Fighter.name.like(u'Bruce %')
     )
 
-    >>> [(dojo.name, figther.name) for dojo, figther in result]
+    >>> [(dojo.name, fighter.name) for dojo, fighter in result]
     [(u'Bruce Lee awesome Dojo', u'Bruce Lee')]
 
 Value auto reload and expression values
@@ -472,7 +472,7 @@ You can also assign what in the |storm| project they call a "*lazy expression*" 
 .. sourcecode:: python
 
     >>> from storm.locals import SQL
-    >>> steven.name = SQL('(SELECT name || ? FROM figther WHERE id=4)', (' Seagal',))
+    >>> steven.name = SQL('(SELECT name || ? FROM fighter WHERE id=4)', (' Seagal',))
     >>> steven.name
     u'Steven Seagal'
 
@@ -487,14 +487,14 @@ Sometimes is really useful to can see which statement |storm| is executing behin
     >>> from storm.tracer import debug
 
     >>> debug(True, stream=sys.stdout)
-    >>> result = store.find(Figther, Figther.id == 1)
+    >>> result = store.find(Fighter, Fighter.id == 1)
     >>> list(result)
-    EXECUTE: 'SELECT figther.id, figther.name, figther.dojo_id FROM figthers WHERE figther.id = 1', ()
-    [<Figther object at 0x...>]
+    EXECUTE: 'SELECT fighter.id, fighter.name, fighter.dojo_id FROM fighters WHERE fighter.id = 1', ()
+    [<Fighter object at 0x...>]
 
     >>> debug(False)
     >>> list(result)
-    [<Figther object at 0x...>]
+    [<Fighter object at 0x...>]
 
 Real SQL Queries
 ================
@@ -503,7 +503,7 @@ Of course we can use real **non database agnostic** queries if we want to
 
 .. sourcecode:: python
 
-    >>> result = store.execute('SELECT * FROM figthers')
+    >>> result = store.execute('SELECT * FROM fighters')
     >>> result.get_all()
     [u'Bruce Lee', u'Chuck Norris', u'Yip Man', u'Steven Seagal']
 
@@ -518,10 +518,10 @@ To do that, we have to inherit our classes from the ``Storm`` base class as well
 
     from storm.locals import Int, Unicode, Reference, ReferenceSet
 
-    class Figther(model.Model, Storm):
+    class Fighter(model.Model, Storm):
 
         __metaclass__ = model.MambaStorm
-        __storm_table__ = 'figthers'
+        __storm_table__ = 'fighters'
 
         id = Int(primary=True)
         name = Unicode()
