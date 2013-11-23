@@ -55,3 +55,6 @@ docs/conf.py
 # Fabric Stuff
 deploy/
 mamba/test/dummy_app/db/dummy.db
+
+# Mamba devtool
+devtools/

@@ -13,7 +13,12 @@ if not hasattr(sys, "version_info") or sys.version_info < (2, 7):
 
 from setuptools import setup, find_packages
 
-from mamba import version
+
+def get_mamba_version():
+    with open('mamba.ver', 'r') as mamba_ver_file:
+        mamba_ver = mamba_ver_file.read()
+
+    return mamba_ver.strip()
 
 long_description = '''
 This is a new release of Mamba the web applications framework for Twisted. Read
@@ -24,11 +29,11 @@ If you like to live at the edge, you can also install the in-development
 version <https://github.com/DamnWidget/mamba.git>
 
 For more information visit the `Mamba website <http://www.pymamba.com>`_
-'''.format(version.short())
+'''.format(get_mamba_version())
 
 setup(
     name='mamba-framework',
-    version=version.short(),
+    version=get_mamba_version(),
     description=('Mamba is a high-level RAD Web Applications framework '
                  'based on Twisted Web that uses Storm ORM as database '
                  'access layer'),
@@ -46,10 +51,11 @@ setup(
         'test/application/view/stylesheets/*.less'
     ]},
     tests_require=['twisted>=10.2.0', 'doublex', 'PyHamcrest'],
-    install_requires=['twisted>=10.2.0', 'storm>=0.19', 'jinja2>=2.4'],
+    install_requires=[
+        'twisted>=10.2.0', 'storm>=0.19', 'jinja2>=2.4', 'singledispatch'],
     requires=[
         'twisted(>=10.2.0)', 'storm(>=0.19)', 'zope.component', 'transaction',
-        'jinja2(>=2.4)'
+        'jinja2(>=2.4)', 'singledispatch'
     ],
     entry_points={
         'console_scripts': [
