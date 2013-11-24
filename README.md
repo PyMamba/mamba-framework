@@ -45,8 +45,10 @@ Mamba uses [buildbot](http://buildbot.net/ "BuildBot") as CI solution. At the mo
 
 Known platforms where Mamba runs
 --------------------------------
-There is no reason to believe that Mamba does not run under Microsoft Windows or Mac OS X operating systems but
-this was not tested and we have no `buildbot slaves` under those operating systems to check it out (any contribution is welcome).
+Altough mamba is hardly tested on GNU/Linux, we don't have full uptime `buildbot slaves` to
+test it on Windows or Mac OS X (we don't have `buildbot slave` at all). Mamba is maintained
+as most compatible as we can we every operating system but any contribution on this field
+is really welcome.
 
 <table>
   <tr>
