@@ -14,7 +14,7 @@
 from os.path import normpath
 
 from storm.uri import URI
-from storm.expr import Desc
+from storm.expr import Desc, Undef
 from storm.twisted.transact import Transactor
 from storm.properties import PropertyPublisherMeta
 
@@ -118,6 +118,31 @@ class Model(ModelProvider):
             setattr(self, name, getattr(orig, name))
 
         return self
+
+    def _set_empty_properties_to_none(self):
+        """If a property is does not allow none and there is
+        no default value for it, Storm itself will raise a NoneError
+        when we set it to None.
+        """
+        for column, property_ in self._storm_columns.items():
+            variable = property_.variable_factory()
+            has_default = not variable._value is Undef
+            value = getattr(
+                self, column._detect_attr_name(self.__class__), None
+            )
+            if not variable._allow_none and not has_default and value is None:
+                variable.set(None)
+
+    def __storm_pre_flush__(self):
+        """
+        Storm calls this method before commiting a store.
+
+        This is used right now to go through all the columns and setting
+        them as None where the column is NOT NULL and there is no default
+        value. If we don't do this, storm proceeds by inserting a 0, 0.0
+        or '' (empty string), what is clearly wrong.
+        """
+        self._set_empty_properties_to_none()
 
     @transact
     def create(self):
