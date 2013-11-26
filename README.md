@@ -1,6 +1,6 @@
-=====
-Mamba
-=====
+===============
+Mamba Framework
+===============
 
 Mamba is a high-level Web Applications framework based on Twisted, Storm and Jinja2.
 
