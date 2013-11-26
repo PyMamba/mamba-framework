@@ -16,7 +16,7 @@ from collections import OrderedDict
 from storm.uri import URI
 from twisted.trial import unittest
 from twisted.python import filepath
-from storm.exceptions import DatabaseModuleError
+from storm.exceptions import DatabaseModuleError, NoneError
 from storm.twisted.testing import FakeThreadPool
 from twisted.internet.defer import inlineCallbacks
 from storm.locals import (
@@ -770,6 +770,10 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModel()
         adapter = dummy.get_adapter()
         self.assertTrue(interfaces.IMambaSQL.providedBy(adapter))
+
+    def test_model_allow_none_false_raises_exception(self):
+        dummy = DummyModel()
+        self.assertRaises(NoneError, dummy.create, async=False)
 
     def test_sqlite_raises_missing_primary_key_exception(self):
 
