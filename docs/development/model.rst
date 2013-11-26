@@ -117,13 +117,14 @@ All the options that we can pass to the constructor are optional and some of the
         b. the attribute name as a string
         c. the value that is being set
     * **size** (*special behaviour*): The behaviour of this attribute differs depending on the database backend and the type of the property we are settings but mainly it sets the size of the field we are defining in the database.
-    * **index**: If set to true, Mamba will create an index for that field.
-    * **unique**: If set to true, Mamba will create an unique index for that field.
+    * **allow_none**: If set to False, Mamba will not allow None (NULL) values to be inserted.
+    * **index** (*special behaviour*): If set to True, Mamba will create an index for that field.
+    * **unique** (*special behaviour*): If set to True, Mamba will create an unique index for that field.
     * **unsigned** (*special behaviour*): The ``unsigned`` parameter has different behaviours depending in the database engine and the type as well. Basically, it sets a numeric field as unsigned, this is mainly used with *MySQL/MariaDB* database engines.
     * **auto_increment** (*special behaviour*): As his friends above, this parameters has special meanings depending on database engine and field type. It's used to set a column as auto increment (mainly primary keys id's).
     * **array** (*postgres only*): This parameter is used to define an array type for PostgreSQL databases. PostgreSQL allows table columnns to be defined as variable-length multidimensional arrays
 
-The **size**, **unsigned**, **auto_increment** and **array** attributes are not present on Storm, they are implemented only in Mamba and it's utility is closely related to the ability of mamba to generate SQL schemas using Python classes definitions.
+The **size**, **index**, **unique**, **unsigned**, **auto_increment** and **array** attributes are not present on Storm, they are implemented only in Mamba and its utility is closely related to the ability of Mamba to generate SQL schemas using Python classes definitions.
 
 Defining compound keys
 ----------------------
