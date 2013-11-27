@@ -18,13 +18,12 @@ from collections import OrderedDict
 from storm.uri import URI
 from storm.expr import Desc
 from storm.twisted.transact import Transactor
-from storm.properties import PropertyPublisherMeta
+from storm.properties import PropertyPublisherMeta, PropertyColumn
 
 from mamba import plugin
 from mamba.utils import config
 from mamba.core import interfaces, module
-from mamba.enterprise.database import (Database, AdapterFactory,
-                                       transact, PropertyColumnMambaPatch)
+from mamba.enterprise.database import Database, AdapterFactory, transact
 
 
 class MambaStorm(PropertyPublisherMeta, plugin.ExtensionPoint):
@@ -111,7 +110,7 @@ class Model(ModelProvider):
         one, in order to maintain full interface compatibility.
         """
         columns = inspect.getmembers(
-            cls, lambda o: isinstance(o, PropertyColumnMambaPatch)
+            cls, lambda o: isinstance(o, PropertyColumn)
         )
 
         creation_order = sorted(
