@@ -432,6 +432,16 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('name varchar' in script)
         self.assertTrue('id integer' in script)
 
+    def test_model_dump_ordered_fields(self):
+        dummy = DummyModelDecimal()
+        script = dummy.dump_table()
+        split_script = script.split('\n')
+
+        self.assertTrue('id integer' in split_script[1])
+        self.assertTrue('money text' in split_script[2])
+        self.assertTrue('money2 text' in split_script[3])
+        self.assertTrue('money3 text' in split_script[4])
+
     @common_config(engine='mysql:')
     def test_model_dump_table_with_mysql(self):
 

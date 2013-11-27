@@ -11,7 +11,9 @@
 
 """
 
+import inspect
 from os.path import normpath
+from collections import OrderedDict
 
 from storm.uri import URI
 from storm.expr import Desc
@@ -21,7 +23,8 @@ from storm.properties import PropertyPublisherMeta
 from mamba import plugin
 from mamba.utils import config
 from mamba.core import interfaces, module
-from mamba.enterprise.database import Database, AdapterFactory, transact
+from mamba.enterprise.database import (Database, AdapterFactory,
+                                       transact, PropertyColumnMambaPatch)
 
 
 class MambaStorm(PropertyPublisherMeta, plugin.ExtensionPoint):
@@ -98,6 +101,33 @@ class Model(ModelProvider):
             self.database.start()
 
         self.transactor = Transactor(self.database.pool)
+
+    def __new__(cls, *args, **kwargs):
+        """This method is remembering the fields in the order that
+        they were declared in the model. This is used to maintain
+        declared order in the generated SQL schema. It uses some
+        inspection to determine what fields should put on the ordered
+        list. It, then, replaces cls._storm_columns with the ordered
+        one, in order to maintain full interface compatibility.
+        """
+        columns = inspect.getmembers(
+            cls, lambda o: isinstance(o, PropertyColumnMambaPatch)
+        )
+
+        creation_order = sorted(
+            columns, key=lambda i: i[1]._creation_order
+        )
+
+        ordered_columns = OrderedDict()
+
+        for _, ordered_property in creation_order:
+            for column, property_ in cls._storm_columns.iteritems():
+                if ordered_property is property_:
+                    ordered_columns[column] = property_
+                    break
+
+        cls._storm_columns = ordered_columns
+        return ModelProvider.__new__(cls, *args, **kwargs)
 
     @property
     def uri(self):

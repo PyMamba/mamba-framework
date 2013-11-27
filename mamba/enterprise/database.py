@@ -317,7 +317,7 @@ class PropertyColumnMambaPatch(Column):
 
         # Copy attributes from the property to avoid one additional
         # function call on each access.
-        for attr in ["__get__", "__set__", "__delete__"]:
+        for attr in ["__get__", "__set__", "__delete__", "_creation_order"]:
             setattr(self, attr, getattr(prop, attr))
 
 
