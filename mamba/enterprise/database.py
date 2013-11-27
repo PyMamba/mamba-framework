@@ -15,13 +15,10 @@ import datetime
 import functools
 from sqlite3 import sqlite_version_info
 
-from storm import properties
 from storm.database import URI
-from storm.expr import Undef, Column
 from storm.zope.interfaces import IZStorm
 from storm.zope.zstorm import global_zstorm
 from storm.twisted.transact import Transactor
-from twisted.python.monkey import MonkeyPatcher
 from twisted.python.threadpool import ThreadPool
 from zope.component import provideUtility, getUtility
 
@@ -31,7 +28,6 @@ from mamba.enterprise.mysql import MySQL
 from mamba.enterprise.sqlite import SQLite
 from mamba.enterprise.common import CommonSQL
 from mamba.enterprise.postgres import PostgreSQL
-from twisted.internet.threads import deferToThreadPool
 
 
 class Database(object):
@@ -71,15 +67,6 @@ class Database(object):
         SQLite.register()
         MySQL.register()
         PostgreSQL.register()
-
-        # MonkeyPatch Storm
-        if not self.monkey_patched:
-            monkey_patcher = MonkeyPatcher(
-                (properties, 'PropertyColumn', PropertyColumnMambaPatch),
-                (Transactor, 'run', mamba_transactor_run)
-            )
-            monkey_patcher.patch()
-            self.monkey_patched = True
 
     def start(self):
         """Starts the Database (and the threadpool)
@@ -286,59 +273,6 @@ class AdapterFactory(object):
 
     def produce(self):
         return self.adapter_mapping.get(self.scheme, CommonSQL)(self.model)
-
-
-# Monkey Patching Storm (only a bit)
-class PropertyColumnMambaPatch(Column):
-    """
-    We need to monkey patch part of Storm to can use size, unsigned
-    and auto_increment named values in Properties.
-
-    I'am supossed to work well with Storm since rev 223 (v0.12)
-    """
-    def __init__(self, prop, cls, attr, name, primary,
-                 variable_class, variable_kwargs):
-        # here we go!
-        self.size = variable_kwargs.pop('size', Undef)
-        self.unsigned = variable_kwargs.pop('unsigned', False)
-        self.index = variable_kwargs.pop('index', False)
-        self.unique = variable_kwargs.pop('unique', False)
-        self.auto_increment = variable_kwargs.pop('auto_increment', False)
-        self.array = variable_kwargs.pop('array', None)
-
-        Column.__init__(self, name, cls, primary,
-                        properties.VariableFactory(
-                            variable_class, column=self,
-                            validator_attribute=attr,
-                            **variable_kwargs)
-                        )
-
-        self.cls = cls  # Used by references
-
-        # Copy attributes from the property to avoid one additional
-        # function call on each access.
-        for attr in ["__get__", "__set__", "__delete__"]:
-            setattr(self, attr, getattr(prop, attr))
-
-
-def mamba_transactor_run(self, function, *args, **kwargs):
-    """
-    Monkeypatched version of the run method for storm transactor that
-    can run the given function in a thread or in the main thread.
-
-    If the named variable 'async' is set to False we don't run the
-    function in the ThreadPool but in the main thread.
-    """
-
-    run_asynchornous = kwargs.pop('async', True)
-    if run_asynchornous:
-        # Inline the reactor import here for sake of safeness, in case a
-        # custom reactor needs to be installed
-        from twisted.internet import reactor
-        return deferToThreadPool(
-            reactor, self._threadpool, self._wrap, function, *args, **kwargs)
-
-    return self._wrap(function, *args, **kwargs)
 
 
 def transact(method):
