@@ -1,6 +1,6 @@
 # Run/Install requeriments
 twisted >= 10.2.0
-storm >= 0.19
+-e git://github.com/PyMamba/mamba-storm.git#egg=mamba-storm
 zope.component
 transaction
 jinja2 >= 2.4
