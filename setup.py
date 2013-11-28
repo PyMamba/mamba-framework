@@ -52,10 +52,13 @@ setup(
     ]},
     tests_require=['twisted>=10.2.0', 'doublex', 'PyHamcrest'],
     install_requires=[
-        'twisted>=10.2.0', 'storm>=0.19', 'jinja2>=2.4', 'singledispatch'],
+        'twisted>=10.2.0', 'storm', 'jinja2>=2.4', 'singledispatch'],
     requires=[
-        'twisted(>=10.2.0)', 'storm(>=0.19)', 'zope.component', 'transaction',
+        'twisted(>=10.2.0)', 'storm', 'zope.component', 'transaction',
         'jinja2(>=2.4)', 'singledispatch'
+    ],
+    dependency_links=[
+        'https://github.com/PyMamba/mamba-storm/tarball/master#egg=storm'
     ],
     entry_points={
         'console_scripts': [
