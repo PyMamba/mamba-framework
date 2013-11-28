@@ -184,7 +184,7 @@ class Model(ModelProvider):
 
     @classmethod
     @transact
-    def read(klass, id, copy=False, **kwargs):
+    def read(klass, id, copy=False):
         """
         Read a register from the database. The give key (usually ID) should
         be a primary key.
