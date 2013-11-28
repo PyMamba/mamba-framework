@@ -25,7 +25,7 @@ Minimum Dependencies
     <td>Twisted</td><td>>= 10.2.0</td><td><a href="http://www.twistedmatrix.com" target="_blank">http://www.twistedmatrix.com</a></td>
   </tr>
   <tr>
-    <td>Mamba's Storm</td><td>>= 0.19</td><td><a href="https://github.com/PyMamba/mamba-storm" target="_blank">https://github.com/PyMamba/mamba-storm</a></td>
+    <td>Mamba's Storm</td><td></td><td><a href="https://github.com/PyMamba/mamba-storm" target="_blank">https://github.com/PyMamba/mamba-storm</a></td>
   </tr>
   <tr>
     <td>Jinja2</td><td>>= 2.4</td><td><a href="http://jinja.pocoo.org/docs/#" target="_blank">http://jinja.pocoo.org/docs/</a></td>
