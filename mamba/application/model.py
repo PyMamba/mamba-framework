@@ -193,14 +193,14 @@ class Model(ModelProvider):
         :type id: int
         """
 
-        self = klass()
-        store = self.database.store()
-        data = store.get(self.__class__, id)
+        obj = klass()
+        store = obj.database.store()
+        data = store.get(klass, id)
 
         if data is not None:
             if copy is True:
-                data = self.copy(data)
-            data.transactor = self.transactor
+                data = obj.copy(data)
+            data.transactor = obj.transactor
 
         return data
 
