@@ -156,9 +156,24 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(dummy.name, u'Dummy')
         self.truncate_dummy()
 
+    @inlineCallbacks
+    def test_model_read_as_class_method(self):
+        self.insert_dummy()
+        dummy = yield DummyModel.read(1)
+        self.assertEqual(dummy.id, 1)
+        self.assertEqual(dummy.name, u'Dummy')
+        self.truncate_dummy()
+
     def test_model_synchronous_read(self):
         self.insert_dummy()
         dummy = DummyModel().read(1, async=False)
+        self.assertEqual(dummy.id, 1)
+        self.assertEqual(dummy.name, u'Dummy')
+        self.truncate_dummy()
+
+    def test_model_synchronous_read_as_class_method(self):
+        self.insert_dummy()
+        dummy = DummyModel.read(1, async=False)
         self.assertEqual(dummy.id, 1)
         self.assertEqual(dummy.name, u'Dummy')
         self.truncate_dummy()
@@ -174,10 +189,31 @@ class ModelTest(unittest.TestCase):
         self.assertNotEqual(dummy, dummy2)
         self.truncate_dummy()
 
+    @inlineCallbacks
+    def test_model_read_copy_as_class_method(self):
+        self.insert_dummy()
+        dummy = yield DummyModel.read(1)
+        dummy2 = yield DummyModel.read(1, True)
+
+        self.assertEqual(dummy.name, u'Dummy')
+        self.assertEqual(dummy2.name, u'Dummy')
+        self.assertNotEqual(dummy, dummy2)
+        self.truncate_dummy()
+
     def test_model_read_synchronous_copy(self):
         self.insert_dummy()
         dummy = DummyModel().read(1, async=False)
         dummy2 = DummyModel().read(1, True, async=False)
+
+        self.assertEqual(dummy.name, u'Dummy')
+        self.assertEqual(dummy2.name, u'Dummy')
+        self.assertNotEqual(dummy, dummy2)
+        self.truncate_dummy()
+
+    def test_model_read_synchronous_copy_as_class_method(self):
+        self.insert_dummy()
+        dummy = DummyModel.read(1, async=False)
+        dummy2 = DummyModel.read(1, True, async=False)
 
         self.assertEqual(dummy.name, u'Dummy')
         self.assertEqual(dummy2.name, u'Dummy')
@@ -222,6 +258,19 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(dummy2.name, u'Dummy')
         self.truncate_dummy()
 
+    @inlineCallbacks
+    def test_model_update_with_read_as_class_method_copy_behaviour(self):
+        self.insert_dummy()
+        dummy = yield DummyModel.read(1, True)
+        dummy.name = u'Dummy'
+        dummy.update()
+        del(dummy)
+
+        dummy2 = yield DummyModel.read(1, True)
+        self.assertEqual(dummy2.id, 1)
+        self.assertEqual(dummy2.name, u'Dummy')
+        self.truncate_dummy()
+
     def test_model_update_with_read_copy_synchornous_behaviour(self):
         self.insert_dummy()
         dummy = DummyModel().read(1, True, async=False)
@@ -230,6 +279,18 @@ class ModelTest(unittest.TestCase):
         del(dummy)
 
         dummy2 = DummyModel().read(1, True, async=False)
+        self.assertEqual(dummy2.id, 1)
+        self.assertEqual(dummy2.name, u'Dummy')
+        self.truncate_dummy()
+
+    def test_model_update_with_read_as_class_method_copy_synchornous_behaviour(self):
+        self.insert_dummy()
+        dummy = DummyModel.read(1, True, async=False)
+        dummy.name = u'Dummy'
+        dummy.update()
+        del(dummy)
+
+        dummy2 = DummyModel.read(1, True, async=False)
         self.assertEqual(dummy2.id, 1)
         self.assertEqual(dummy2.name, u'Dummy')
         self.truncate_dummy()
