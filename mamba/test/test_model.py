@@ -283,7 +283,8 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(dummy2.name, u'Dummy')
         self.truncate_dummy()
 
-    def test_model_update_with_read_as_class_method_copy_synchornous_behaviour(self):
+    def test_model_update_with_read_as_class_method_copy_synchornous_behaviour(
+            self):
         self.insert_dummy()
         dummy = DummyModel.read(1, True, async=False)
         dummy.name = u'Dummy'
