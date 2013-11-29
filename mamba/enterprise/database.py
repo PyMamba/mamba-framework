@@ -281,6 +281,8 @@ def transact(method):
 
     @functools.wraps(method)
     def wrapper(self, *args, **kwargs):
+        if kwargs.get('async', None) is None:
+            kwargs['async'] = getattr(self, '__mamba_async__', True)
         try:
             return self.transactor.run(method, self, *args, **kwargs)
         except AttributeError:

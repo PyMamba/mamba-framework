@@ -126,6 +126,32 @@ All the options that we can pass to the constructor are optional and some of the
 
 The **size**, **index**, **unique**, **unsigned**, **auto_increment** and **array** attributes are not present on Storm, they are implemented only in Mamba and its utility is closely related to the ability of Mamba to generate SQL schemas using Python classes definitions.
 
+Defining a default behaviour
+-----------------------------
+
+Mamba allows you to run queries synchronous or asynchronous by passing the parameter **async** on functions like `read`, `find`, `update`, `create` and so on. However, sometimes, you want that a specific model to have a default behaviour. Mamba's default is always asynchronous, but if you want to make queries on a specific model always synchronous, you can just set ``__mamba_async__``.
+
+.. sourcecode:: python
+
+    from storm.locals import Int
+    from mamba.application import model
+
+    class Dummy(model.Model):
+
+        __storm_table__ = 'dummy'
+        __mamba_async__ = False
+
+        id = Int()
+        status = Int()
+
+Queries on this model will always run synchronous.
+
+.. note::
+
+    You can always override the default behaviour for a single operation. If you issue Dummy().read(1, async=True), this single query will be
+    executed asynchronously.
+
+
 Defining compound keys
 ----------------------
 

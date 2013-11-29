@@ -18,7 +18,7 @@ from twisted.trial import unittest
 from twisted.python import filepath
 from storm.exceptions import DatabaseModuleError, NoneError
 from storm.twisted.testing import FakeThreadPool
-from twisted.internet.defer import inlineCallbacks
+from twisted.internet.defer import inlineCallbacks, Deferred
 from storm.locals import (
     Int, Unicode, Reference, Enum, List, Bool, DateTime, Decimal
 )
@@ -441,6 +441,18 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(dummy[0].id, 2)
         self.assertEqual(dummy[0].name, u'OrderTest')
         self.truncate_dummy()
+
+    def test_model_global_behaviour_sync(self):
+        self.insert_dummy()
+        DummyModel.__mamba_async__ = False
+        dummy = DummyModel().read(1)
+        self.assertTrue(isinstance(dummy, DummyModel))
+
+    def test_model_global_behaviour_async(self):
+        self.insert_dummy()
+        DummyModel.__mamba_async__ = True
+        dummy = DummyModel().read(1)
+        self.assertTrue(isinstance(dummy, Deferred))
 
     @inlineCallbacks
     def test_model_all_order_by_no_instance(self):
