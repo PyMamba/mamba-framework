@@ -95,6 +95,7 @@ class Model(ModelProvider):
 
     def __init__(self):
         super(Model, self).__init__()
+        self.__mamba_async__ = getattr(self, '__mamba_async__', True)
 
         if not self.database.started:
             self.database.start()
