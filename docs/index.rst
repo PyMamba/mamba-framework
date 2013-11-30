@@ -3,10 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to mamba's documentation!
+Welcome to Mamba's documentation!
 =================================
 
-Welcomte to the official mamba project documentation. Mamba is a high level rapid application development framework developed using the `Python <http://www.python.org>`_ language and licensed under the terms of the `GPL v3 <https://raw.github.com/DamnWidget/mamba/master/LICENSE>`_ from the `Free Software Foundation <http://www.fsf.org>`_.
+Welcomte to the official Mamba project documentation. Mamba is a high-level rapid application development framework (RAD) developed using the `Python <http://www.python.org>`_ language and licensed under the terms of the `GPL v3 <https://raw.github.com/DamnWidget/mamba/master/LICENSE>`_ from the `Free Software Foundation <http://www.fsf.org>`_.
 
 Using Mamba:
 ------------
