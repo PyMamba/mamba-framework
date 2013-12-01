@@ -1,17 +1,17 @@
 .. _controller:
 
 ==========================
-The mamba controller guide
+The Mamba controller guide
 ==========================
 
-The controller is what connects your model and business logic with the views in the frontend part of the application. In mamba we don't have routing system like Django does, in mamba we use a request routing system similar to the one found in Bottle or Flask.
+The controller is what connects your model and business logic with the views in the frontend part of the application. In Mamba we don't have routing system like Django does, in Mamba we use a request routing system similar to the one found in Bottle or Flask.
 
 How it works?
 =============
 
-Every controller in a mamba application inherits directly from the :class:`mamba.application.controller.Controller` class. A controller can define **action methods** and regular methods.
+Every controller in a Mamba application inherits directly from the :class:`mamba.application.controller.Controller` class. A controller can define **action methods** and regular methods.
 
-    * An action method is a method that is invoqued by the underlying request routing system when our application receives a request. Each action in our controller has to fit in a route, we define routes using the ``route`` decorator and decorating the method to fit a route.
+    * An action method is a method that is invoked by the underlying request routing system when our application receives a request. Each action in our controller has to fit in a route, we define routes using the ``route`` decorator and decorating the method to fit a route.
     * A regular method is just a normal method that is not decorated and is usually some kind of helper method that helps our controllers to make its work.
 
 A controller can define as many action and regular emthods as is needed and every controller action represents a single URL segment of the application.
@@ -36,18 +36,18 @@ A controller can define as many action and regular emthods as is needed and ever
 
 Mamba create and handles an internal controller manager object that load all the controllers that are found in our application on initialization time and register all its routes with the routing system.
 
-When a HTTP request is made from a client, its captured by the underlying |twisted| routing mechanism that delegate its process to the main or root mamba's controller (that is defined internally into the framework) that pass it to the mamba's routing and templating system to locate, retrieve and render a response for the given request.
+When a HTTP request is made from a client, it's captured by the underlying |twisted| routing mechanism that delegate its process to the main or root Mamba's controller (that is defined internally into the framework) that pass it to the Mamba's routing and templating system to locate, retrieve and render a response for the given request.
 
-The response can be a HTML rendered page, text, a JSON structure, a XML Object or arbitrary binary data, that depends completely on the application and what the client is looking for. If mamba can't locate a valid action or resource for the given request, a 404 response will be returned back.
+The response can be a HTML rendered page, text, a JSON structure, a XML Object or arbitrary binary data, that depends completely on the application and what the client is looking for. If Mamba can't locate a valid action or resource for the given request, a 404 response will be returned back.
 
 Controllers route
 =================
 
-Every mamba controller has to define a route for themselves, this route is their position in the web site path hierarchy and it **must** be a single path segment of the URL. A controller that doesn't define a controller route is attached to the main |twisted| Site object and becomes the root of the application. That means no mamba's default special behaviour is goign to be available for the site if we dont define it mannually in the controller that becomes the root.
+Every Mamba controller has to define a route for themselves, this route is their position in the web site path hierarchy and it **must** be a single path segment of the URL. A controller that doesn't define a controller route is attached to the main |twisted| Site object and becomes the root of the application. That means no Mamba's default special behaviour is going to be available for the site if we don't define it mannually in the controller that becomes the root.
 
 .. note::
 
-    Don't worry if you don't totally undertand that, it will be clear later in this chapter.
+    Don't worry if you don't totally understand that, it will be clear later in this chapter.
 
 The controller's route can be defined when we create the controller using the ``mamba-admin controller`` sub-command or just editing the resulting file with our text editor. The argument for the ``mamba-admin`` command line tool is ``--route=<our route>`` so for example, the command::
 
@@ -96,7 +96,7 @@ As you can see, the generated file already defines the controller's route as ``'
     __route__ = 'api/socket'
     ...
 
-The above example should end in the behaviour described avobe.
+The above example should end in the behaviour described above.
 
 Controllers actions
 ===================
@@ -125,7 +125,7 @@ Controller actions can define more extensive route paths so we can for example r
         contact = new Contact(email, password)
         contact.create()
 
-In the above example our final route path (as will be invoqued from the web client) is ``http://localhost/api/contacts/add/john_doe@gmail.com/ultrasecret``. This is:
+In the above example our final route path (as will be invoked from the web client) is ``http://localhost/api/contacts/add/john_doe@gmail.com/ultrasecret``. This is:
 
 ================ ============= ==========================================================
 Controller route Action route  Match
@@ -140,9 +140,9 @@ Controller route Action route  Match
 Mamba's default root
 ====================
 
-Mamba defines internally a default root route that points always to the ``index.html`` template view. Sometimes we need a controller becomes the root of our application because we want to develop a full backend REST service or for whatever other reasson. When we do that, we are going to override all the mamba's auto insertion of mambaerized resources like CSS, LESS or JavaScript files.
+Mamba defines internally a default root route that points always to the ``index.html`` template view. Sometimes we need a controller to become the root of our application because we want to develop a full backend REST service or for whatever other reasson. When we do that, we are going to override all the Mamba's auto insertion of **mambaerized** resources like CSS, LESS or JavaScript files.
 
-If you are not going to use a frontend at all then you are just done, all is ok and you don't have to care about but if you are planning to use mamba's templating system then you have to create a new index to recover the default root functionallity.
+If you are not going to use a frontend at all then you are just done, all is ok and you don't have to care about but if you are planning to use Mamba's templating system then you have to create a new index to recover the default root functionality.
 
 First of all we have to create a new view for the controller using the ``mamba-admin view`` subcommand. Let's imagine we defined a controller that becomes the root resource in our application and we call it ``Main`` and we use the default ``root`` action method as the ``/`` or index route:
 
@@ -155,7 +155,7 @@ First of all we have to create a new view for the controller using the ``mamba-a
 
         def __init__(self):
             """
-            Put your initializarion code here
+            Put your initialization code here
             """
             super(Main, self).__init__()
 
@@ -167,9 +167,9 @@ Then we generate a new view for the root action using the ``mamba-admin`` comman
 
     $ mamba-admin view root Main
 
-This will generate a new file ``application/view/Main/root.html`` that becomes our new index template for our whole application that inherits from the ``layout.html`` template and knows howto insert the mambaerized resources into our templates in automatic way.
+This will generate a new file ``application/view/Main/root.html`` that will be our new index template for the whole application that inherits from the ``layout.html`` template. This view will know how to insert the **mambaerized** resources into our templates in automatic way.
 
-Our last step is just make a small change in the ``root`` action in the controller to make it render our new index:
+Our last step is to just make a small change in the ``root`` action in the controller to make it render our new index:
 
 .. sourcecode:: python
 
@@ -182,7 +182,7 @@ Our last step is just make a small change in the ``root`` action in the controll
 
         def __init__(self):
             """
-            Put your initializarion code here
+            Put your initialization code here
             """
             super(Main, self).__init__()
             self.template = templating.Template(controller=self)
@@ -198,7 +198,7 @@ Our last step is just make a small change in the ``root`` action in the controll
 Going asynchronous
 ==================
 
-Mamba is just |twisted| and |twisted| is an asynchornous network framework, we can run operations asynchronous and return back callbacks from |twisted| deferreds as we do in any normal |twisted| application. We can do it always that we decorate a model method with the ``@transact`` decorator in our models.
+Mamba is just |twisted| and |twisted| is an asynchronous network framework. We can run operations asynchronous and return back callbacks from |twisted| deferreds as we do in any normal |twisted| application. We can do it always that we decorate a model method with the ``@transact`` decorator in our models.
 
 .. sourcecode:: python
 
@@ -243,7 +243,7 @@ We just used the |twisted|'s ``@defer.inlineCallbacks`` decorator to yield resul
 Returning values from controller actions
 ========================================
 
-I'm pretty sure that the reader already noticed that we use an ``Ok`` object as return from our controller actions. The :class:`~mamba.web.responses.Ok` class is one of the multiple built-in response objects that you can return from your application controllers.
+Surely the reader already noticed that we use an ``Ok`` object as return from our controller actions. The :class:`~mamba.web.responses.Ok` class is one of the multiple built-in response objects that you can return from your application controllers.
 
 Mamba defines 14 predefined types of response objects that set the content-type and other parameters of the HTTP response that our applications can return back to the web clients.
 
@@ -264,4 +264,4 @@ Mamba defines 14 predefined types of response objects that set the content-type 
 
 Mamba return back some of those codes by itself in some situations, for example, if we try to use a route that exists but in a different HTTP method, we get a :class:`~mamba.web.response.NotImplemented` response object.
 
-You can return whatever of those objects from your controller, mamba take care to render it correctly to the web client. You can also return dictionaries and other objects, mamba should try to convert whatever object that you return from a controller into a serializable JSON structure with a default 200 OK HTTP response code and an 'application/json' encoding.
+You can return whatever of these objects from your controller. Mamba take care of rendering it correctly to the web client. You can also return dictionaries and other objects. Mamba will try to convert whatever object you return from a controller into a serializable JSON structure with a default 200 OK HTTP response code and an 'application/json' encoding.

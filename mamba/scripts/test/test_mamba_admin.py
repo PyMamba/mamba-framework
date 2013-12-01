@@ -581,7 +581,7 @@ class ControllerScriptTest(unittest.TestCase):
             '    __route__ = \'\'\n\n'
             '    def __init__(self):\n'
             '        """\n'
-            '        Put your initializarion code here\n'
+            '        Put your initialization code here\n'
             '        """\n'
             '        super(TestController, self).__init__()\n\n'
             '    @route(\'/\')\n'

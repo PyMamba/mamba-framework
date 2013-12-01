@@ -344,7 +344,7 @@ This will create a new file called ``contact.py`` in the ``application/controlle
 
         def __init__(self):
             """
-            Put your initializarion code here
+            Put your initialization code here
             """
             super(Contact, self).__init__()
 
@@ -417,7 +417,7 @@ Now we have to modify our controller a bit in order to make it use the new templ
 
         def __init__(self):
             """
-            Put your initializarion code here
+            Put your initialization code here
             """
             super(Contact, self).__init__()
 
@@ -477,6 +477,6 @@ The End
 
 And we have reached the end of this basic introduction to Mamba framework, there is a lot more to discover about Mamba's features but we hope you have now an idea of the backbone of the framework.
 
-Of course all the files that we created with the ``mamba-admin`` command line tool can be created by hand and it should work as expected. If you want to see a real world Mamba application, we suggest you to visit the `BlackMamba <https://github.com/DamnWidget/BlackMamba>`_ GitHub repository.
+Of course all the files that we created with the ``mamba-admin`` command line tool can be created by hand and it should work as expected. If you want to see a real world Mamba application, we suggest you to visit the `BlackMamba <https://github.com/PyMamba/BlackMamba>`_ GitHub repository.
 
 |

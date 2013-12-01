@@ -67,13 +67,13 @@ rst_prolog = """
 .. _pep8: http://www.python.org/dev/peps/pep-0008/
 
 .. |repo| replace:: GitHub repository
-.. _repo: https://github.com/DamnWidget/mamba
+.. _repo: https://github.com/PyMamba/mamba-framework
 
 .. |less| replace:: LESS
 .. _less: http://lesscss.org/
 
 .. |relnotes| replace:: relnotes index
-.. _relnotes: https://github.com/DamnWidget/mamba/blob/master/docs/relnotes/index.rst
+.. _relnotes: https://github.com/PyMamba/mamba-framework/blob/master/docs/relnotes/index.rst
 
 .. |noasync| replace:: This method is not asynchronous!
 """

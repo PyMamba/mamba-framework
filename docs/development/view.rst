@@ -1,24 +1,24 @@
 .. _view:
 
 ====================
-The mamba view guide
+The Mamba view guide
 ====================
 
-Mamba uses |jinja2|_ as template engine. Jinja2 is a modern and designer friendly templating language for Python, modelled after Django's templates. It is fast, widely used and secure with optional sandboxed template execution environment.
+Mamba uses |jinja2|_ as template engine. Jinja2 is a modern and designer friendly templating language for Python, modelled after Django's templating system. It is fast, widely used and secure with optional sandboxed template execution environment.
 
 Jinja2 Documentation
 ====================
 
-Jinja2 has it's own (and extensive) documentation, mamba take cares of the initialization of the common contexts and loaders so you don't have to take care yourself.
+Jinja2 has its own (and extensive) documentation, Mamba take cares of the initialization of the common contexts and loaders so you don't have to take care yourself.
 
-The |jinja2| documentation is available in it's `project web site <http://jinja.pocoo.org/docs/>`_, we recommend you visit their documentation.
+The |jinja2| documentation is available in it's `project web site <http://jinja.pocoo.org/docs/>`_, we recommend you read their documentation.
 
 Mamba templating
 ================
 
-Mamba implements its own wrapper around |jinja2| templating engine to integrate it with mamba routing and controllers systems.
+Mamba implements its own wrapper around |jinja2| templating engine to integrate it with Mamba routing and controllers systems.
 
-In mamba, the only thing that you need to create and render a new template is create a |jinja2| template file into ``application/view/templates`` directory and point to it with your browsers or link it in another of your application pages.
+In Mamba, the only thing that you need to create and render a new template is create a |jinja2| template file into ``application/view/templates`` directory and point to it with your browsers or link it in another of your application pages.
 
 Mamba define a default root template internally called ``root_page.html`` that is needed for the framework to insert the web resources that we add to the ``stylesheets`` and ``scripts`` directories into ``application/view``. The layout that all the views in your application share inherit directly from this internal template.
 
@@ -36,7 +36,7 @@ for css files and::
 
 for JavaScript ones.
 
-When we generate a new mamba application with the ``mamba-admin`` command line tool, it creates a default ``layout.html`` file that is located inside the ``application/view`` directory. This file can be used as common layout for all your application pages and it **must** inherit directly from ``root_page.html``.
+When we generate a new Mamba application with the ``mamba-admin`` command line tool, it creates a default ``layout.html`` file that is located inside the ``application/view`` directory. This file can be used as common layout for all your application pages and it **must** inherit directly from ``root_page.html``.
 
 The default content of the basic layout is as follows:
 
@@ -80,16 +80,16 @@ The command above will generate a new ``index.html`` template file inside ``appl
 
         {% endblock %}
 
-As you can see, this new template file inherits from ``layout.html``, as we already defined our web site layout we have only to take care of the *content* of this especific template or page, in this way we don't need to rewrite unnecesary HTML code in every template in our web site.
+As you can see, this new template file inherits from ``layout.html``, as we already defined our web site layout we have only to take care of the *content* of this especific template or page, in this way we don't need to rewrite unnecessary HTML code in every template in our web site.
 
 We can create as many template files as we want for our application but those templates are just static templates their content is really inmutable. Sometimes this us just what you want because you are creating a single page application for example and what you need is just load some JavaScript files that really takes care of all the frontend related actions.
 
 To generate dynamic content for our templates we need controllers and routes that call actions in those controllers and then render a view based in our template files.
 
-The mamba Template class
+The Mamba Template class
 ========================
 
-The way that mamba controllers have to render our templates is just using the :class:`mamba.core.templating.Template` class. We can render whatever template that we need instanciating those classes and calling their ``render`` method with the arguments that we need.
+The way that Mamba controllers have to render our templates is just using the :class:`mamba.core.templating.Template` class. We can render whatever template that we need instantiating those classes and calling their ``render`` method with the arguments that we need.
 
 .. sourcecode:: python
 
@@ -108,7 +108,7 @@ The way that mamba controllers have to render our templates is just using the :c
             super(DummyController, self).__init__()
             self.template = templating.Template(controller=self)
 
-When we pass ``self`` as the ``controller`` argument to the constructor we are telling mamba to look for templates also in the controller templates directory. Every template that is inside this directory hides whatever other template that is located in the general templates directory (``application/view/templates``) that has the same name.
+When we pass ``self`` as the ``controller`` argument to the constructor we are telling Mamba to look for templates also in the controller templates directory. Every template that is inside this directory hides whatever other template that is located in the general templates directory (``application/view/templates``) that has the same name.
 
 The controller templates directory
 ----------------------------------
@@ -179,7 +179,7 @@ This is the case of the mamba's main page navigation bar for example. Mamba main
       {% endif %}
     </ul>
 
-To correctly render the web site we need to know in which page we are now and which pages are available from where we are. To do that we added a global structure in the ``applicaiton/controller/__init__.py`` file that we can use from whatever controller:
+To correctly render the web site we need to know in which page we are now and which pages are available from where we are. To do that we added a global structure in the ``application/controller/__init__.py`` file that we can use from whatever controller:
 
 .. sourcecode:: python
 
@@ -266,20 +266,20 @@ We fill the ``controller.template_args`` using the function ``toggle_menu`` with
 
 .. note::
 
-    The full code of the mamba web site can be found under the GPLv3 License at `https://github.com/DamnWidget/BlackMamba <https://github.com/DamnWidget/BlackMamba>`_
+    The full code of the mamba web site can be found under the GPLv3 License at `https://github.com/PyMamba/BlackMamba <https://github.com/PyMamba/BlackMamba>`_
 
 Rendering global templates from controller actions
 --------------------------------------------------
 
-We can pass a template name as the first argument (or as template keyword argument) to the template ``render`` method. If we passed ``self`` as value of the ``controller`` argument when you instantiate the ``Template`` object, then mamba should try to load it from the controller's templates directory and if can't find it then it will look in the global templates directory.
+We can pass a template name as the first argument (or as template keyword argument) to the template ``render`` method. If we passed ``self`` as value of the ``controller`` argument when you instantiate the ``Template`` object, then Mamba should try to load it from the controller's templates directory and if can't find it then it will look in the global templates directory.
 
-If mamba can't find any template with that name then it raises a :class:`core.templating.NotConfigured` exception.
+If Mamba can't find any template with that name then it raises a :class:`core.templating.NotConfigured` exception.
 
 Auto compiling LESS scripts
 ===========================
 
-Mamba can auto-compile `LESS <http://lesscss.org/>`_ scripts if the `lessc` tool has been istalled on the system as its available to the user that is running the mamba application.
-In case that the `lessc` tool is not installed on the system, the raw contents of the less file are returned as fallback.
+Mamba can auto-compile `LESS <http://lesscss.org/>`_ scripts if the `lessc` tool has been installed on the system and it's available to the user that is running the Mamba application.
+In case the `lessc` tool is not installed on the system, the raw contents of the less file are returned as fallback.
 
 To add a |less| resource to our application we should just place the |less| file into the `application/view/stylesheets` directory with the following header:
 
@@ -295,7 +295,7 @@ Mamba will try to compile the |less| scripts that are placed in that directory a
 |less| auto-compilation when lessc is not available
 ---------------------------------------------------
 
-In environments where `lessc` is not available, Heroku for example, we can set the configuration option `lessjs` in `config/application.json` with the exact file name of the `less.js` script that we want to use.
+In environments where `lessc` is not available, Heroku for example, we can set the configuration option `lessjs` in `config/application.json` with the exact file name of the `less.js` script that we want to user.
 Mamba will insert the |less| JavaScript version in the main layout for us.
 
 .. note ::
