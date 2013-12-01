@@ -483,6 +483,7 @@ class WebSocketProtocol(ProtocolWrapper):
 
         reactor.listenTCP(6543, websocket.WebSocketFactory(EchoFactory()))
 
+    .. versionadded:: 0.3.6
 
     """
 
