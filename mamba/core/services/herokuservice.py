@@ -52,7 +52,7 @@ class HerokuService(service.Service):
         heroku_url = config.Application().heroku_url
         log.msg('Heroku Awakner: Pinging {}'.format(heroku_url))
         return Agent(reactor).request(
-            'POST', heroku_url,
+            'POST', str(heroku_url),
             Headers({'User-Agent': ['Mamba Heroku Web Client']}),
             None
         )
