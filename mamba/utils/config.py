@@ -248,6 +248,8 @@ class Application(BaseConfig):
         self.platform_debug = False
         self.development = False
         self.auto_select_reactor = False
+        self.force_heroku_awake = False
+        self.heroku_url = None
 
 
 class InstalledPackages(BaseConfig):

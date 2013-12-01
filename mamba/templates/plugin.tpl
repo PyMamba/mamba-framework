@@ -8,6 +8,8 @@ from twisted.application.service import IServiceMaker
 from mamba.utils import config
 from mamba.enterprise import database
 from mamba.core.session import Session
+from mamba.utils.heroku import are_we_on_heroku
+from mamba.core.services.herokuservice import HerokuService
 from mamba.core.services.threadpool import ThreadPoolService
 from ${application} import MambaApplicationFactory
 
@@ -41,6 +43,9 @@ class MambaServiceMaker(object):
 
         thread_pool = ThreadPoolService(database.Database.pool)
         application.addService(thread_pool)
+
+        if are_we_on_heroku():
+            application.addService(HerokuService)
 
         return application
 
