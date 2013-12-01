@@ -45,7 +45,7 @@ class MambaServiceMaker(object):
         application.addService(thread_pool)
 
         if are_we_on_heroku():
-            application.addService(HerokuService)
+            application.addService(HerokuService())
 
         return application
 
