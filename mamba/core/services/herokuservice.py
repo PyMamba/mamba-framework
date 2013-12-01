@@ -34,7 +34,7 @@ class HerokuService(service.Service):
 
     def startService(self):
         if self.on_heroku and self.allowed and not self.running:
-            self.ping_task.start(300)  # run each five minutes
+            self.ping_task.start(1200)  # run each twenty minutes
             service.Service.startService(self)
 
     def stopService(self):
@@ -52,7 +52,7 @@ class HerokuService(service.Service):
         heroku_url = config.Application().heroku_url
         log.msg('Heroku Awakening: Pinging {}'.format(heroku_url))
         return Agent(reactor).request(
-            'POST', str(heroku_url),
+            'GET', '{url}/_mamba_pong'.format(url=str(heroku_url)),
             Headers({'User-Agent': ['Mamba Heroku Web Client']}),
             None
         )
