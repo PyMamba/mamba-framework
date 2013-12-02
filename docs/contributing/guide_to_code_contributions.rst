@@ -5,7 +5,7 @@
 Mamba guide to code contributions
 =================================
 
-This is just a basic guide to mamba development. If you came here looking for a guide about how to use mamba to develop web applications, please, refer to the :doc:`../development/mamba_development_guide`.
+This is just a basic guide to Mamba development. If you came here looking for a guide about how to use Mamba to develop web applications, please, refer to the :doc:`../development/mamba_development_guide`.
 
 Just a few considerations
 -------------------------
@@ -14,7 +14,7 @@ We assume you have already a `GitHub <https://github.com>`_ account and you know
 
 Mamba follows the workflow described in this `Git Workflow <https://sandofsky.com/blog/git-workflow.html>`_ Document wrote by Benjamin Sandofsky.
 
-You should be familiarized already with mamba concepts. In particular you should read and understand :doc:`mamba_12_steps`, :doc:`submitting_code` and :doc:`coding_style`.
+You should be familiarized already with Mamba concepts. In particular you should read and understand :doc:`mamba_12_steps`, :doc:`submitting_code` and :doc:`coding_style`.
 
 Contributors documentation
 --------------------------

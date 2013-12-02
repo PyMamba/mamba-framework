@@ -25,7 +25,7 @@ class ${controller_class}(controller.Controller):
 
     def __init__(self):
         """
-        Put your initializarion code here
+        Put your initialization code here
         """
         super(${controller_class}, self).__init__()
 

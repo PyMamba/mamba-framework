@@ -4,7 +4,7 @@
 Mamba coding style guide
 ========================
 
-Like other Python projects, mamba try to follow the |pep8|_ and |sphinx|_ as docstrings conventions. Make sure to read those documents if you intent to contrbute to Mamba.
+Like other Python projects, Mamba try to follow the |pep8|_ and |sphinx|_ as docstrings conventions. Make sure to read those documents if you intent to contrbute to Mamba.
 
 Naming conventions
 ------------------
@@ -29,17 +29,17 @@ Style rules
 Inconsistences
 --------------
 
-Mamba uses |twisted|_ as his main component and Twisted doesn't follow |pep8|_ coding style and is never going to follow it. Because that you are going to be aware of some pretty inconsistences where we use twisted objects and methods.
+Mamba uses |twisted|_ as its main component and Twisted doesn't follow |pep8|_ coding style and is never going to follow it. Because of that, be aware of some inconsistences where we use twisted objects and methods.
 
-We want to be clear on that, we **never** use |twisted| coding name conventions in exclusive mamba code, **no exceptions** to this rule.
+We want to be clear on that: we **never** use |twisted| coding name conventions in exclusive Mamba code, **no exceptions** to this rule.
 
 Principles
 ----------
 
-#. Never violates `DRY <http://programmer.97things.oreilly.com/wiki/index.php/Don%27t_Repeat_Yourself>`_
-#. Any code change **must** pass unit tests and shouldn't break any other test in the system
-#. No commit should break the master build
-#. No change should break user code silently, deprecations and incompatibilities must be always a known (and a well documented) matter
+#. Never violates `DRY <http://programmer.97things.oreilly.com/wiki/index.php/Don%27t_Repeat_Yourself>`_.
+#. Any code change **must** pass unit tests and shouldn't break any other test in the system.
+#. No commit should break the master build.
+#. No change should break user code silently, deprecations and incompatibilities must be always a known (and a well documented) matter.
 
 |
 |
