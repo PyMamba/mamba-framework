@@ -73,6 +73,8 @@ class Page(resource.Resource):
         # insert stylesheets and scripts
         self.insert_stylesheets()
         self.insert_scripts()
+        # register service ponger
+        self.putChild('_mamba_pong', static.Data('PONG', 'text/plain'))
 
         # static accessible data (scripts, css, images, and others)
         self.putChild('assets', self._assets)

@@ -17,6 +17,8 @@ import string
 
 class Checkers(object):
     """Just implement common methods to perform checks on user inputs
+
+    .. versionadded:: 0.3.6
     """
 
     NONE, CAPS, NUMERIC, SYMBOLS = [1 << i for i in range(4)]

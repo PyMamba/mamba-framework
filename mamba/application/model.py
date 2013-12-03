@@ -95,6 +95,7 @@ class Model(ModelProvider):
 
     def __init__(self):
         super(Model, self).__init__()
+        self.__mamba_async__ = getattr(self, '__mamba_async__', True)
 
         if not self.database.started:
             self.database.start()
@@ -252,6 +253,8 @@ class Model(ModelProvider):
             model.find(Customer.name == u"John")
             model.find(name=u"John")
             model.find((Customer, City), Customer.city_id == City.id)
+
+        .. versionadded:: 0.3.6
         """
 
         obj = klass
@@ -270,6 +273,8 @@ class Model(ModelProvider):
         :type order_by: model property
         :param desc: if True, order the resultset by descending order
         :type desc: bool
+
+        .. versionadded:: 0.3.6
         """
 
         def inner_transaction():

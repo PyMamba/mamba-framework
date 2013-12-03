@@ -420,6 +420,13 @@ class PageTest(unittest.TestCase):
             self.root.getChild('test', DummyRequest(['']))
         )
 
+    def test_page_add_pong_static_url(self):
+
+        request = DummyRequest([''])
+        self.assertEqual(
+            self.root.children.get('_mamba_pong').render_GET(request), 'PONG'
+        )
+
     def test_page_add_script(self):
 
         style = stylesheet.Stylesheet(
