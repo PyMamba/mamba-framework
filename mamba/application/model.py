@@ -244,7 +244,6 @@ class Model(ModelProvider):
         store.remove(self)
 
     @classmethod
-    @transact
     def find(klass, *args, **kwargs):
         """Find an object in the underlying database
 
@@ -259,10 +258,11 @@ class Model(ModelProvider):
         if len(args) > 0 and (type(args[0]) == tuple or type(args[0]) == list):
             obj = args[0]
 
-        return klass.database.store().find(obj, *args, **kwargs)
+        return Transactor(klass.database.pool).run(
+            klass.database.store().find, obj, *args, **kwargs
+        )
 
     @classmethod
-    @transact
     def all(klass, order_by=None, desc=False, *args, **kwargs):
         """Return back all the rows in the database for this model
 
@@ -280,7 +280,8 @@ class Model(ModelProvider):
 
             return data
 
-        return inner_transaction(*args, **kwargs)
+        return Transactor(
+            klass.database.pool).run(inner_transaction, *args, **kwargs)
 
     @transact
     def create_table(self):
