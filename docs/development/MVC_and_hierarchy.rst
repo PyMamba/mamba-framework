@@ -6,20 +6,20 @@ Mamba and the MVC pattern
 
 According to Wikipedia; *Model View Controller (MVC) is a software architecture, currently considered as an architectural pattern used in software engineering. The pattern isolates "domain logic" (the application logic for the user) from input and presentation (GUI), permitting independent development, testing and maintenance of each.*
 
-Mamba implements the MVC pattern using Jinja2 templates as the **view**, the **model** and the **controller** components. In mamba, the routing system is integrated into the controller itself.
+Mamba implements the MVC pattern using Jinja2 templates as the **view**, then Mamba components act as the **model** and the **controller**. In Mamba, the routing system is integrated into the controller itself.
 
-Is mamba meant to be a real MVC implementation?
+Is Mamba meant to be a real MVC implementation?
 -----------------------------------------------
 
 That depends on the interpretation of the paragraph above. Mamba applications are implemented using a MVC like pattern as we separate our business logic from the view (that only knows about render HTML), the controllers receive inputs as HTTP requests and initiates responses by calling methods in model objects that interacts with different data sources, interpret that data and send results back to the view through the controller (or send it through JSON or sockets to third parties).
 
-The last description can be defined as a MVC pattern implementation or not depending from the point of view. Anyway, that's not important, the point is understand that mamba isolates the logic from the data from the presentation of the data, that's all that you are going to want to take care of.
+The last description can be defined as a MVC pattern implementation or not depending on the point of view. Anyway, Mamba isolates the logic of the data from the presentation of the data, that's all that you are going to want to take care of.
 
 =================================
-Standard mamba application layout
+Standard Mamba application layout
 =================================
 
-A mamba standard application layout is as follows::
+A Mamba standard application layout is as follows::
 
     application                     → Application package
      └ controller                   → Application controllers
@@ -49,14 +49,14 @@ The application directory
 
 The ``application`` directory contains all our application Python code (with the exception of the shared packages and the ``ApplicationFactory``)
 
-The ``application`` directory contains three directories to implement the MVC pattern and a forth one where to place all the code that doesn't fit the MVC pattern and 3rd party libraries as well, all of them are Python packages:
+The ``application`` directory contains three directories to implement the MVC pattern and a fourth one where to place all the code that doesn't fit the MVC pattern and 3rd party libraries as well, all of them are Python packages:
 
     * application/controller        → Python package
     * application/model             → Python package
     * application/view              → Python package
     * application/lib               → Python package
 
-The ``application`` directory is a package itself, that means it contains an ``__init__.py`` file so you can add whatever other directory/package/module that you need to it. The application directory and all it contents are exported by default when you pack or install your application.
+The ``application`` directory is a package itself, meaning it contains an ``__init__.py`` file so you can add whatever other directory/package/module that you need. The application directory and all its contents are exported by default when you :ref:`pack <packing-an-application>` or install your application.
 
 The config directory
 --------------------
@@ -66,11 +66,11 @@ The ``config`` contains the application configuration files. Those files **must*
     * ``application.json``, this is the main configuration file for the application, if you need to add some configurable parameter to your application, this is the file to place it
     * ``database.json``, this file is used to configure database connections and it parameters
 
-There is a 3rd file that is used to tell mamba that we want to include some mamba shared package in our application:
+A third file is used to tell Mamba that we want to include some Mamba shared package in our application:
 
-    * ``installed_packages.json``, this file contains a list of installed mamba shared packages that we want to use in our application
+    * ``installed_packages.json``, this file contains a list of installed Mamba shared :ref:`packages <reusability>` that we want to use in our application
 
-If you need to add some custom configuration file, you have to place it inside this directory by convention.
+If you need to add some custom configuration file, you shoud place it inside this directory to follow convention.
 
 The docs directory
 ------------------
@@ -95,7 +95,7 @@ The ``test`` directory contains your application unit tests and integration test
 The twisted directory
 ---------------------
 
-Twisted directory is used internally by mamba and |twisted| to daemonize your mamba applications, you don't have to care about this derectory and it contents.
+Twisted directory is used internally by mamba and |twisted| to daemonize your mamba applications, you don't have to care about this dIrectory and itS contents.
 
 The logs directory
 ------------------

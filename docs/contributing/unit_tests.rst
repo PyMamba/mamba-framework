@@ -5,12 +5,12 @@
 Unit testing
 ============
 
-Each unit test will test a single functionallity of the system. Unit tests are automated and should run with no human intervention. The output of an unit test should be **pass** or **fail**. All the tests on mamba al gathered in a single test suite and can run as a single batch.
+Each unit test will test a single functionallity of the system. Unit tests are automated and should run with no human intervention. The output of an unit test should be **pass** or **fail**. All the tests on mamba are gathered in a single test suite and can run as a single batch.
 
-Howto running tests
+How to run tests
 -------------------
 
-Mamba uses Twisted's `Trial <http://twistedmatrix.com/trac/wiki/TwistedTrial>`_ tool to run unit tests. To run the test suite you have to cd into the mamba root directory and run the trial tool:
+Mamba uses Twisted's `Trial <http://twistedmatrix.com/trac/wiki/TwistedTrial>`_ tool to run unit tests. To run the test suite you have to cd into the Mamba root directory and run the trial tool:
 
     $ trial mamba
 
@@ -21,11 +21,11 @@ You can also execute the `tests` bash script that runs `trial mamba` in the back
 Adding new tests
 ----------------
 
-You never add a new module to mamba without adding a batch of unit tests for the module as well. You never commit any code **until you make sure** that all the tests pass, so that means all the tests should be green when you run `trial mamba` in the root of the project.
+You never add a new module to Mamba without adding a batch of unit tests for the module as well. You never commit any code **until you make sure** that all the tests pass, so that means all the tests should be green when you run `trial mamba` in the root of the project.
 
-If you commit code that breaks the unit test suite ever you can be *hunted down* by other developers so make sure your code follow the guidelines and pass the tests.
+If you commit code that breaks the unit test suite you can be *hunted down* by other developers so make sure your code follow the guidelines and pass the tests.
 
-You have to add unit tests for your module and code because in this way other developers can check if their own changes to other parts of the code affects in any way your modules just runnign the test suite.
+You have to add unit tests for your module and code because in this way other developers can check if their own changes to other parts of the code affects in any way your modules just running the test suite.
 
 Tests go into dedicated test packages, normally `mamba/test/` for framework tests and `mamba/scripts/test` for the `mamba-admin` command line tool. Tests should be named as `test_module.py`. If the module is part of a core system like *web* you can add the tests directly into the `mamba/test/test_web.py` file.
 
@@ -34,7 +34,7 @@ Mamba tests cases should inherit from `twisted.trial.unittest.TestCase` instead 
 Twisted test implementation guidelines
 --------------------------------------
 
-The next section is exact to `twisted unit testing documentation <http://twistedmatrix.com/documents/current/core/development/policy/test-standard.html>`_, mamba is based on twisted itself so the same guidelines are applied to the implementation of unit tests. Those guidelines has been copied (and modified for convenience in some cases) as is from the current twisted version documentation.
+The next section is exact to `twisted unit testing documentation <http://twistedmatrix.com/documents/current/core/development/policy/test-standard.html>`_, Mamba is based on twisted itself so the same guidelines are applied to the implementation of unit tests. Those guidelines has been copied (and modified for convenience in some cases) as is from the current twisted version documentation.
 
 Real I/O
 ~~~~~~~~

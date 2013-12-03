@@ -193,7 +193,7 @@ Mamba integrates the Jinja2 templating system as a core component of the framewo
 Deployment
 ----------
 
-Mamba integrates the Fabric deployment library and it's used by Mamba itself to release new versions and deploy the framework to the live mamba web site. To see an example of usage you can check the `mamba devel <https://github.com/DamnWidget/mamba_devel>`_ package on GitHub.
+Mamba integrates the Fabric deployment library and it's used by Mamba itself to release new versions and deploy the framework to the live mamba web site. To see an example of usage you can check the `mamba devel <https://github.com/PyMamba/mamba_devel>`_ package on GitHub.
 
 .. autoclass:: mamba.deployment.deployer.DeployerImporter
     :members:

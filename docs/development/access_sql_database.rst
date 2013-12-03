@@ -4,7 +4,7 @@
 Using SQL databases
 ===================
 
-Mamba provides access to SQL databases through the :class:`~mamba.core.model.Model` class in asyncrhonous or synchronous way using the same database connection. Actually, Mamba supports **SQLite**, **MySQL/MariaDB** and **PostgreSQL** databases. In order to connect to a database, you have to configure the connection details in your application ``config/database.json`` file:
+Mamba provides access to SQL databases through the :class:`~mamba.core.model.Model` class in asynchronous or synchronous way using the same database connection. Currently, Mamba supports **SQLite**, **MySQL/MariaDB** and **PostgreSQL** databases. In order to connect to a database, you have to configure the connection details in your application ``config/database.json`` file:
 
 .. code-block:: json
 
@@ -102,7 +102,7 @@ Mamba uses a valid `URI <http://en.wikipedia.org/wiki/Uniform_resource_identifie
 SQLite URIs
 -----------
 
-The simplest valid URI that we can use for our mamba application is just the SQLite in memory database:
+The simplest valid URI that we can use for our mamba application is just the SQLite in-memory database:
 
 .. sourcecode:: python
 
@@ -117,7 +117,7 @@ Relative (to the web application root directory) or absolute paths can be used f
     "uri": "sqlite:///foo"
     "uri": "sqlite:///home/user/foo"
 
-If the database doesn't exists yet, mamba will create it when we try to use first. If the path doesn't exists or is not accessible (e.g. permission denied), an exception ``OperationalError`` will be raised.
+If the database doesn't exists yet, Mamba will create it when we first try to use it. If the path doesn't exists or is not accessible (e.g. permission denied), an exception ``OperationalError`` will be raised.
 
 SQLite accepts one option in the option part of the URI. We can set the time that SQLite will wait when trying to obtain a lock on the database. The default value for the timeout is five seconds, an example of the above is as follows:
 
@@ -138,13 +138,13 @@ MySQL and MariaDB share syntax for URI's:
 
 .. note::
 
-    MySQL supports depends on the `MySQLdb <http://mysql-python.sourceforge.net/>`_ |python| module
+    MySQL/MariaDB support depends on the `MySQLdb <http://mysql-python.sourceforge.net/>`_ |python| module
 
 
 PostgreSQL
 ----------
 
-Syntax for PostgreSQL is exactly the same than MySQL/MariaDB but replacing the ``mysql://`` for the right ``postgres://`` scheme:
+Syntax for PostgreSQL is exactly the same than MySQL/MariaDB but replacing the ``mysql://`` with ``postgres://`` scheme:
 
 .. sourcecode:: python
 
@@ -152,16 +152,16 @@ Syntax for PostgreSQL is exactly the same than MySQL/MariaDB but replacing the `
 
 .. note::
 
-    PostgreSQL supports depends on the `psycopg2 <http://initd.org/psycopg/>`_ Python module
+    PostgreSQL support depends on the `psycopg2 <http://initd.org/psycopg/>`_ Python module
 
 .. warning::
 
     If you are planning to use PyPy as your interpreter, you **must** install `psycopg2ct <https://github.com/mvantellingen/psycopg2-ctypes>`_ that is an implementation of the psycopg2 module using ctypes
 
-Create or dump SQL schema from mamba models
+Create or dump SQL schema from Mamba models
 ===========================================
 
-In mamba we don't create a schema config file that is then used to generate our model classes, instead of that, we define our model classes and then we generate our SQL schema using our already defined Python code.
+In Mamba we don't create a schema config file that is then used to generate our model classes, instead of that, we define our model classes and then we generate our SQL schema using our already defined Python code.
 
 To create our database structure in live or dump a SQL file with the schema (for whatever SQL backend we configured) we use the ``mamba-admin sql create`` subcommand in the command line interface, so for example to dump the schema into a file we should use::
 
@@ -193,11 +193,11 @@ The above command will dump the database into a file in the current directory na
 Truncating all data in your database
 ====================================
 
-Some times we need to truncate all tables in our database, normally because development tasks. For that scenario you can use the ``reset`` command as::
+Sometimes we need to truncate all tables in our database. For that scenario you can use the ``reset`` command::
 
     $ mamba-admin sql reset --noquestions
 
-The above command will reset all your data without any question, please, be careful with this command.
+The above command will reset all your data without any questions. So, please, be careful with this command.
 
 Interactive Shell
 =================
@@ -218,19 +218,19 @@ The Mamba |storm| - |twisted| integration
 
 Mamba uses a custom modified version of the |storm|'s |twisted| ``@transact`` integration added in |storm| v0.19. It also creates a ``ThreadPool`` service on initialization time so you don't have to take care of do it yourself. The *transact* system is quite simple:
 
-    Any model method that is decorated with the ``@transact`` decorator is executed in a separate thread into the mamba database thread pool and returns a |twisted| `deferred <http://twistedmatrix.com/documents/current/core/howto/defer-intro.html>`_ object. Any method that is not decorated by ``@transact`` is just using regular storm features and it can't run asynchronous.
+    Any model method that is decorated with the ``@transact`` decorator is executed in a separate thread into the Mamba database thread pool and returns a |twisted| `deferred <http://twistedmatrix.com/documents/current/core/howto/defer-intro.html>`_ object. Any method that is not decorated by ``@transact`` is just using regular storm features and it can't run asynchronous.
 
 Using the *transact* system has advantages and disadvantages:
     * The main advantage is it runs asynchronous so it **doesn't block** the |twisted| reactor loop.
     * The main disadvantage is that any return value from the decorated (with ``@transact``) method must **not** contain any reference to Storm objects because they were retrieved in a different thread and of course can't be used outside it. This put limits in some awesome |storm| features that can be used within the decorated method only, ``Reference`` and ``ReferenceSets`` for example.
 
-The transact mechanism can be dangerous in environments where serialization or sinchronization of the data is a requirement because using the ``@transact`` decorated methods can end in unexpected race conditions.
+The transact mechanism can be dangerous in environments where serialization or synchronization of the data is a requirement because using the ``@transact`` decorated methods can end up in unexpected race conditions.
 
-The developer should think about what she needs and use ``@transact`` or not following what the application or the feature or system that is being implemented needs to fit.
+The developer should give some thought about what he or the applications needs to implement, in order to know when to use ``@transact`` or not.
 
-Some mamba model operations runs with ``@transact`` decorated method by default (for example, create, find, read, delete or update) if you need to run those methods in synchronous way you can add the named parameter ``async=False`` to it's call, just like ``customer.update(async=False)``. That is pretty common for calls to those methods from methods that are already decorated by the ``@transact`` decorator.
+Some Mamba model operations runs with ``@transact`` decorated method by default (for example, create, find, read, delete or update) if you need to run those methods in synchronous way you can add the named parameter ``async=False`` to its call, just like ``customer.update(async=False)``. This is pretty common workflow if you're calling these methods from places that are already decorated by the ``@transact`` decorator.
 
-Howto use Storm in mamba models?
+How to use Storm in Mamba models?
 ================================
 
 Mamba's enterprise system take care of any initialization that is needed by the underlying |storm| library, we don't have to care about create database connections or stores. We can use it with CPython or PyPy without any type of code modification.
@@ -238,7 +238,7 @@ Mamba's enterprise system take care of any initialization that is needed by the 
 The Store object
 ----------------
 
-|storm| (and mamba by extension) uses *stores* to operate with the underlying database. You can take a look to the `Storm API documentation <http://people.canonical.com/~therve/storm/storm.store.Store.html>`_ to retrieve a complete list of Store methods and properties.
+|storm| (and Mamba by extension) uses *stores* to operate with the underlying database. You can take a look at the `Storm API documentation <http://people.canonical.com/~therve/storm/storm.store.Store.html>`_ to retrieve a complete list of Store methods and properties.
 
 The mamba's enterprise system initialize a valid |storm| Store object for us always that we need it using the ``database`` model property ``store()`` method:
 
@@ -248,7 +248,7 @@ The mamba's enterprise system initialize a valid |storm| Store object for us alw
 
 Every model object has a copy of the ``database`` object that can be used to retrieve stores and other database related information.
 
-Stores are used to retrieve objects from the database, to insert and update objects on it and of course to execute SQL queries directly to the database. Store is like a traditional ``cursor`` but much more flexible.
+Stores are used to retrieve objects from the database, to insert and update objects on it and of course to execute SQL queries directly to the database. Store is like a traditional ``cursor`` but much more flexible and powerful.
 
 If we need to create and insert a new row into the database we just instantiate the model object and then add it to a valid store:
 
@@ -260,7 +260,7 @@ If we need to create and insert a new row into the database we just instantiate 
     store = self.database.store()
     store.add(peter)
 
-Once an object is added to or retrieved from a store, we can verify if it is bound or related to an store easily:
+Once an object is added or retrieved from a store, we can verify if it is bound or related to an store easily:
 
 .. sourcecode:: python
 
@@ -297,12 +297,12 @@ Stores caches objects as default behaviour so we can check that ``user`` and ``p
     >>> pk_user is user
     True
 
-Each store has an object cache, when an object is linked to a store, it is cached by the store for as long there is a reference to the object somewhere, or while the object becomes dirty (has changes on it). In this way |storm| make sure that we don't access to the database when is not necessary to retrieve the same objects.
+Each store has an object cache. When an object is linked to a store, it is cached by the store for as long there is a reference to the object somewhere, or when the object becomes dirty (has changes on it). In this way |storm| make sure that we don't access to the database when is not necessary to retrieve the same objects again.
 
 Modifiying objects with the Store
 ---------------------------------
 
-We dont have to retrieve an object from the database and then modify and save it, we can just use the Store to do the work for us using expressions:
+We don't have to retrieve an object from the database and then modify and save it, we can just use the Store to do the work for us using expressions:
 
 .. sourcecode:: python
 
@@ -338,18 +338,18 @@ Just decorate your model methods with the ``@transact`` decorator and make sure 
             store = self.database.store()
             return store.find(Dummy).order_by(Dummy.id).last()
 
-The ``get_last`` method above will retrieve the last inserted row in the database, as we are using the ``@transact`` decorator we couldn't use ``Reference`` or ``ReferenceSet`` in the returned object cos those are lazy evaluated and the object was created in a different thread, if we ever try to do that we will get an exception from |storm| ZStore module.
+The ``get_last`` method above will retrieve the last inserted row in the database. As we are using the ``@transact`` decorator we can't use ``Reference`` or ``ReferenceSet`` in the returned object because those are lazy evaluated and the object was created in a different thread. If we ever try to do that we will get an exception from |storm| ZStore module.
 
 If we don't want to use an asynchronous operation we can just remove the ``@transact`` line and it will work perfectly synchronous, of course the limitations about using references with the returned object does not apply on this scenario.
 
 How do I use a store from outside the model method?
 ===================================================
 
-Even mamba allows us to use Store objects everywhere, them are not supossed to be used outside the model but nothing stop you tu use it in the controller or whatever other part of your application.
+Even if Mamba allows us to use Store objects everywhere, they are not suposed to be used outside the model but nothing stop you to use it in the controller or whatever other part of your application.
 
-If you think that you need to use a store object from outside your model class then you can do it in several ways:
+If you think that you need to use a store object from outside your model class,then you can do it in several ways:
 
-1. Don't decorate a method in your moddel with ``@transact`` and then return the store from it. As this store as been created in the same thread that the rest of the application you can use it anywhere.
+1. Don't decorate a method in your model with ``@transact`` and then return the store from it. As this store has been created in the same thread that the rest of the application you can use it anywhere.
 2. Just retrieve a store object executing the ``database.store()`` object directly from your model at class level:
     .. sourcecode:: python
 
@@ -365,6 +365,6 @@ If you think that you need to use a store object from outside your model class t
 Should I share stores between threads?
 --------------------------------------
 
-Please no, everytime that you call the ``database.store()`` method in the model object, mamba gives you a ready to use Store for the thread that you are calling the method from. Don't even try to share stores between threads. That means that you are not able to share stores between methods if they are decorated with the ``@transact`` decorator.
+No. Everytime that you call the ``database.store()`` method in the model object, Mamba gives you a ready to use Store for the thread that you are calling the method from. Don't even try to share stores between threads. This means that you are not able to share stores between methods if they are decorated with the ``@transact`` decorator.
 
 |

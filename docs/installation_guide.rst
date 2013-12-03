@@ -3,9 +3,9 @@
 Mamba installation guide
 ========================
 
-Mamba is written in the Python programming language and supports only version 2.7 of the language (some mamba components doesn't support Python 3.x yet). Mamba also need a database server `SQLite <http://sqlite.org/>`_, `MySQL <http://mysql.com/>`_, `MariaDB <https://mariadb.org/>`_ or `PostgreSQL <http://www.postgresql.org/>`_ in order to create and use schemes through `Storm ORM <http://storm.canonical.com>`_. For HTML rendering, mamba uses the `Jinja2 <http://jinja.pocoo.org/docs/>`_ templating system.
+Mamba is written in the Python programming language and supports only version 2.7 of the language (some Mamba components do not support Python 3.x yet). Mamba also need a database server (`SQLite <http://sqlite.org/>`_, `MySQL <http://mysql.com/>`_, `MariaDB <https://mariadb.org/>`_ or `PostgreSQL <http://www.postgresql.org/>`_ are currently supported) in order to create and use schemas through `Storm ORM <http://storm.canonical.com>`_. For HTML rendering, Mamba uses the `Jinja2 <http://jinja.pocoo.org/docs/>`_ templating system.
 
-In order to execute mamba tests suite `doublex <https://bitbucket.org/DavidVilla/python-doublex>`_ and `PyHamcrest <http://pythonhosted.org/PyHamcrest/>`_ are required.
+In order to execute Mamba tests suite `doublex <https://bitbucket.org/DavidVilla/python-doublex>`_ and `PyHamcrest <http://pythonhosted.org/PyHamcrest/>`_ are required.
 
 To build the documentation, Fabric must be installed on the system.
 
@@ -25,18 +25,18 @@ Installation Step
 Dependencies
 ------------
 
-Those are the mamba framework dependencies
+These are the Mamba framework dependencies
 
 .. _Mandatory Dependencies:
 
 Mandatory Dependencies
 ......................
 
-The following dependencies must to ve satisfied to install mamba.
+The following dependencies must be satisfied to install mamba.
 
 * |python|_, version >= 2.7 <= 2.7.5 (3.x is not supported)
 * |twisted|_, version >= 10.2.0
-* |storm|_, version >= 0.19
+* |mamba-storm|_, version >= 0.19
 * `zope.component <http://docs.zope.org/zope.component/>`_
 * `transaction <http://www.zodb.org/zodbbook/transactions.html>`_
 *  |jinja2|_, version >= 2.4
@@ -46,7 +46,7 @@ Is pretty possible that you also need a database manager and the corresponding P
 For SQLite database
 ~~~~~~~~~~~~~~~~~~~
 
-As you must be using Python 2.7 SQLite should be already built on it. This maybe is not true if you compiled Python interpreter yourself, in that case make sure you compile it with --enable-loadable-sqlite-extensions option.
+As you're using Python 2.7, SQLite should be already built in. This may not be true if you compiled Python interpreter yourself, in that case make sure you compile it with --enable-loadable-sqlite-extensions option.
 
 If you are using PyPy, SQLite should be always compiled and present in your installation.
 
@@ -60,7 +60,7 @@ For PostgreSQL database
 
 The `psycopg2 <http://pypi.python.org/pypi/psycopg2>`_ driver is our target for PostgreSQL databases if we are using the CPython interpreter
 
-If you are using PyPy as your interpreter you need to install `psycopg2ct <https://github.com/mvantellingen/psycopg2-ctypes>`_ instead. Psycopg2ct is a psycopg2 implementation that uses ctypes and is just the boy that we want to do the job in PyPy.
+If you are using PyPy as your interpreter you need to install `psycopg2ct <https://github.com/mvantellingen/psycopg2-ctypes>`_ instead. Psycopg2ct is a psycopg2 implementation that uses ctypes and is just what we want to do the job in PyPy.
 
 .. warning::
 
@@ -72,7 +72,7 @@ If you are using PyPy as your interpreter you need to install `psycopg2ct <https
 Optional Dependencies
 .....................
 
-The following dependencies must be satisfied if we are planning on running mamba tests, building the documentation ourselves or contributing with the mamba project
+The following dependencies must be satisfied if we are planning on running Mamba tests, building the documentation yourself or contributing with the Mamba project
 
 * |doublex|_, version >= 1.5.1
 * `PyHamcrest <http://pythonhosted.org/PyHamcrest/>`_
@@ -89,7 +89,7 @@ Installing Mamba
 
 There are three ways to install mamba in your system.
 
-The first one is install all the mamba dependencies as with any other software, downloading it from sources, precompiled binaries or just using your distribution package manager.
+The first one is install all the Mamba dependencies like any other software: downloading it from sources, precompiled binaries or using your distribution package manager.
 
 The second one is using ``pip`` or ``easy_install`` as::
 
@@ -97,10 +97,10 @@ The second one is using ``pip`` or ``easy_install`` as::
 
 .. _The easy way:
 
-The easy way: PyPI - the Python Package Index
+The easy way and recommended way: PyPI - the Python Package Index
 .............................................
 
-The third one is using virtualenv to create a virtual environment for your mamba framework installation and then using ``pip`` on it, this is the recommended way as well::
+The third one is using virtualenv to create a virtual environment for your Mamba framework installation and then using ``pip`` on it::
 
     $ virtualenv --no-site-packages -p /usr/bin/python --prompt='(mamba-python2.7) ' mamba-python2.7
     $ source mamba-python2.7/bin/activate
@@ -113,17 +113,17 @@ Or if you prefer to use ``virtualenvwrapper``::
     $ pip install mamba-framework
     $ pip install MySQL-Python
 
-We recommend the use of ``virtualenvwrapper`` in development environments to be cleaner and easier to maintain.
+We recommend the use of ``virtualenvwrapper`` in development environments as it is cleaner and easier to maintain.
 
 .. _Living on the edge:
 
 Living on the edge
 ..................
 
-If you like to live in the edge you can clone the mamba's |repo|_ and use the ``setup.py`` script to install it yourself::
+If you like to live in the edge you can clone Mamba's |repo|_ and use the ``setup.py`` script to install it yourself::
 
-    $ git clone https://github.com/DamnWidget/mamba
-    $ cd mamba
+    $ git clone https://github.com/PyMamba/mamba-framework.git
+    $ cd mamba-framework
     $ mkvirtualenv --no-site-packages -p /usr/bin/pypy --prompt='(mamba-dev-pypy) ' mamba-dev-pypy
     $ pip install -r requirements.txt
     $ ./tests
@@ -131,14 +131,14 @@ If you like to live in the edge you can clone the mamba's |repo|_ and use the ``
 
 .. warning::
 
-    The mamba |repo| is under heavy development, we dont guarantee the stability of the mamba in-development version
+    The Mamba |repo| is under heavy development, we do not guarantee the stability of the Mamba in-development version.
 
 .. _Using Mamba:
 
 Using Mamba
 -----------
 
-Once you have mamba installed in yout system, you should be able to generate a new project using the ``mamba-admin`` command line tool.
+Once you have Mamba installed in your system, you should be able to generate a new project using the ``mamba-admin`` command line tool.
 
 **Enjoy it!**
 
