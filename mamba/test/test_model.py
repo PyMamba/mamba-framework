@@ -1211,6 +1211,7 @@ class ModelManagerTest(unittest.TestCase):
         self.assertIsInstance(self.mgr.get_models(), OrderedDict)
 
     def test_get_models_is_empty(self):
+        self.flushLoggedErrors()
         self.assertNot(self.mgr.get_models())
 
     def test_is_valid_file_works_on_valid(self):
