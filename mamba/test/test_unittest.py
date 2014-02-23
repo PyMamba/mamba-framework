@@ -18,6 +18,10 @@ from mamba.unittest import database_helpers
 
 class DatabaseHelpersTest(unittest.TestCase):
 
+    def setUp(self):
+        # c
+        pass
+
     def tearDown(self):
         Model.database = database_helpers.Database()
 
@@ -74,6 +78,7 @@ class DatabaseHelpersTest(unittest.TestCase):
             Model.database.__class__, database_helpers.TestableDatabase)
 
     def test_database_is_started_defacto(self):
+        config.Database('../mamba/test/dummy_app/config/database.json')
         model = Model()
         database_helpers.prepare_model_for_test(model)
         self.assertTrue(model.database.started)
