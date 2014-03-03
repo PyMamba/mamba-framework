@@ -16,6 +16,7 @@ from os.path import normpath
 from collections import OrderedDict
 
 from storm.uri import URI
+from twisted.python import log
 from storm.expr import Desc, Undef
 from storm.twisted.transact import Transactor
 from storm.properties import PropertyPublisherMeta, PropertyColumn
@@ -190,11 +191,22 @@ class Model(ModelProvider):
         Read a register from the database. The give key (usually ID) should
         be a primary key.
 
+        .. warning:
+
         :param id: the ID to get from the database
         :type id: int
         """
 
-        obj = klass()
+        try:
+            obj = klass()
+        except TypeError:
+            log.err(
+                'Mamba cannot instantiate an object for class {}, please '
+                'define default parameters on it\'s constructor'.format(
+                    klass.__name__, klass.__name__)
+            )
+            raise
+
         store = obj.database.store()
         data = store.get(klass, id)
 

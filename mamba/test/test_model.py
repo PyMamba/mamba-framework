@@ -164,6 +164,29 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(dummy.name, u'Dummy')
         self.truncate_dummy()
 
+    def test_model_read_raises_type_error_on_wrong_instantiation(self):
+
+        class NonInstantiableByRead(Model):
+
+            def __init__(self, one):
+                pass
+
+        self.assertRaises(
+            TypeError, NonInstantiableByRead.read, 1, async=False)
+
+    def test_model_read_non_raises_type_error_when_defaults_are_defined(self):
+
+        class InstantiableByRead(Model):
+
+            __storm_table__ = 'dummy'
+
+            id = Int(primary=True)
+
+            def __init__(self, one=1):
+                pass
+
+        self.assertEqual(None, InstantiableByRead.read(1, async=False))
+
     def test_model_synchronous_read(self):
         self.insert_dummy()
         dummy = DummyModel().read(1, async=False)
