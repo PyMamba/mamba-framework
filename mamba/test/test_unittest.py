@@ -19,7 +19,6 @@ from mamba.unittest import database_helpers
 class DatabaseHelpersTest(unittest.TestCase):
 
     def setUp(self):
-        # c
         pass
 
     def tearDown(self):
