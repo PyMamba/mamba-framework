@@ -589,7 +589,7 @@ class Packer(object):
         """
 
         command = (
-            'find -type f -name "*.py" -print0 | xargs -0 sed -i '
+            'find . -type f -name "*.py" -print0 | xargs -0 sed -i="" '
             '"s/from application/from {}/"'.format(name)
         )
         subprocess.call(command, shell=True)

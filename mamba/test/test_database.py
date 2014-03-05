@@ -7,9 +7,10 @@ Tests for mamba.enterprise.database
 """
 
 from storm.locals import Store
-from doublex import Spy, ANY_ARG
 from twisted.trial import unittest
+from storm.exceptions import DisconnectionError
 from twisted.python.threadpool import ThreadPool
+from doublex import Spy, ANY_ARG, assert_that, called
 
 from mamba.utils import config
 from mamba.core import GNU_LINUX
@@ -276,6 +277,53 @@ class DatabaseTest(unittest.TestCase):
         self.assertTrue('CREATE TABLE dummy (' in sql)
         self.assertTrue('CREATE TABLE stubing (' in sql)
         self.assertTrue('dummy_not_on_schema' not in sql)
+
+    def test_ensure_connect_called_when_ensure_connect_is_true(self):
+
+        def _ensure_connect():
+            raise RuntimeError
+
+        self.database._ensure_connect = _ensure_connect
+        self.assertRaises(
+            RuntimeError, self.database.store, ensure_connect=True)
+
+    def test_ensure_connect_calls_execute_and_commit(self):
+
+        getUtility_spy, store = self._prepare_store_spy()
+
+        from mamba.enterprise import database
+        _getUtility = database.getUtility
+        database.getUtility = getUtility_spy
+
+        self.database.store(ensure_connect=True)
+        assert_that(store.execute, called().with_args('SELECT 1').times(1))
+        assert_that(store.commit, called().times(1))
+
+        database.getUtility = _getUtility
+
+    def test_ensure_connect_calls_rollback_on_disconnectionerror(self):
+
+        getUtility_spy, store = self._prepare_store_spy(True)
+
+        from mamba.enterprise import database
+        _getUtility = database.getUtility
+        database.getUtility = getUtility_spy
+
+        self.database.store(ensure_connect=True)
+        assert_that(store.execute, called().with_args('SELECT 1').times(1))
+        assert_that(store.rollback, called().times(1))
+        assert_that(store.commit, called().times(0))
+
+        database.getUtility = _getUtility
+
+    def _prepare_store_spy(self, raises_exception=False):
+
+        with Spy() as store:
+            getUtility_spy = lambda _: {'mamba': store}
+            if raises_exception is True:
+                store.execute(ANY_ARG).raises(DisconnectionError)
+
+        return getUtility_spy, store
 
 
 class NativeEnumTest(unittest.TestCase):

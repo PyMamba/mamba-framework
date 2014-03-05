@@ -18,9 +18,9 @@ from sqlite3 import sqlite_version_info
 from storm.database import URI
 from storm.zope.interfaces import IZStorm
 from storm.zope.zstorm import global_zstorm
-from storm.twisted.transact import Transactor
 from twisted.python.threadpool import ThreadPool
 from zope.component import provideUtility, getUtility
+from storm.twisted.transact import Transactor, DisconnectionError
 
 from mamba import version
 from mamba.utils import config
@@ -101,13 +101,16 @@ class Database(object):
 
         self.pool.adjustPoolsize(min_threads, max_threads)
 
-    def store(self):
+    def store(self, ensure_connect=False):
         """
         Returns a Store per-thread through :class:`storm.zope.zstorm.ZStorm`
         """
 
         if not self.started:
             self.start()
+
+        if ensure_connect:
+            self._ensure_connect()
 
         zstorm = getUtility(IZStorm)
         return zstorm.get('mamba')
@@ -252,6 +255,17 @@ class Database(object):
         """
 
         return URI(config.Database().uri).database
+
+    def _ensure_connect(self):
+        """Ensure that we are connected to the database server
+        """
+
+        store = getUtility(IZStorm).get('mamba')
+        try:
+            store.execute('SELECT 1')
+            store.commit()
+        except DisconnectionError:
+            store.rollback()
 
 
 class AdapterFactory(object):

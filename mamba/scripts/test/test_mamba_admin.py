@@ -310,8 +310,8 @@ class SqlCreateTest(unittest.TestCase):
 
         self.assertTrue('CREATE TABLE IF NOT EXISTS dummy' in result)
         self.assertTrue('PRIMARY KEY(id)' in result)
-        self.assertTrue('name VARCHAR' in result)
-        self.assertTrue('id INTEGER' in result)
+        self.assertTrue('name varchar' in result)
+        self.assertTrue('id integer' in result)
 
     @defer.inlineCallbacks
     def test_sql_create_file(self):
@@ -1081,7 +1081,12 @@ class PackagePackerTest(unittest.TestCase):
             self.assertTrue(os.path.exists('LICENSE'))
             self.assertFalse(os.path.exists('docs'))
 
+    @defer.inlineCallbacks
     def test_pack_sdist(self):
+
+        result = yield utils.getProcessValue('mamba-admin', [], os.environ)
+        if result == 1:
+            raise unittest.SkipTest('mamba framework is not installed yet')
 
         with self._generate_docs():
             self.config.parseOptions()
@@ -1093,7 +1098,12 @@ class PackagePackerTest(unittest.TestCase):
             self.assertTrue(os.path.exists('mamba-dummy-0.1.2.tar.gz'))
             self.packer.do(['rm', 'mamba-dummy-0.1.2.tar.gz'])
 
+    @defer.inlineCallbacks
     def test_pack_egg(self):
+
+        result = yield utils.getProcessValue('mamba-admin', [], os.environ)
+        if result == 1:
+            raise unittest.SkipTest('mamba framework is not installed yet')
 
         with self._generate_docs():
             self.config.parseOptions()
