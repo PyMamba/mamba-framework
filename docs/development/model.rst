@@ -56,7 +56,7 @@ In mamba we define our database schema just creating new Python classes like the
 +------------+-----------+---------------------+-------------------------------------------+-------------------------------------------------------+
 | Int        | int, long | INT                 | TINYINT, SMALLINT, MEDIUMINT, INT, BIGINT | SERIAL, BIGSERIAL, SMALLSERIAL, INT, BIGINT, SMALLINT |
 +------------+-----------+---------------------+-------------------------------------------+-------------------------------------------------------+
-| Float      | float     | REAL, FLOAT, DOUBLE | FLOAT, REAL, DOUBLE PRECISSION            | FLOAT, REAL, DOUBLE PRECISION                        |
+| Float      | float     | REAL, FLOAT, DOUBLE | FLOAT, REAL, DOUBLE PRECISSION            | FLOAT, REAL, DOUBLE PRECISION                         |
 +------------+-----------+---------------------+-------------------------------------------+-------------------------------------------------------+
 | Decimal    | Decimal   | VARCHAR, TEXT       | DECIMAL, NUMERIC                          | DECIMAL, NUMERIC, MONEY                               |
 +------------+-----------+---------------------+-------------------------------------------+-------------------------------------------------------+
@@ -172,7 +172,7 @@ To define a compound key we have to use the ``__storm_primary__`` class-level at
         status = Int()
 
 Defining an unique for multiple columns
-----------------------
+---------------------------------------
 
 To define a compound unique we have to use the ``__mamba_unique__`` class-level attribute and set it as a tuple of tuples with the names of the properties that composes the compound unique index:
 
@@ -190,7 +190,7 @@ To define a compound unique we have to use the ``__mamba_unique__`` class-level 
         status = Int()
 
 Defining an index for multiple columns
-----------------------
+--------------------------------------
 
 To define a compound index we have to use the ``__mamba_index__`` class-level attribute and set it as a tuple of tuples with the names of the properties that composes the compound index:
 

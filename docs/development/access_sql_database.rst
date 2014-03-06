@@ -226,12 +226,27 @@ Using the *transact* system has advantages and disadvantages:
 
 The transact mechanism can be dangerous in environments where serialization or synchronization of the data is a requirement because using the ``@transact`` decorated methods can end up in unexpected race conditions.
 
-The developer should give some thought about what he or the applications needs to implement, in order to know when to use ``@transact`` or not.
+The developer should give some thought about what she or the applications needs to implement, in order to know when to use ``@transact`` or not.
 
 Some Mamba model operations runs with ``@transact`` decorated method by default (for example, create, find, read, delete or update) if you need to run those methods in synchronous way you can add the named parameter ``async=False`` to its call, just like ``customer.update(async=False)``. This is pretty common workflow if you're calling these methods from places that are already decorated by the ``@transact`` decorator.
 
+.. note::
+
+    Some notes about the `read` method. Storm uses lazy evaluation to access objects properties, the `read` method can't guarantee that the object that the it returns can be safely used in another thread, if you need safe access to properties of those objects returned with read you can add the named parameter ``copy=True`` to the `read` call like ``kevin = customer.read(1, copy=True)`` and mamba will guarantee the lazy evaluation of the object properties is performed before return the object back. You can also run the call with ``async=False`` to make sure the object that is returned by read is created in the same thread that the call is made and then is safe to use it (and lazy evaluation is possible)
+
+.. note::
+
+    If you get the exception ``ZStormError("Store not registered with ZStorm, or registered with another thread.")`` this means that you are trying to use a Storm object that has been created in another thread (mainly using @trasact decorator) or you are trying to access a property that is lazy evaluated.
+
+.. warning::
+
+    `References` and `ReferenceSets` are always lazy evaluated so there is no safe way to access them from outside the thread that the object has been created.
+
+When you use ``@transact`` (asynchronously or not), mamba takes care of ensure that your stores are connected to the database reconnecting and rerunning your transactions if the database connection gone away because inactivity or any other problem.
+
+
 How to use Storm in Mamba models?
-================================
+=================================
 
 Mamba's enterprise system take care of any initialization that is needed by the underlying |storm| library, we don't have to care about create database connections or stores. We can use it with CPython or PyPy without any type of code modification.
 
@@ -245,6 +260,10 @@ The mamba's enterprise system initialize a valid |storm| Store object for us alw
 .. sourcecode:: python
 
     store = self.database.store()
+
+.. note::
+
+    If you are planning to use stores outside `transacted` methods wil be a good idea to use the named parameter ``ensure_connect=True`` to make sure storm is connected to your database before try to use the store.
 
 Every model object has a copy of the ``database`` object that can be used to retrieve stores and other database related information.
 
