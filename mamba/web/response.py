@@ -186,6 +186,25 @@ class Unauthorized(Response):
 
 
 @implementer(IResponse)
+class Forbidden(Response):
+    """
+    Error 403 Forbidden HTTP Response
+
+    :param subject: the subject of the response
+    :type subject: :class:`~mamba.web.Response` or dict or str
+    :param headers: the HTTP headers to return back in the response to the
+                    browser
+    :type headers: dict or a list of dicts
+    """
+
+    def __init__(self, subject, headers={}):
+        if not subject:
+            subject = 'Access is Forbidden'
+
+        super(Forbidden, self).__init__(http.FORBIDDEN, subject, headers)
+
+
+@implementer(IResponse)
 class NotFound(Response):
     """
     Error 404 Not Found HTTP Response
