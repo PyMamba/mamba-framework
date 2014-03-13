@@ -619,7 +619,7 @@ class RouterTest(unittest.TestCase):
         self.assertEqual(result.headers, {'content-type': 'text/plain'})
 
     @defer.inlineCallbacks
-    def test_dispatch_route_returns_text_html_on_html_resturning_route(self):
+    def test_dispatch_route_returns_text_html_on_html_returning_route(self):
 
         StubController.test2 = routes_generator('<h1>HTML Text</h1>')
         request = request_generator(['/test2'])
