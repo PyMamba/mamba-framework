@@ -421,7 +421,7 @@ class RouteDispatcher(object):
         data = self.request.content.read()
         data_json = {}
 
-        if self.request.method in ['POST', 'PUT']:
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
             ct = self.request.requestHeaders.getRawHeaders('content-type')
             if 'application/json' in ct:
                 try:
