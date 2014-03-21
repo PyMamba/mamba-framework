@@ -396,7 +396,7 @@ class Package(object):
 
         print('Installing {} application in {} store...'.format(
             path.basename(),
-            'global' if not self.options.subOptions['global'] else 'user'
+            'global' if self.options.subOptions['global'] else 'user'
         ).ljust(73), end='')
         try:
             packer.install_package_file(path, self.options.subOptions)
