@@ -83,6 +83,7 @@ Bug Fixes
 * Fixed some model tests that weren't working
 * When `mamba-admin sql configure` ran in a validmamba app directory that does not contains a `config` directory, it crashed, fixed
 * Fixed bug in PostgreSQL schema generation for FOREIGN KEYS
+* Fixed wrong response being displayed when installing mamba reusabiility package from file
 
 
 Changes
