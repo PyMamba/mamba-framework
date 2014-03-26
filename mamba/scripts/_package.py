@@ -495,6 +495,7 @@ class Packer(object):
         else:
             if PIP_IS_AVAILABLE:
                 args.insert(0, 'pip')
+                args.insert(2, '--upgrade')
                 p = subprocess.Popen(
                     args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
                 )
