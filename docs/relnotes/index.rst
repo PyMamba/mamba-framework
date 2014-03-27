@@ -85,6 +85,7 @@ Bug Fixes
 * Fixed bug in PostgreSQL schema generation for FOREIGN KEYS
 * Fixed wrong response being displayed when installing mamba reusabiility package from file
 * Fixed bug where updates made to an installed mamba package was not updated.
+* Fixed bug where mamba packages in egg format were not being installed. Added two extra unit tests in test_mamaba_admin.py for installing from egg and tar.
 
 
 Changes

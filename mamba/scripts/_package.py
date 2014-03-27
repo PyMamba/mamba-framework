@@ -471,12 +471,10 @@ class Packer(object):
         """Installs a package file given by path
         """
 
-        args = ['install']
-        if options['user']:
-            args.append('--user')
-        args.append(path.path)
-
         if path.basename().endswith('.egg'):
+            args = ['easy_install']
+            args.append(path.path)
+
             # this is an egg file, pip can't install egg files
             # we try to import easy_install main func and use it in order
             # to install the package, if easy_install is not present we fail
@@ -486,13 +484,18 @@ class Packer(object):
             except ImportError:
                 raise RuntimeError('easy_install is not present on system')
 
-            p = subprocess.Poepn(
-                args[1:], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            p = subprocess.Popen(
+                args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
             )
             output, error = p.communicate()
             if error is not '':
                 raise RuntimeError(error)
         else:
+            args = ['install']
+            if options['user']:
+                args.append('--user')
+            args.append(path.path)
+
             if PIP_IS_AVAILABLE:
                 args.insert(0, 'pip')
                 args.insert(2, '--upgrade')
@@ -603,6 +606,8 @@ class Packer(object):
             manifest.write('include .mamba-package\n')
             manifest.write('recursive-include {}/static *\n'.format(name))
             manifest.write('recursive-include {}/view *\n'.format(name))
+            manifest.write('recursive-include docs *\n')
+            manifest.write('include LICENSE\n')
 
             for directory in options['extra_directories']:
                 manifest.write('recursive-include {} *\n'.format(directory))
