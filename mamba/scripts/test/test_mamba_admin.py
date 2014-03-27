@@ -1120,9 +1120,52 @@ class PackagePackerTest(unittest.TestCase):
                 ['rm', 'mamba_dummy-0.1.2-py{}.{}.egg'.format(major, minor)]
             )
 
+    @defer.inlineCallbacks
+    def test_is_mamba_package_for_egg_file(self):
+
+        result = yield utils.getProcessValue('mamba-admin', [], os.environ)
+        if result == 1:
+            raise unittest.SkipTest('mamba framework is not installed yet')
+
+        with self._generate_docs():
+            self.config.parseOptions()
+            self.config['name'] = 'mamba-dummy'
+            self.packer.pack_application(
+                'bdist_egg', self.config,
+                config.Application('config/application.json')
+            )
+            major, minor = sys.version_info[:2]
+            self.assertTrue(os.path.exists(
+                'mamba_dummy-0.1.2-py{}.{}.egg'.format(major, minor))
+            )
+            path = filepath.FilePath(
+                'mamba_dummy-0.1.2-py{}.{}.egg'.format(major, minor)
+            )
+            is_mamba_package = self.packer.is_mamba_package(path)
+            self.assertTrue(is_mamba_package)
+            self.packer.do(
+                ['rm', 'mamba_dummy-0.1.2-py{}.{}.egg'.format(major, minor)]
+            )
+
+    @defer.inlineCallbacks
     def test_is_mamba_package_for_tar_file(self):
 
-        pass
+        result = yield utils.getProcessValue('mamba-admin', [], os.environ)
+        if result == 1:
+            raise unittest.SkipTest('mamba framework is not installed yet')
+
+        with self._generate_docs():
+            self.config.parseOptions()
+            self.config['name'] = 'mamba-dummy'
+            self.packer.pack_application(
+                'sdist', self.config,
+                config.Application('config/application.json')
+            )
+            self.assertTrue(os.path.exists('mamba-dummy-0.1.2.tar.gz'))
+            path = filepath.FilePath('mamba-dummy-0.1.2.tar.gz')
+            is_mamba_package = self.packer.is_mamba_package(path)
+            self.assertTrue(is_mamba_package)
+            self.packer.do(['rm', 'mamba-dummy-0.1.2.tar.gz'])
 
     @contextmanager
     def _generate_README_and_LICENSE(self):

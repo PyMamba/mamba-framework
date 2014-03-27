@@ -9,6 +9,7 @@ Distutils/Setuptools installer for ${application}
 
 import os
 import sys
+import os.path
 
 if not hasattr(sys, "version_info") or sys.version_info < (2, 7):
     raise RuntimeError("Mamba requires Python 2.7 or later.")
@@ -21,6 +22,18 @@ long_description = '%s\n\n%s' % (
     open(os.path.join(os.path.dirname(__file__), 'README.rst')).read(),
     'For more information about mamba visit the `Mamba website <http://www.pymamba.com>`_'
 )
+
+def walk_files(path):
+    l = list()
+    for path, _, files in os.walk(path):
+        for name in files:
+            l.append((path, [os.path.join(path, name)]))
+    return l
+
+
+data_files = walk_files('docs')
+data_files.append(('', ['.mamba-package', 'LICENSE', 'README.rst']))
+
 
 setup(
     name='''${application_name}''',
@@ -42,5 +55,6 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
         '${license_classifier}',
-    ]
+    ],
+    data_files=data_files
 )
