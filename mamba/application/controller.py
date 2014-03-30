@@ -73,6 +73,7 @@ class Controller(resource.Resource, ControllerProvider):
 
     isLeaf = True
     loaded = False
+    _container = None
     _router = routing.Router()
 
     def __init__(self, *args, **kwargs):
@@ -115,9 +116,13 @@ class Controller(resource.Resource, ControllerProvider):
             'Controller. That means that you are defining the class level \n'
             'variable `isLeaf` as False, this cause Twisted try to dispatch \n'
             'routes with its own built mechanism instead of mamba routing.\n\n'
-            'This is not a fatal error but you should revise your Controller\n'
-            'because should be probable that your routing dispatching does\n'
-            'not work at all (even the Twisted ones)\n'
+            'This is not a fatal error but if you are not using controllers\n'
+            'containers you should revise your Controller becaue should be \n'
+            'probable that your routing dispatching does not work at all \n'
+            '(even the Twisted ones)\n\n'
+            'If you are using controllers containers just overwrite the \n'
+            'getChild method in your container controller to disable this \n'
+            'warning (your getChild can just return self)\n'
             '===============================================================\n'
             '                             WARNING\n'
             '===============================================================\n'
