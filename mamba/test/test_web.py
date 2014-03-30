@@ -487,6 +487,46 @@ class PageTest(unittest.TestCase):
         )
         filepath.FilePath(config_file.name).remove()
 
+    def test_page_register_containers(self):
+
+        mgr = controller.ControllerManager()
+        if GNU_LINUX:
+            self.addCleanup(mgr.notifier.loseConnection)
+
+        sys.path.append('../mamba/test/dummy_app')
+        mgr.load('../mamba/test/dummy_app/application/controller/container.py')
+        mgr.load('../mamba/test/dummy_app/application/controller/contained.py')
+
+        self.root._controllers_manager = mgr
+        self.root.register_controllers()
+
+        self.assertEqual(len(self.root._contained_controllers), 1)
+        self.assertIdentical(
+            self.root.getChildWithDefault('container', DummyRequest([''])),
+            mgr.lookup('container')['object']
+        )
+        self.assertIdentical(
+            mgr.lookup('container')['object'].getChildWithDefault(
+                'contained', DummyRequest([''])),
+            mgr.lookup('contained')['object']
+        )
+
+    def test_page_register_container_dont_register_contained_into_root(self):
+
+        mgr = controller.ControllerManager()
+        if GNU_LINUX:
+            self.addCleanup(mgr.notifier.loseConnection)
+
+        sys.path.append('../mamba/test/dummy_app')
+        mgr.load('../mamba/test/dummy_app/application/controller/container.py')
+        mgr.load('../mamba/test/dummy_app/application/controller/contained.py')
+
+        self.root._controllers_manager = mgr
+        self.root.register_controllers()
+
+        self.assertEqual(len(self.root._contained_controllers), 1)
+        self.assertTrue('contained' not in self.root.children)
+
     def test_page_add_template_paths_string(self):
 
         self.root.add_template_paths('/test_string')

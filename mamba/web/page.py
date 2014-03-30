@@ -46,6 +46,7 @@ class Page(resource.Resource):
                 app.already_logging is False and app.log_file is not None):
             log.startLogging(DailyLogFile.fromFullPath(app.log_file))
 
+        self._contained_controllers = []
         self._assets = resource.Assets([os.getcwd() + '/static'])
         self.template_paths = [
             'application/view/templates',
@@ -158,6 +159,8 @@ class Page(resource.Resource):
 
         for controller in self._controllers_manager.get_controllers().values():
             self._register_controller_module(controller)
+
+        self._build_controllers_tree()
 
     def register_shared_controllers(self):
         """
@@ -289,10 +292,29 @@ class Page(resource.Resource):
             )
         )
 
-        self.putChild(
-            controller.get('object').get_register_path(),
-            controller.get('object')
-        )
+        if controller.get('object')._container is not None:
+            # this controller is contained by another controller
+            self._contained_controllers.append(controller.get('object'))
+        else:
+            self.putChild(
+                controller.get('object').get_register_path(),
+                controller.get('object')
+            )
+
+    def _build_controllers_tree(self):
+        """Build the controllers tree hierarchy
+        """
+
+        for controller in self._contained_controllers:
+            parent = controller._container
+            path = controller.get_register_path()
+            if parent in self.children:
+                self.children[parent].putChild(path, controller)
+            else:
+                for contained_controller in self._contained_controllers:
+                    if (contained_controller is not controller and
+                       contained_controller.get_register_path() == parent):
+                            contained_controller.putChild(path, controller)
 
 
 __all__ = ['Page']
