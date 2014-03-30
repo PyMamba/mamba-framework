@@ -245,7 +245,7 @@ Returning values from controller actions
 
 Surely the reader already noticed that we use an ``Ok`` object as return from our controller actions. The :class:`~mamba.web.responses.Ok` class is one of the multiple built-in response objects that you can return from your application controllers.
 
-Mamba defines 14 predefined types of response objects that set the content-type and other parameters of the HTTP response that our applications can return back to the web clients.
+Mamba defines 15 predefined types of response objects that set the content-type and other parameters of the HTTP response that our applications can return back to the web clients.
 
     * :class:`~mamba.web.response.Response` dummy base response object, we can use this object to create ad-hoc responses on demand. All the rest of responses inherits from this class
     * :class:`~mamba.web.response.Ok` - Ok 200 HTTP Response
@@ -256,6 +256,7 @@ Mamba defines 14 predefined types of response objects that set the content-type 
     * :class:`~mamba.web.response.SeeOther` - Ok 303 HTTP Response
     * :class:`~mamba.web.response.BadRequest` - Error 400 HTTP Response
     * :class:`~mamba.web.response.Unauthorized` - Error 401 HTTP Response
+    * :class:`~mamba.web.response.Forbidden` - Error 403 HTTP Response
     * :class:`~mamba.web.response.NotFound` - Error 404 HTTP Response
     * :class:`~mamba.web.response.Conflict` - Error 409 HTTP Response
     * :class:`~mamba.web.response.AlreadyExists` - Error 409 HTTP Response (Conflict found in POST)
