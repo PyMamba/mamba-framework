@@ -195,6 +195,119 @@ Our last step is to just make a small change in the ``root`` action in the contr
 
     If you don't know what a *mambaerized resource file* is, we recommend you to read the :doc:`../getting_started` document and come back here when you read it
 
+Controller Containers
+=====================
+
+Sometimes we want to group different controllers under the same path (user, cart and actions under the `api` path for example), we can use the Mamba's Controller's Container for that.
+
+A Controller's Container is just a regular Mamba controller that defines it's `isLeaf` property as `False` so it can append childrens to itself and use the twisted routing dispatch mechanism.
+
+.. note::
+
+    Is a good idea to implement the `getChild` method in a controller container, just to avoid some warnings from the mamba controller routing mechanism, the `getChild` metod should return `self`.
+
+.. warning::
+
+    A controller's container can define only a method for the path `@route('/')` that can implement whatever logic that we need on it. Any other route/method will be completely ignored.
+
+A container can (and should) define a controller's `__route__` just like any other controller.
+
+How to use it?
+~~~~~~~~~~~~~~
+
+We can set the container of any controllers (including other containers) just defining the class property `_container` with the correct name of the route of the container that we want to add our controller to. We can have for example a container called `api` and attach the controllers `users` and `wallet` to it.
+
+The controller's container code should look like the code below:
+
+.. sourcecode:: python
+
+    from mamba.application import route
+    from mamba.application import controller
+    from mamba.web.response import BadRequest
+
+
+    class Api(controller.Controller):
+
+        name = 'Api'
+        isLeaf = False
+        __route__ = 'api'
+
+        def __init__(self):
+            """Put your initialization code here
+            """
+            super(Api, self).__init__()
+
+        @route('/')
+        def root(self, request, **kwargs):
+            return BadRequest()
+
+While the attached controllers should look like:
+
+.. sourcecode:: python
+
+    from mamba.web.response import Ok
+    from mamba.application import route
+    from mamba.application import controller
+
+
+    class UserController(controller.Controller):
+        """User Controller
+        """
+
+        name = 'User'
+        __route__ = 'user'
+        _container = 'api'
+
+        def __init__(self):
+            """Put your initialization code here
+            """
+            super(UserController, self).__init__()
+
+        @route('/')
+        def root(self, request, **kwargs):
+            return Ok('Give me users please!')
+
+        @route('/test')
+        def test(self, request, **kwargs):
+            return Ok('TEST OK!')
+
+.. sourcecode:: python
+
+    from mamba.web.response import Ok
+    from mamba.application import route
+    from mamba.application import controller
+
+
+    class WalletController(controller.Controller):
+        """User Controller
+        """
+
+        name = 'User'
+        __route__ = 'user'
+        _container = 'api'
+
+        def __init__(self):
+            """Put your initialization code here
+            """
+            super(WalletController, self).__init__()
+
+        @route('/get/<int:wallet_id>')
+        def test(self, request, wallet_id, **kwargs):
+            return Ok('Fake Wallet')
+
+
+With the configuration above, we should end with the following routes:
+
+    ==============  ====================
+    **Path**        **Result**
+    ==============  ====================
+    /api            BadRequest
+    /api/user       Give me users please
+    /api/user/test  TEST OK!
+    /api/wallet/1   Fake Wallet
+    ==============  ====================
+
+
 Going asynchronous
 ==================
 
