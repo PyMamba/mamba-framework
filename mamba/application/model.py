@@ -104,7 +104,8 @@ class Model(ModelProvider):
         self.transactor = Transactor(self.database.pool)
 
     def __new__(cls, *args, **kwargs):
-        """This method is remembering the fields in the order that
+        """
+        This method is remembering the fields in the order that
         they were declared in the model. This is used to maintain
         declared order in the generated SQL schema. It uses some
         inspection to determine what fields should put on the ordered
@@ -130,6 +131,17 @@ class Model(ModelProvider):
         cls._storm_columns = ordered_columns
         return ModelProvider.__new__(cls, *args, **kwargs)
 
+    def __storm_pre_flush__(self):
+        """
+        Storm calls this method before commiting a store.
+
+        This is used right now to go through all the columns and setting
+        them as None where the column is NOT NULL and there is no default
+        value. If we don't do this, storm proceeds by inserting a 0, 0.0
+        or '' (empty string), what is clearly wrong.
+        """
+        self._set_empty_properties_to_none()
+
     @property
     def uri(self):
         """Returns the database URI for this model
@@ -149,31 +161,6 @@ class Model(ModelProvider):
             setattr(self, name, getattr(orig, name))
 
         return self
-
-    def _set_empty_properties_to_none(self):
-        """If a property is does not allow none and there is
-        no default value for it, Storm itself will raise a NoneError
-        when we set it to None.
-        """
-        for column, property_ in self._storm_columns.items():
-            variable = property_.variable_factory()
-            has_default = not variable._value is Undef
-            value = getattr(
-                self, column._detect_attr_name(self.__class__), None
-            )
-            if not variable._allow_none and not has_default and value is None:
-                variable.set(None)
-
-    def __storm_pre_flush__(self):
-        """
-        Storm calls this method before commiting a store.
-
-        This is used right now to go through all the columns and setting
-        them as None where the column is NOT NULL and there is no default
-        value. If we don't do this, storm proceeds by inserting a 0, 0.0
-        or '' (empty string), what is clearly wrong.
-        """
-        self._set_empty_properties_to_none()
 
     @transact
     def create(self):
@@ -397,6 +384,20 @@ class Model(ModelProvider):
                     return column.name
         else:
             return self.__storm_primary__
+
+    def _set_empty_properties_to_none(self):
+        """If a property is does not allow none and there is
+        no default value for it, Storm itself will raise a NoneError
+        when we set it to None.
+        """
+        for column, property_ in self._storm_columns.items():
+            variable = property_.variable_factory()
+            has_default = not variable._value is Undef
+            value = getattr(
+                self, column._detect_attr_name(self.__class__), None
+            )
+            if not variable._allow_none and not has_default and value is None:
+                variable.set(None)
 
 
 class ModelManager(module.ModuleManager):
