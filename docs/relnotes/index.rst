@@ -16,6 +16,7 @@ Features
 * Added Unauthorized (401 HTTP) Response to predefined responses
 * Added MovedPermanently (301 HTTP) Response to predefined responses
 * Added SeeOther (303 HTTP) Response to predefined responses
+* Added Forbidden (403 HTTP) Response to predefined responses
 * Added decimal size and precission using size property for MySQL decimal fields definitions::
 
     some_field = Decimal(size=(10, 2))  # using a tuple
@@ -103,7 +104,7 @@ Changes
 * The mamba-admin application subcommand generates now a ``lib`` directory into the ``application`` directory in oreder to place code that doesn't fit the MVC pattern and 3rd party libraries
 * The ``@route`` decorator now accepts lists and tuples defining more than one HTTP method where to register the given action
 * The :class:`~mamba.enterprise.common.NativeEnum` type has been reimplemented as a ``set``. Implementation provided by Patrick O'Loughlin @paddyoloughlin on GitHub
-* Added new find and afind methods to model object to find in syncrhonous or asynchronous way respectively
+* Added new find method to model object to find ojects into the database
 * Storm.locals imports moved to ``mamba.entreprise`` package
 
 Documentation
