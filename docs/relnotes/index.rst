@@ -59,6 +59,8 @@ Features
 * Added support to dont add some tables to the generated schema using ``__mamba_schema__ = False`` option
 * Added ``--noschema`` option in ``mamba-admin sql`` command line options
 * Added shell to ``mamba-admin sql`` command line tool
+* Added TestableDatabase and prepare_model_for_test function to make easier the task of test mamba applications models
+* Added fixtures class (extends Storm's Schema)
 
 
 Bug Fixes
