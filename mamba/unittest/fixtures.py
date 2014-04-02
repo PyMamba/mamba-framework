@@ -11,8 +11,7 @@
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 """
 
-from storm.schema import schema
-
+from mamba.enterprise import schema
 from mamba.enterprise.database import Database
 from mamba.application.model import ModelManager
 
@@ -86,7 +85,7 @@ class Fixture(schema.Schema):
         """
 
         manager = ModelManager()
-        store = self.database().store()
+        store = self.database.store()
         for model in [m['object'] for m in manager.get_models().values()]:
             store.execute(model.dump_table().replace(
                 model.__storm_table__,
@@ -100,7 +99,7 @@ class Fixture(schema.Schema):
         """
 
         manager = ModelManager()
-        store = self.database().store()
+        store = self.database.store()
         for model in [m['object'] for m in manager.get_models().values()]:
             store.execute(model.get_adapter().drop_table().replace(
                 model.__storm_table__,
@@ -117,7 +116,7 @@ class Fixture(schema.Schema):
         """
 
         if store is None:
-            store = Database().store()
+            store = self.database.store()
 
         super(Fixture, self).create(self._valid_store(store))
 
