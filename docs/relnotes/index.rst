@@ -53,10 +53,12 @@ Features
 * Added `async` magic named boolean argument to `Transactor.run` so we can now run a `@transact` decorated method synchronous just as:
         customer = Customer.find(name=u'Pam', async=False)
         customer = Customer().read(1, async=False)
+* Added global class `__mamba_async__` property to `mamba.application.model` so we can just make all the methods from a given class synchronous by default
+* Added `auto_commit` msgic boolean argument to `Transactor.run` so we can now run a `@transact` decorated method that is not commit in automatic way by the transact mechanism (autocommit is True by default).
 * Added several unit tests
 * Added support for FOREIGN KEYS in SQLite version >= 3.6.19
 * Added UNIQUE and INDEX for single and compound SQLite, MySQL/MariaDB and PostgreSQL fields
-* Added support to dont add some tables to the generated schema using ``__mamba_schema__ = False`` option
+* Added support to don't add some tables to the generated schema using ``__mamba_schema__ = False`` option
 * Added ``--noschema`` option in ``mamba-admin sql`` command line options
 * Added shell to ``mamba-admin sql`` command line tool
 * Added Controller's Containers that can be used to attach controllers to a single and common path
