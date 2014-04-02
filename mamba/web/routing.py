@@ -423,19 +423,19 @@ class RouteDispatcher(object):
 
         if self.request.method in ['POST', 'PUT', 'PATCH']:
             ct = self.request.requestHeaders.getRawHeaders('content-type')
-            if 'application/json' in ct:
-                try:
+            try:
+                if 'application/json' in ct:
                     data_json = json.loads(data)
                     self.request.json = data_json
-                except ValueError:
-                    data_json = {}
+            except ValueError:
+                data_json = {}
 
         request_args = self.request.args
         request_headers = self.request.requestHeaders.getRawHeaders(
             'content-type'
         )
 
-        if self.request.method == 'PUT':
+        if self.request.method == 'PUT' and request_headers:
             if 'application/x-www-form-urlencoded' in request_headers:
                 request_args = parse_qs(data, 1)
 
