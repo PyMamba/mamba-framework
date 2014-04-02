@@ -59,6 +59,7 @@ Features
 * Added support to dont add some tables to the generated schema using ``__mamba_schema__ = False`` option
 * Added ``--noschema`` option in ``mamba-admin sql`` command line options
 * Added shell to ``mamba-admin sql`` command line tool
+* Added Controller's Containers that can be used to attach controllers to a single and common path
 
 
 Bug Fixes
@@ -87,6 +88,7 @@ Bug Fixes
 * Fixed wrong response being displayed when installing mamba reusabiility package from file
 * Fixed bug where updates made to an installed mamba package was not updated.
 * Fixed bug where mamba packages in egg format were not being installed. Added two extra unit tests in test_mamaba_admin.py for installing from egg and tar.
+* Fixed exception being raised when POST, PUT and PATCH requests were send with no body
 
 
 Changes
