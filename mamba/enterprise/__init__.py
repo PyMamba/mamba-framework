@@ -8,6 +8,7 @@ Subpackage containing the modules that implement database abstraction layer
 
 from storm.base import Storm
 from storm.info import ClassAlias
+from storm.schema import schema, patch
 from storm.store import Store, AutoReload
 from storm.properties import TimeDelta, Pickle, JSON
 from storm.references import Reference, ReferenceSet, Proxy
@@ -28,6 +29,7 @@ __all__ = [
     'TimeDelta', 'Pickle', 'JSON',
     'Reference', 'ReferenceSet', 'Proxy',
     'Store', 'AutoReload',
+    'schema', 'patch',
     'Select', 'Insert', 'Update', 'Delete', 'Join', 'SQL',
     'Like', 'In', 'Asc', 'Desc', 'And', 'Or', 'Min', 'Max', 'Count', 'Not',
     'ClassAlias',
