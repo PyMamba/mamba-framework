@@ -67,8 +67,8 @@ class ControllerTest(unittest.TestCase):
     def test_class_inherits_twisted_web_resource(self):
         self.assertTrue(issubclass(controller.Controller, resource.Resource))
 
-    def test_container_is_none_by_default(self):
-        self.assertIsNone(self.c._container)
+    def test_parent_is_none_by_default(self):
+        self.assertIsNone(self.c.__parent__)
 
     def test_is_leaf(self):
         self.assertTrue(self.c.isLeaf)

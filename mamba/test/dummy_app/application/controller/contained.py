@@ -22,7 +22,7 @@ class DummyContained(controller.Controller, controller.ControllerProvider):
     name = 'DummyContained'
     desc = 'I am a dummy contained created for tests purposes'
     loaded = False
-    _container = 'container'
+    __parent__ = 'container'
     __route__ = 'contained'
 
     def __init__(self):

@@ -500,7 +500,6 @@ class PageTest(unittest.TestCase):
         self.root._controllers_manager = mgr
         self.root.register_controllers()
 
-        self.assertEqual(len(self.root._contained_controllers), 1)
         self.assertIdentical(
             self.root.getChildWithDefault('container', DummyRequest([''])),
             mgr.lookup('container')['object']
@@ -524,7 +523,6 @@ class PageTest(unittest.TestCase):
         self.root._controllers_manager = mgr
         self.root.register_controllers()
 
-        self.assertEqual(len(self.root._contained_controllers), 1)
         self.assertTrue('contained' not in self.root.children)
 
     def test_page_add_template_paths_string(self):

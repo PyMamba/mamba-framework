@@ -22,7 +22,6 @@ class DummyContainer(controller.Controller, controller.ControllerProvider):
     name = 'DummyContainer'
     desc = 'I am a dummy container created for tests purposes'
     loaded = False
-    isLeaf = False
     __route__ = 'container'
 
     def __init__(self):

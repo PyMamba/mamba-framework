@@ -195,27 +195,17 @@ Our last step is to just make a small change in the ``root`` action in the contr
 
     If you don't know what a *mambaerized resource file* is, we recommend you to read the :doc:`../getting_started` document and come back here when you read it
 
-Controller Containers
-=====================
+Nested Controllers
+==================
 
-Sometimes we want to group different controllers under the same path (user, cart and actions under the `api` path for example), we can use the Mamba's Controller's Container for that.
+Sometimes we want to group different controllers under the same path (user, cart and actions under the `api` path for example), controllers can be attached to other controllers setting the `__parent__` property to the route of the controller that we want to arrach it.
 
-A Controller's Container is just a regular Mamba controller that defines it's `isLeaf` property as `False` so it can append childrens to itself and use the twisted routing dispatch mechanism.
-
-.. note::
-
-    Is a good idea to implement the `getChild` method in a controller container, just to avoid some warnings from the mamba controller routing mechanism, the `getChild` metod should return `self`.
-
-.. warning::
-
-    A controller's container can define only a method for the path `@route('/')` that can implement whatever logic that we need on it. Any other route/method will be completely ignored.
-
-A container can (and should) define a controller's `__route__` just like any other controller.
+A container can (and should) define a controller's `__route__` just like any other controller. If the `__route__` property is not set in an attached controller, this can lead to totally unprdictable and hard to debug weird behaviour in your routes dispatching.
 
 How to use it?
 ~~~~~~~~~~~~~~
 
-We can set the container of any controllers (including other containers) just defining the class property `_container` with the correct name of the route of the container that we want to add our controller to. We can have for example a container called `api` and attach the controllers `users` and `wallet` to it.
+We can set the container of any controllers (including other containers) just defining the class property `__parent__` with the correct name of the route of the container that we want to add our controller to. We can have for example a container called `api` and attach the controllers `users` and `wallet` to it.
 
 The controller's container code should look like the code below:
 
@@ -256,7 +246,7 @@ While the attached controllers should look like:
 
         name = 'User'
         __route__ = 'user'
-        _container = 'api'
+        __parent__ = 'api'
 
         def __init__(self):
             """Put your initialization code here
@@ -284,7 +274,7 @@ While the attached controllers should look like:
 
         name = 'User'
         __route__ = 'user'
-        _container = 'api'
+        __parent__ = 'api'
 
         def __init__(self):
             """Put your initialization code here
