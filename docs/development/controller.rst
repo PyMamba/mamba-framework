@@ -279,11 +279,11 @@ While the attached controllers should look like:
 
 
     class WalletController(controller.Controller):
-        """User Controller
+        """Wallet Controller
         """
 
-        name = 'User'
-        __route__ = 'user'
+        name = 'Wallet'
+        __route__ = 'wallet'
         _container = 'api'
 
         def __init__(self):
@@ -291,7 +291,7 @@ While the attached controllers should look like:
             """
             super(WalletController, self).__init__()
 
-        @route('/get/<int:wallet_id>')
+        @route('/<int:wallet_id>')
         def test(self, request, wallet_id, **kwargs):
             return Ok('Fake Wallet')
 
