@@ -376,6 +376,7 @@ class RouteDispatcher(object):
         self.router = router
         self.request = request
         self.method = request.method
+        self.controller_object = controller
         self.controller = controller.__class__.__name__
         self.url = UrlSanitizer().sanitize_container(
             [controller.get_register_path()] + request.postpath
@@ -402,6 +403,17 @@ class RouteDispatcher(object):
                 if route:
                     self._parse_request_args(route)
                     return route
+            elif len(self.controller_object.children) > 0:
+                for _, child in self.controller_object.children.items():
+                    child_name = child.__class__.__name__
+                    if child_name in controllers:
+                        rd = RouteDispatcher(self.router, child, self.request)
+                        rd.url = rd.url.split(child.get_register_path(), 1)[1]
+                        route = controllers.get(child_name).validate(rd)
+
+                        if route:
+                            self._parse_request_args(route)
+                            return route
 
         for url in self.router.routes.values():
             controllers = url.values()
