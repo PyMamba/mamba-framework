@@ -532,7 +532,7 @@ class Packer(object):
         os.chdir('..')
         self.do(['rm', '-Rf', 'package'])
 
-        if error is not '':
+        if type(error) is str and len(error) > 0:
             raise RuntimeError(error)
 
     def create_package_directory(self, name, options, config):

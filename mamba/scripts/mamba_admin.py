@@ -210,7 +210,7 @@ def handle_start_command(options=None, dropin_cache_wa=False):
                 return handle_start_command(options, True)
             else:
                 result = darkgreen('Ok')
-                exit_code = 1
+                exit_code = 0
         else:
             result = darkred('Fail')
             exit_code = -1
