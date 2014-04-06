@@ -167,7 +167,8 @@ class ControllerManagerTest(unittest.TestCase):
         import os
         currdir = os.getcwd()
         os.chdir('../mamba/test/dummy_app/')
-        self.assertTrue(self.mgr.is_valid_file('dummy.py'))
+        self.assertTrue(
+            self.mgr.is_valid_file('application/controller/dummy.py'))
         os.chdir(currdir)
 
     def test_is_valid_file_works_on_invalid(self):
@@ -177,7 +178,8 @@ class ControllerManagerTest(unittest.TestCase):
         import os
         currdir = os.getcwd()
         os.chdir('../mamba/test/dummy_app/')
-        self.assertTrue(self.mgr.is_valid_file(filepath.FilePath('dummy.py')))
+        self.assertTrue(self.mgr.is_valid_file(
+            filepath.FilePath('application/controller/dummy.py')))
         os.chdir(currdir)
 
     def test_is_loading_modules_works(self):
