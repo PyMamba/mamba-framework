@@ -3,6 +3,11 @@
 import os
 import sys
 
+from mamba._version import versions
+
+# This is an auto-generated property, Do not edit it.
+version = versions.Version('shell', 0, 0, 0)
+
 
 def mysql(uri):
     """Runs a MySQL shell.
