@@ -1,7 +1,7 @@
 .. _what_mamba_is:
 
-What Mamba is?
-==============
+What Mamba is
+=============
 
 A part of a genus of *tree snakes*, Mamba is a rapid application development (RAD) framework built on top of Twisted, Storm and Jinja2 templating system.
 
