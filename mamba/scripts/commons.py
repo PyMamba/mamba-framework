@@ -220,3 +220,30 @@ def post_options(self):
     else:
         # just set an invalid RFC2822 email address (thats what irony mean)
         self['email'] = '{}@localhost'.format(self['author'])
+
+
+def process_path_name(name):
+    """Process the path and name of the model
+    """
+
+    name_args = name.split('.')
+    if len(name_args) > 1 and len(name_args) < 3:
+        subpath, name = name_args
+    elif len(name_args) >= 3:
+        subpath, name = name_args[0], ''.join(name_args[1:])
+    else:
+        subpath, name = '', name_args
+
+    return subpath, name
+
+
+def generate_sub_packages(path_file):
+    """Generate directories and __init__.py scripts for subpackages
+    """
+
+    modules_dirs = filepath.FilePath(path_file.path.rsplit('/', 1)[0])
+    modules_dirs.makedirs()
+    for directory in [f for f in modules_dirs.walk() if f.isdir()]:
+        fp = filepath.FilePath(filepath.joinpath(f.path, '__init__.py'))
+        if not fp.exists():
+            fp.touch()
