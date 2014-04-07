@@ -77,8 +77,9 @@ class ModelOptions(usage.Options):
 
         regex = re.compile(r'[\s]')
         name = regex.sub('', name)
+        path, name = self._process_path_name(name)
 
-        self['filename'] = name.lower()
+        self['filename'] = filepath.joinpath(path.lower(), name.lower())
         self['name'] = CamelCase(name.replace('_', ' ')).camelize(True)
         self['model_table'] = table
 
@@ -111,6 +112,20 @@ class ModelOptions(usage.Options):
 
         if self['platforms'] is None:
             self['platforms'] = 'Linux'
+
+    def _process_path_name(self, name):
+        """Process the path and name of the model
+        """
+
+        name_args = name.split('.')
+        if len(name_args) > 1 and len(name_args) < 3:
+            subpath, name = name_args
+        elif len(name_args) >= 3:
+            subpath, name = name_args[0], ''.join(name_args[1:])
+        else:
+            subpath, name = '', name_args
+
+        return subpath, name
 
 
 class Model(object):
@@ -175,14 +190,20 @@ class Model(object):
                 return
 
         print('Writing the model...'.ljust(73), end='')
-        model_file.open('w').write(self._process_template())
+        try:
+            model_file.open('w').write(self._process_template())
+        except IOError:
+            # package directory doesn't exists yet
+            model_dirs = filepath.FilePath(model_file.path.rsplit('/', 1)[0])
+            model_dirs.makedirs()
+            model_file.open('w').write(self._process_template())
 
     def _process_template(self):
         """Prepare the template to write/dump
         """
 
         sep = filepath.os.sep  # windows needs '\\' as separator
-        controller_template = Template(
+        model_template = Template(
             filepath.FilePath('{}/templates/model.tpl'.format(
                 '/'.join(filepath.dirname(__file__).split(sep)[:-1])
             )).open('r').read()
@@ -212,4 +233,4 @@ class Model(object):
             'model_class': classname,
         }
 
-        return controller_template.safe_substitute(**args)
+        return model_template.safe_substitute(**args)
