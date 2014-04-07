@@ -80,14 +80,14 @@ class Fixture(schema.Schema):
 
         self._deletes.add(query)
 
-    def create_testing_tables(self, store=None):
+    def create_testing_tables(self, store=None, mgr=None):
         """Create testing tables in the conigured database (if any)
 
         :param store: an optional store to being used
         :type store: :class:`mamba.enterprise.Store`
         """
 
-        manager = ModelManager()
+        manager = ModelManager() if mgr is None else mgr
         store = self._valid_store(store)
         for model in [m['object'] for m in manager.get_models().values()]:
             store.execute(model.dump_table().replace(
@@ -97,14 +97,14 @@ class Fixture(schema.Schema):
 
         store.commit()
 
-    def drop_testing_tables(self, store=None):
+    def drop_testing_tables(self, store=None, mgr=None):
         """Drop testing tables from the configured database (if any)
 
         :param store: an optional store to being used
         :type store: :class:`mamba.enterprise.Store`
         """
 
-        manager = ModelManager()
+        manager = ModelManager() if mgr is None else mgr
         store = self._valid_store(store)
         for model in [m['object'] for m in manager.get_models().values()]:
             store.execute(model.get_adapter().drop_table().replace(

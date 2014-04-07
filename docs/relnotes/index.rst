@@ -64,6 +64,7 @@ Features
 * Now controllers can be attached to other controllers controllers to form a path route tree
 * Added TestableDatabase and prepare_model_for_test function to make easier the task of test mamba applications models
 * Added fixtures class (extends Storm's Schema)
+* Added modules and controllers sub pacages automatic pre-load (for ex: application/model/sub_package/model.py)
 
 
 Bug Fixes
@@ -112,6 +113,7 @@ Changes
 * The :class:`~mamba.enterprise.common.NativeEnum` type has been reimplemented as a ``set``. Implementation provided by Patrick O'Loughlin @paddyoloughlin on GitHub
 * Added new find method to model object to find ojects into the database
 * Storm.locals imports moved to ``mamba.entreprise`` package
+* Now is possible to create subpakages for modules and controllers using 'subpackage.module_name' as the name of the controller or model, for ex: mamba-admin controller community.users
 
 Documentation
 -------------

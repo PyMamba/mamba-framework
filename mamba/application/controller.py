@@ -12,7 +12,7 @@
 
 """
 
-from os.path import normpath
+from os.path import normpath, join
 
 from twisted.python import log
 from twisted.web import http, server
@@ -263,16 +263,9 @@ class ControllerManager(module.ModuleManager):
 
         if type(file_path) is not str:
             return self._valid_file(
-                normpath('{}/{}'.format(
-                    self._module_store, file_path.basename())
-                ),
-                'mamba-controller'
-            )
+                normpath(file_path.path), 'mamba-controller')
 
-        return self._valid_file(
-            normpath('{}/{}'.format(self._module_store, file_path)),
-            'mamba-controller'
-        )
+        return self._valid_file(normpath(file_path), 'mamba-controller')
 
     def build_controller_tree(self, controller):
         """Build the controller's tree
@@ -284,6 +277,5 @@ class ControllerManager(module.ModuleManager):
         module = controller.get('object')
         if module.__parent__ is not None:
             parent = self.lookup(module.__parent__).get('object')
-            print(parent)
             if parent is not None:
                 parent.children[module.__route__] = module

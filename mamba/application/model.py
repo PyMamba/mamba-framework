@@ -12,7 +12,7 @@
 """
 
 import inspect
-from os.path import normpath
+from os.path import normpath, join
 from collections import OrderedDict
 
 from storm.uri import URI
@@ -432,14 +432,6 @@ class ModelManager(module.ModuleManager):
         """
 
         if type(file_path) is not str:
-            return self._valid_file(
-                normpath('{}/{}'.format(
-                    self._module_store, file_path.basename())
-                ),
-                'mamba-model'
-            )
+            return self._valid_file(normpath(file_path.path), 'mamba-model')
 
-        return self._valid_file(
-            normpath('{}/{}'.format(self._module_store, file_path)),
-            'mamba-model'
-        )
+        return self._valid_file(normpath(file_path), 'mamba-model')

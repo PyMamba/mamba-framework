@@ -1241,7 +1241,7 @@ class ModelManagerTest(unittest.TestCase):
     def test_is_valid_file_works_on_valid(self):
         currdir = os.getcwd()
         os.chdir('../mamba/test/dummy_app')
-        self.assertTrue(self.mgr.is_valid_file('dummy.py'))
+        self.assertTrue(self.mgr.is_valid_file('application/model/dummy.py'))
         os.chdir(currdir)
 
     def test_is_valid_file_works_on_invalid(self):
@@ -1250,7 +1250,8 @@ class ModelManagerTest(unittest.TestCase):
     def test_is_valid_file_works_with_filepath(self):
         currdir = os.getcwd()
         os.chdir('../mamba/test/dummy_app')
-        self.assertTrue(self.mgr.is_valid_file(filepath.FilePath('dummy.py')))
+        self.assertTrue(self.mgr.is_valid_file(
+            filepath.FilePath('application/model/dummy.py')))
         os.chdir(currdir)
 
     def test_load_modules_works(self):
