@@ -10,7 +10,9 @@ import sys
 
 from twisted.trial import unittest
 
+from mamba.core import GNU_LINUX
 from mamba.unittest import fixtures
+from mamba.application.model import ModelManager
 
 
 class FixturesTest(unittest.TestCase):
@@ -100,7 +102,11 @@ class FixturesTest(unittest.TestCase):
     def test_fixture_create_testing_tables(self):
         os.chdir('../mamba/test/dummy_app')
         sys.path.append('.')
-        self.fixture.create_testing_tables()
+        mgr = ModelManager()
+        if GNU_LINUX:
+            self.addCleanup(mgr.notifier.loseConnection)
+
+        self.fixture.create_testing_tables(mgr=mgr)
         self.assertTrue(
             '_mamba_test_dummy' in [r[0] for r in self.fixture.store.execute(
                 "SELECT name FROM sqlite_master WHERE type='table'"
@@ -112,18 +118,21 @@ class FixturesTest(unittest.TestCase):
             ).get_all()]
         )
 
-        self.fixture.drop_testing_tables()
+        self.fixture.drop_testing_tables(mgr=mgr)
 
     def test_fixture_drop_testing_tables(self):
         os.chdir('../mamba/test/dummy_app')
         sys.path.append('.')
-        self.fixture.create_testing_tables()
+        mgr = ModelManager()
+        if GNU_LINUX:
+            self.addCleanup(mgr.notifier.loseConnection)
+        self.fixture.create_testing_tables(mgr=mgr)
         self.assertTrue(
             '_mamba_test_dummy' in [r[0] for r in self.fixture.store.execute(
                 "SELECT name FROM sqlite_master WHERE type='table'"
             ).get_all()]
         )
-        self.fixture.drop_testing_tables()
+        self.fixture.drop_testing_tables(mgr=mgr)
         self.assertFalse(
             '_mamba_test_dummy' in [r[0] for r in self.fixture.store.execute(
                 "SELECT name FROM sqlite_master WHERE type='table'"

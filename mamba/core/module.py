@@ -48,6 +48,7 @@ class ModuleManager(object):
     def __init__(self):
         # Initialize the ExtensionLoader parent object
         super(ModuleManager, self).__init__()
+        self.pattern = re.compile(r'[^_?]\.py$', re.IGNORECASE)
 
         self._modules = OrderedDict()
         self._extension = '.py'
@@ -69,17 +70,10 @@ class ModuleManager(object):
         self.setup()
 
     def setup(self):
-        """Setup the loader and load the Mamba plugins
+        """Setup the loder and load the Mamba plugins
         """
 
-        try:
-            files = filepath.listdir(self._module_store)
-            pattern = re.compile(r'[^_?]\.py$', re.IGNORECASE)
-            for py_file in filter(pattern.search, files):
-                if self.is_valid_file(py_file):
-                    self.load(py_file)
-        except OSError:
-            pass
+        self._load_from_package(self._module_store)
 
     def load(self, filename):
         """Loads a Mamba module
@@ -92,10 +86,7 @@ class ModuleManager(object):
             filename = filename.path
 
         module_name = filepath.splitext(filepath.basename(filename))[0]
-        module_path = '{}.{}'.format(
-            self._modulize_store(),
-            module_name
-        )
+        module_path = self._modulize_path(filename).split('.py')[0]
 
         if module_name in self._modules:
             return
@@ -234,6 +225,40 @@ class ModuleManager(object):
             retval = self._module_store.replace('/', '.')
 
         return retval
+
+    def _modulize_path(self, path):
+        """Return a modularied version of the given path
+        """
+
+        path = filepath.joinpath(
+            self._module_store, path.split(self._module_store + '/')[1])
+        if self._package is not None:
+            # seems like this is a package
+            retval = '{}{}'.format(
+                self._package,
+                path.rsplit(self._package, 1)[1]
+            ).replace('/', '.')
+        else:
+            retval = path.replace('/', '.')
+
+        return retval
+
+    def _load_from_package(self, package=''):
+        """Load modules from the given package
+        """
+
+        try:
+            for f in filepath.listdir(package):
+                filename = filepath.joinpath(package, f)
+                fp = filepath.FilePath(filename)
+                if fp.isdir():
+                    self._load_from_package(filename)
+                    continue
+                if self.pattern.search(filename) is not None:
+                    if self.is_valid_file(filename):
+                        self.load(filename)
+        except OSError:
+            pass
 
 
 __all__ = ['ModuleError', 'ModuleManager']

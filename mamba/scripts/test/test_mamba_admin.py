@@ -495,6 +495,11 @@ class MambaAdminControllerTest(unittest.TestCase):
         self.assertEqual(self.config['filename'], 'test_controller')
         self.assertEqual(self.config['name'], 'TestController')
 
+    def test_filename_path_split_on_dot_name(self):
+        self.config.parseOptions(['test.controller'])
+        self.assertEqual(self.config['filename'], 'test/controller')
+        self.assertEqual(self.config['name'], 'Controller')
+
     def test_email_validation(self):
 
         def fake_exit(value):
@@ -624,6 +629,11 @@ class MambaAdminModelTest(unittest.TestCase):
         self.config.parseOptions(['Tes/t_model$', 'test'])
         self.assertEqual(self.config['filename'], 'test_model')
         self.assertEqual(self.config['name'], 'TestModel')
+
+    def test_filename_path_split_on_dot_name(self):
+        self.config.parseOptions(['test.model', 'test'])
+        self.assertEqual(self.config['filename'], 'test/model')
+        self.assertEqual(self.config['name'], 'Model')
 
     def test_email_validation(self):
 
