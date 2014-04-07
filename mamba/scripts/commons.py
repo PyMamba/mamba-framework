@@ -232,7 +232,7 @@ def process_path_name(name):
     elif len(name_args) >= 3:
         subpath, name = name_args[0], ''.join(name_args[1:])
     else:
-        subpath, name = '', name_args
+        subpath, name = '', name_args[0]
 
     return subpath, name
 
