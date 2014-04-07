@@ -75,7 +75,7 @@ class ModelOptions(usage.Options):
             self['table'] = None
             return
 
-        regex = re.compile(r'[\W]')
+        regex = re.compile(r'[\s]')
         name = regex.sub('', name)
 
         self['filename'] = name.lower()
