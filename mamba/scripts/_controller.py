@@ -74,7 +74,7 @@ class ControllerOptions(usage.Options):
             self['name'] = name
             return
 
-        regex = re.compile(r'[\s]')
+        regex = re.compile(r'[^._a-zA-Z0-9]')
         name = regex.sub('', name)
         path, name = commons.process_path_name(name)
 

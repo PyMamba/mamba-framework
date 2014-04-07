@@ -75,7 +75,7 @@ class ModelOptions(usage.Options):
             self['table'] = None
             return
 
-        regex = re.compile(r'[\s]')
+        regex = re.compile(r'[^._a-zA-Z0-9]')
         name = regex.sub('', name)
         path, name = commons.process_path_name(name)
 
