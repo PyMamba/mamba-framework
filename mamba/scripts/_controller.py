@@ -74,10 +74,11 @@ class ControllerOptions(usage.Options):
             self['name'] = name
             return
 
-        regex = re.compile(r'[\W]')
+        regex = re.compile(r'[\s]')
         name = regex.sub('', name)
+        path, name = commons.process_path_name(name)
 
-        self['filename'] = name.lower()
+        self['filename'] = filepath.joinpath(path.lower(), name.lower())
         self['name'] = CamelCase(name.replace('_', ' ')).camelize(True)
 
     def postOptions(self):
@@ -168,7 +169,12 @@ class Controller(object):
                 return
 
         print('Writing the controller...'.ljust(73), end='')
-        controller_file.open('w').write(self._process_template())
+        try:
+            controller_file.open('w').write(self._process_template())
+        except IOError:
+            # package directory doesn't exists yet
+            commons.generate_sub_packages(controller_file)
+            controller_file.open('w').write(self._process_template())
 
     def _process_template(self):
         """Prepare the template to write/dump
