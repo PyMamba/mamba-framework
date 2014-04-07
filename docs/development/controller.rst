@@ -30,6 +30,16 @@ A controller can define as many action and regular emthods as is needed and ever
 
         return 'Hello World!'
 
+Its possible to create subpackages to maintain our controllers under more order and control using a `doted` name for the controller, for example::
+
+    $ mamba-admin controller community.user_controller
+
+The previous command will add a python package `community` in `application/controller` so finally we can import it in our application with::
+
+.. sourcecode:: python
+
+    from application.controller.community.user_controller import UserController
+
 .. seealso::
 
     :doc:`routing`

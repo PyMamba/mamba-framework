@@ -45,6 +45,17 @@ You can pass many parameters to the ``mamba-admin model`` subcommand. You can se
 
 As you can see in the code that ``mamba-admin`` tool generated for us, we define a new class ``Dummy`` that inherits from :class:`mamba.application.model.Model` class and define a static property named ``__storm_table__`` that points to the real name of our database table, ``dummy_table`` in this case. The class define another static property ``id`` that is an instance of the |storm|_ class :class:`storm.properties.Int` with the parameters ``primary`` and ``unsigned`` as ``True``.
 
+Its possible to create subpackages to maintain our models under more order and control using a `doted` name for the model, for example::
+
+    $ mamba-admin model community.users users
+
+The previous command will add a python package `community` in `application/model` so finally we can import it in our application with::
+
+.. sourcecode:: python
+
+    from application.model.community import users
+
+
 Mamba's Storm properties
 ========================
 In mamba we define our database schema just creating new Python classes like the one in the example above. The following is a table of the available |storm| types and their SQLite, MySQL/MariaDB and PostgreSQL equivalents:
