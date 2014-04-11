@@ -14,6 +14,7 @@ from twisted.python.threadpool import ThreadPool
 from mamba.utils import config
 from mamba.application.model import Model
 from mamba.unittest import database_helpers
+from mamba.test.test_model import DummyModel
 
 
 class DatabaseHelpersTest(unittest.TestCase):
@@ -75,6 +76,13 @@ class DatabaseHelpersTest(unittest.TestCase):
         database_helpers.prepare_model_for_test(Model)
         self.assertEqual(
             Model.database.__class__, database_helpers.TestableDatabase)
+
+    def test_prepare_model_for_test_using_real_model(self):
+        self.assertEqual(
+            DummyModel.database.__class__, database_helpers.Database)
+        database_helpers.prepare_model_for_test(DummyModel)
+        self.assertEqual(
+            DummyModel.database.__class__, database_helpers.TestableDatabase)
 
     def test_database_is_started_defacto(self):
         config.Database('../mamba/test/dummy_app/config/database.json')

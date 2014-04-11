@@ -103,7 +103,10 @@ def prepare_model_for_test(model, engine=ENGINE.INMEMORY):
     :type model: :class:`~mamba.application.model.Model`
     """
 
-    if isinstance(model, type) and model.__name__ == 'Model':
+    if isinstance(model, type) and (
+        model.__name__ == 'Model'
+            or 'Model' in [base.__class__.__name__ for base in model.__bases__]
+            or model.__base__.__name__ == 'Model'):
         model.database = TestableDatabase(engine)
     elif isinstance(model, Model):
         model.__class__.database = TestableDatabase(engine)
