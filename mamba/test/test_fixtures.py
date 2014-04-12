@@ -138,3 +138,33 @@ class FixturesTest(unittest.TestCase):
                 "SELECT name FROM sqlite_master WHERE type='table'"
             ).get_all()]
         )
+
+
+class FixturesTestCaseTest(unittest.TestCase):
+
+    def test_setup_patch_modules(self):
+        with fixtures.fixture_project('../mamba/test/dummy_app'):
+            fixture_test_case = fixtures.FixtureTestCase()
+            fixture_test_case.setUp()
+            self.assertTrue(all(
+                ['_mamba_test_' in m['object'].__storm_table__ for m in
+                    fixture_test_case.manager.get_models().values()]
+            ))
+
+    def test_tear_down_unpatch_modules(self):
+        with fixtures.fixture_project('../mamba/test/dummy_app'):
+            fixture_test_case = fixtures.FixtureTestCase()
+            fixture_test_case.setUp()
+            self.assertTrue(all(
+                ['_mamba_test_' in m['object'].__storm_table__ for m in
+                    fixture_test_case.manager.get_models().values()]
+            ))
+            fixture_test_case.tearDown()
+            self.assertTrue(all(
+                ['_mamba_test_' not in m['object'].__storm_table__ for m in
+                    fixture_test_case.manager.get_models().values()]
+            ))
+
+    def test_fixture_project_defaults_to_inmediate_directory(self):
+        with fixtures.fixture_project():
+            self.assertTrue(fixtures.os.path.exists('./_trial_temp'))

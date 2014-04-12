@@ -82,7 +82,10 @@ class FabricDeployerTest(unittest.TestCase):
     def __prepare_file(self, valid):
         # we need to delete binary files from previous tests because we get
         # invalid magic method error on buildbot and PyPy
-        binary = filepath.FilePath('/tmp/fabric_deployer_test.dco')
+        binary = filepath.FilePath(filepath.joinpath(
+            tempfile.gettempdir(),
+            'fabric_deployer_test.dco'
+        ))
         if binary.exists():
             binary.remove()
         del binary
