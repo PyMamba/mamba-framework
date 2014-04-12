@@ -145,6 +145,12 @@ class FixturesTestCaseTest(unittest.TestCase):
     def test_setup_patch_modules(self):
         with fixtures.fixture_project('../mamba/test/dummy_app'):
             fixture_test_case = fixtures.FixtureTestCase()
+            if GNU_LINUX:
+                fixture_test_case.manager = ModelManager()
+                self.addCleanup(
+                    fixture_test_case.manager.notifier.loseConnection
+                )
+
             fixture_test_case.setUp()
             self.assertTrue(all(
                 ['_mamba_test_' in m['object'].__storm_table__ for m in
@@ -154,6 +160,12 @@ class FixturesTestCaseTest(unittest.TestCase):
     def test_tear_down_unpatch_modules(self):
         with fixtures.fixture_project('../mamba/test/dummy_app'):
             fixture_test_case = fixtures.FixtureTestCase()
+            if GNU_LINUX:
+                fixture_test_case.manager = ModelManager()
+                self.addCleanup(
+                    fixture_test_case.manager.notifier.loseConnection
+                )
+
             fixture_test_case.setUp()
             self.assertTrue(all(
                 ['_mamba_test_' in m['object'].__storm_table__ for m in

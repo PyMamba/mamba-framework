@@ -170,7 +170,8 @@ class FixtureTestCase(unittest.TestCase):
 
     def setUp(self):
         store = self.base_path if hasattr(self, 'base_path') else None
-        self.manager = ModelManager(store=store)
+	if not hasattr(self, 'manager'):
+	    self.manager = ModelManager(store=store)
 
         if GNU_LINUX:
             self.addCleanup(self.manager.notifier.loseConnection)
