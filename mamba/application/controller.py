@@ -12,7 +12,7 @@
 
 """
 
-from os.path import normpath, join
+from os.path import normpath
 
 from twisted.python import log
 from twisted.web import http, server
