@@ -6,13 +6,19 @@
 """
 
 import os
-import sys
 
 from twisted.trial import unittest
 
-from mamba.core import GNU_LINUX
 from mamba.unittest import fixtures
-from mamba.application.model import ModelManager
+from mamba.application.model import Model
+
+orig_testable = fixtures.TestableDatabase
+
+
+class FakeTesttableDatabase(object):
+
+    def __init__(self, engine=None):
+        self.engine = engine
 
 
 class FixturesTest(unittest.TestCase):
@@ -99,84 +105,67 @@ class FixturesTest(unittest.TestCase):
             set(['DELETE FROM TABLE dummy;', 'DELETE FROM TABLE dummy2;'])
         )
 
-    def test_fixture_create_testing_tables(self):
-        os.chdir('../mamba/test/dummy_app')
-        sys.path.append('.')
-        mgr = ModelManager()
-        if GNU_LINUX:
-            self.addCleanup(mgr.notifier.loseConnection)
+    def test_fixture_context_returns_himself_when_as_is_used(self):
+        with fixtures.Fixture() as fxt:
+            self.assertIsInstance(fxt, fixtures.Fixture)
 
-        self.fixture.create_testing_tables(mgr=mgr)
-        self.assertTrue(
-            '_mamba_test_dummy' in [r[0] for r in self.fixture.store.execute(
-                "SELECT name FROM sqlite_master WHERE type='table'"
-            ).get_all()]
-        )
-        self.assertTrue(
-            '_mamba_test_stubing' in [r[0] for r in self.fixture.store.execute(
-                "SELECT name FROM sqlite_master WHERE type='table'"
-            ).get_all()]
-        )
+    def test_fixture_context_raises_fixture_error_on_wrong_path(self):
+        os.chdir('../')
+        try:
+            with fixtures.Fixture():
+                pass
+        except fixtures.FixtureError as error:
+            self.assertEqual(
+                error[0], 'Fixture context must be used in tests only')
+            os.chdir('_trial_temp')
 
-        self.fixture.drop_testing_tables(mgr=mgr)
+    def test_fixture_context_defaults_to_inmediate_directory(self):
 
-    def test_fixture_drop_testing_tables(self):
-        os.chdir('../mamba/test/dummy_app')
-        sys.path.append('.')
-        mgr = ModelManager()
-        if GNU_LINUX:
-            self.addCleanup(mgr.notifier.loseConnection)
-        self.fixture.create_testing_tables(mgr=mgr)
-        self.assertTrue(
-            '_mamba_test_dummy' in [r[0] for r in self.fixture.store.execute(
-                "SELECT name FROM sqlite_master WHERE type='table'"
-            ).get_all()]
-        )
-        self.fixture.drop_testing_tables(mgr=mgr)
-        self.assertFalse(
-            '_mamba_test_dummy' in [r[0] for r in self.fixture.store.execute(
-                "SELECT name FROM sqlite_master WHERE type='table'"
-            ).get_all()]
-        )
+        with fixtures.Fixture():
+            self.assertTrue(fixtures.os.path.exists('./_trial_temp'))
 
+    def test_fixture_context_uses_path_if_given(self):
 
-class FixturesTestCaseTest(unittest.TestCase):
+        with fixtures.Fixture(path='../mamba/test/dummy_app'):
+            self.assertEqual(os.path.split(os.getcwd())[1], 'dummy_app')
 
-    def test_setup_patch_modules(self):
-        with fixtures.fixture_project('../mamba/test/dummy_app'):
-            fixture_test_case = fixtures.FixtureTestCase()
-            if GNU_LINUX:
-                fixture_test_case.manager = ModelManager()
-                self.addCleanup(
-                    fixture_test_case.manager.notifier.loseConnection
-                )
+    def test_fixture_context_model_prepate_for_test_if_given(self):
 
-            fixture_test_case.setUp()
-            self.assertTrue(all(
-                ['_mamba_test_' in m['object'].__storm_table__ for m in
-                    fixture_test_case.manager.get_models().values()]
-            ))
+        fixtures.TestableDatabase = FakeTesttableDatabase
+        with fixtures.Fixture(model=Model) as fxt:
+            self.assertIsInstance(fxt._model.database, FakeTesttableDatabase)
+            self.assertIs(fxt._model.database, Model.database)
+        fixtures.TestableDatabase = orig_testable
 
-    def test_tear_down_unpatch_modules(self):
-        with fixtures.fixture_project('../mamba/test/dummy_app'):
-            fixture_test_case = fixtures.FixtureTestCase()
-            if GNU_LINUX:
-                fixture_test_case.manager = ModelManager()
-                self.addCleanup(
-                    fixture_test_case.manager.notifier.loseConnection
-                )
+    def test_fixture_context_model_engine_is_set_if_given(self):
 
-            fixture_test_case.setUp()
-            self.assertTrue(all(
-                ['_mamba_test_' in m['object'].__storm_table__ for m in
-                    fixture_test_case.manager.get_models().values()]
-            ))
-            fixture_test_case.tearDown()
-            self.assertTrue(all(
-                ['_mamba_test_' not in m['object'].__storm_table__ for m in
-                    fixture_test_case.manager.get_models().values()]
-            ))
+        fixtures.TestableDatabase = FakeTesttableDatabase
+        with fixtures.Fixture(
+                model=Model, engine=fixtures.ENGINE.NATIVE) as fxt:
+            self.assertIs(fxt._model.database.engine, fixtures.ENGINE.NATIVE)
+
+        fixtures.TestableDatabase = orig_testable
+
+    def test_fixture_context_model_database_come_back_on_leave(self):
+
+        database = None
+        fixtures.TestableDatabase = FakeTesttableDatabase
+        with fixtures.Fixture(model=Model) as fxt:
+            database = fxt._original_database
+            self.assertIsInstance(fxt._model.database, FakeTesttableDatabase)
+            self.assertIs(fxt._model.database, Model.database)
+
+        fixtures.TestableDatabase = orig_testable
+        self.assertIs(Model.database, database)
+
+    def test_fixture_context_path_comes_back_on_leave(self):
+
+        with fixtures.Fixture():
+            self.assertTrue(os.path.exists('./_trial_temp'))
+
+        self.assertTrue(not os.path.exists('./_trial_temp'))
+        self.assertEqual(os.path.split(os.getcwd())[1], '_trial_temp')
 
     def test_fixture_project_defaults_to_inmediate_directory(self):
         with fixtures.fixture_project():
-            self.assertTrue(fixtures.os.path.exists('./_trial_temp'))
+            self.assertTrue(os.path.exists('./_trial_temp'))

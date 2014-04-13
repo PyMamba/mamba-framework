@@ -14,12 +14,8 @@
 import os
 from contextlib import contextmanager
 
-from twisted.trial import unittest
-
-from mamba.core import GNU_LINUX
 from mamba.enterprise import schema
-from mamba.application.model import ModelManager
-from mamba.unittest.database_helpers import TestableDatabase
+from mamba.unittest.database_helpers import TestableDatabase, ENGINE
 
 
 class FixtureError(Exception):
@@ -31,11 +27,36 @@ class Fixture(schema.Schema):
     """Create, insert, drop and clean table schemas.
     """
 
-    testable_database = TestableDatabase()
-
-    def __init__(self, base_path=None):
+    def __init__(self, model=None, path='../', engine=ENGINE.NATIVE):
         super(Fixture, self).__init__(
             creates=set(), drops=set(), deletes=set(), patch_package=None)
+
+        self._path = path
+        self._model = model
+        self._original_database = None
+
+        if self._model is not None:
+            self._original_database = self._model.database
+            self._model.database = TestableDatabase(engine)
+
+    def __enter__(self):
+        """Enter the fixture context
+        """
+
+        self._currdir = os.getcwd()
+        if '_trial_temp' not in self._currdir:
+            raise FixtureError('Fixture context must be used in tests only')
+
+        os.chdir(self._path)
+        return self
+
+    def __exit__(self, ext, exv, trb):
+        """Leave the fixture context
+        """
+
+        os.chdir(self._currdir)
+        if self._original_database is not None:
+            self._model.database = self._original_database
 
     @property
     def store(self):
@@ -86,40 +107,6 @@ class Fixture(schema.Schema):
 
         self._deletes.add(query)
 
-    def create_testing_tables(self, store=None, mgr=None):
-        """Create testing tables in the conigured database (if any)
-
-        :param store: an optional store to being used
-        :type store: :class:`mamba.enterprise.Store`
-        """
-
-        manager = ModelManager() if mgr is None else mgr
-        store = self._valid_store(store)
-        for model in [m['object'] for m in manager.get_models().values()]:
-            store.execute(model.dump_table().replace(
-                model.__storm_table__,
-                '_mamba_test_{}'.format(model.__storm_table__))
-            )
-
-        store.commit()
-
-    def drop_testing_tables(self, store=None, mgr=None):
-        """Drop testing tables from the configured database (if any)
-
-        :param store: an optional store to being used
-        :type store: :class:`mamba.enterprise.Store`
-        """
-
-        manager = ModelManager() if mgr is None else mgr
-        store = self._valid_store(store)
-        for model in [m['object'] for m in manager.get_models().values()]:
-            store.execute(model.get_adapter().drop_table().replace(
-                model.__storm_table__,
-                '_mamba_test_{}'.format(model.__storm_table__))
-            )
-
-        store.commit()
-
     def create(self, store=None):
         """Run CREATE TABLE SQL statements using the given store (if any)
 
@@ -160,49 +147,6 @@ class Fixture(schema.Schema):
         """
 
         return self.testable_database.store() if store is None else store
-
-
-class FixtureTestCase(unittest.TestCase):
-
-    def __init__(self, methodName='runTest'):
-        super(FixtureTestCase, self).__init__(methodName)
-        self.database = None
-
-    def setUp(self):
-        store = self.base_path if hasattr(self, 'base_path') else None
-	if not hasattr(self, 'manager'):
-	    self.manager = ModelManager(store=store)
-
-        if GNU_LINUX:
-            self.addCleanup(self.manager.notifier.loseConnection)
-
-        self._patch_models()
-
-    def tearDown(self):
-        self._unpatch_models()
-
-    def _patch_models(self):
-        """Patch models to use TestableDatabase
-        """
-
-        for model in [m['object'] for m in self.manager.get_models().values()]:
-            if self.database is None:
-                self.database = model.database
-
-            model.__storm_table__ = '_mamba_test_{}'.format(
-                model.__storm_table__)
-            model.database = Fixture.testable_database
-
-    def _unpatch_models(self):
-        """Unpatch models that use TestableDatabase
-        """
-
-        for model in [m['object'] for m in self.manager.get_models().values()]:
-            model.__storm_table__ = model.__storm_table__.replace(
-                '_mamba_test_', '')
-
-            if self.database is not None:
-                model.database = self.database
 
 
 @contextmanager
