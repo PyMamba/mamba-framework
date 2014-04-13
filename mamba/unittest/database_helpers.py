@@ -103,13 +103,14 @@ def prepare_model_for_test(model, engine=ENGINE.INMEMORY):
     :type model: :class:`~mamba.application.model.Model`
     """
 
+    testable_database = TestableDatabase(engine)
     if isinstance(model, type) and (
         model.__name__ == 'Model'
             or 'Model' in [base.__class__.__name__ for base in model.__bases__]
             or model.__base__.__name__ == 'Model'):
-        model.database = TestableDatabase(engine)
+        model.database = testable_database
     elif isinstance(model, Model):
-        model.__class__.database = TestableDatabase(engine)
+        model.__class__.database = testable_database
         model.transactor._threadpool = model.database.pool
     else:
         raise RuntimeError(
