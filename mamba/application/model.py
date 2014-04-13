@@ -12,7 +12,7 @@
 """
 
 import inspect
-from os.path import normpath, join
+from os.path import normpath
 from collections import OrderedDict
 
 from storm.uri import URI
