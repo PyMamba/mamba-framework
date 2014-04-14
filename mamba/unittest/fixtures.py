@@ -34,10 +34,11 @@ class Fixture(schema.Schema):
         self._path = path
         self._model = model
         self._original_database = None
+        self.testable_database = TestableDatabase(engine)
 
         if self._model is not None:
             self._original_database = self._model.database
-            self._model.database = TestableDatabase(engine)
+            self._model.database = self.testable_database
 
     def __enter__(self):
         """Enter the fixture context
