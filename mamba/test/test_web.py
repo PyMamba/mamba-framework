@@ -7,6 +7,7 @@ Tests for mamba.web
 """
 
 import sys
+import json
 import tempfile
 from cStringIO import StringIO
 from os import sep, getcwd, chdir
@@ -27,6 +28,7 @@ from mamba.web import stylesheet, page, asyncjson, response, script
 from mamba.web.routing import Route, Router, RouteDispatcher, RouterError
 
 from mamba.test.test_less import less_file
+from mamba.test.test_model import DummyModel
 from mamba.test.dummy_app.application.controller.dummy import DummyController
 
 
@@ -704,6 +706,20 @@ class RouterTest(unittest.TestCase):
         self.assertEqual(result.headers, {'content-type': 'application/json'})
         self.assertEqual(result.subject, {
             'name': 'Person', 'interests': 'Testing', 'age': 30
+        })
+
+    @defer.inlineCallbacks
+    def test_dispatch_route_returns_json_on_models(self):
+
+        StubController.test2 = routes_generator(DummyModel('Dummy'))
+
+        request = request_generator(['/test2'])
+
+        result = yield StubController().render(request)
+        self.assertIsInstance(result, response.Ok)
+        self.assertEqual(result.headers, {'content-type': 'application/json'})
+        self.assertEqual(json.loads(result.subject), {
+            'name': 'Dummy', 'id': None
         })
 
     @defer.inlineCallbacks

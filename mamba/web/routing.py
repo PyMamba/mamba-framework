@@ -24,6 +24,7 @@ from twisted.web.http import parse_qs
 
 from mamba.web import response
 from mamba.utils import output, config
+from mamba.application.model import Model
 from mamba.utils.converter import Converter
 from mamba.web.url_sanitizer import UrlSanitizer
 
@@ -162,6 +163,7 @@ class Router(object):
 
         self._prepare_response = singledispatch(self._prepare_response)
         self._prepare_response.register(str, self._prepare_response_str)
+        self._prepare_response.register(Model, self._prepare_response_model)
         self._prepare_response.register(
             response.Response, self._prepare_response_object)
 
@@ -338,7 +340,7 @@ class Router(object):
         )
 
     def _prepare_response(self, result, request):
-        """Renders the result to cobvert it to the appropiate format
+        """Renders the result to convert it to the appropiate format
         """
 
         result = Converter.serialize(result)
@@ -362,10 +364,20 @@ class Router(object):
         """Renders the result.subject into JSON if needed
         """
 
-        if 'application/json' in result.headers.values():
+        if isinstance(result.subject, Model):
+            result.subject = result.subject.json
+        elif 'application/json' in result.headers.values():
             result.subject = Converter.serialize(result.subject)
 
         return result
+
+    def _prepare_response_model(self, result, request):
+        """Convert a model object into JSON and return it back (try)
+        """
+
+        headers = {'content-type': 'application/json'}
+        retval = response.Ok(result.json, headers)
+        return retval
 
 
 class RouteDispatcher(object):
