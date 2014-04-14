@@ -21,7 +21,8 @@ from storm.exceptions import DatabaseModuleError, NoneError
 from storm.twisted.testing import FakeThreadPool
 from twisted.internet.defer import inlineCallbacks, Deferred
 from storm.locals import (
-    Int, Unicode, Reference, Enum, List, Bool, DateTime, Decimal
+    Int, Unicode, Reference, ReferenceSet, Enum, List, Bool, DateTime, Decimal,
+    Storm
 )
 
 from mamba import Database
@@ -29,8 +30,8 @@ from mamba.utils import config
 from mamba import Model, ModelManager
 from mamba.core import interfaces, GNU_LINUX
 from mamba.enterprise.common import NativeEnum
-from mamba.application.model import InvalidModelSchema
 from mamba.enterprise.mysql import MySQLMissingPrimaryKey, MySQL
+from mamba.application.model import InvalidModelSchema, MambaStorm
 from mamba.enterprise.sqlite import SQLiteMissingPrimaryKey, SQLite
 from mamba.enterprise.postgres import PostgreSQLMissingPrimaryKey, PostgreSQL
 
@@ -135,6 +136,45 @@ class ModelTest(unittest.TestCase):
         store = self.database.store()
         store.execute('DELETE FROM dummy')
         store.commit()
+
+    def test_dict(self):
+        dummy = DummyModel('Dummy')
+        d = dummy.dict()
+        self.assertEqual(d['name'], u'Dummy')
+        self.assertEqual(d['id'], None)
+
+    def test_json(self):
+        dummy = DummyModel('Dummy')
+        j = dummy.json
+        self.assertEqual(j, '{"id": null, "name": "Dummy"}')
+
+    def test_pickle(self):
+        dummy = DummyModel('Dummy')
+        p = dummy.pickle
+        self.assertEqual(p, "(dp1\nS'id'\np2\nNsS'name'\np3\nVDummy\np4\ns.")
+
+    def test_dict_traverse_reference_set(self):
+        dummy = DummyModelRelated()
+        dummy.name = u'Dummy1'
+        store = dummy.database.store()
+        store.add(dummy)
+        dummy.dummies.add(DummyRelationModel('Dummy2'))
+        d = dummy.dict()
+        self.assertEqual(len(d['dummies']), 1)
+        self.assertEqual(d['dummies'][0]['name'], u'Dummy2')
+        store.rollback()
+
+    def test_dict_traverse_reference(self):
+        dummy = DummyModelRelated()
+        dummy.name = u'Dummy1'
+        dummy2 = DummyRelationModel('Dummy2')
+        store = dummy.database.store()
+        store.add(dummy)
+        store.add(dummy2)
+        dummy2.dummy_id = 1
+        d = dummy2.dict()
+        self.assertEqual(d['dummy']['id'], d['dummy_id'])
+        store.rollback()
 
     @inlineCallbacks
     def test_model_create(self):
@@ -1306,6 +1346,38 @@ class DummyModel(Model):
 
     def __init__(self, name=None):
         super(DummyModel, self).__init__()
+
+        if name is not None:
+            self.name = unicode(name)
+
+
+class DummyModelRelated(Model, Storm):
+    """DummyModelRelated"""
+
+    __metaclass__ = MambaStorm
+    __storm_table__ = 'dummy'
+    id = Int(primary=True, auto_increment=True, unsigned=True)
+    name = Unicode()
+
+    # references
+    dummies = ReferenceSet(
+        'DummyModelRelated.id', 'DummyRelationModel.dummy_id')
+
+
+class DummyRelationModel(Model, Storm):
+    """DummyRelationModel"""
+
+    __metaclass__ = MambaStorm
+    __storm_table__ = 'dummy_two'
+    id = Int(primary=True, auto_increment=True, unsigned=True)
+    name = Unicode()
+    dummy_id = Int()
+
+    # references
+    dummy = Reference(dummy_id, DummyModelRelated.id)
+
+    def __init__(self, name=None):
+        super(DummyRelationModel, self).__init__()
 
         if name is not None:
             self.name = unicode(name)

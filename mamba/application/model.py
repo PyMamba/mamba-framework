@@ -11,6 +11,12 @@
 
 """
 
+import json
+try:
+    import cPickle as pickle
+except:
+    import pickle
+
 import inspect
 from os.path import normpath
 from collections import OrderedDict
@@ -19,7 +25,12 @@ from storm.uri import URI
 from twisted.python import log
 from storm.expr import Desc, Undef
 from storm.twisted.transact import Transactor
+from storm.references import Reference, ReferenceSet
 from storm.properties import PropertyPublisherMeta, PropertyColumn
+from storm.variables import (
+    TimeDeltaVariable, TimeVariable, DateVariable,
+    DateTimeVariable, DecimalVariable
+)
 
 from mamba import plugin
 from mamba.utils import config
@@ -151,6 +162,73 @@ class Model(ModelProvider):
             return self.__uri__
 
         return None
+
+    @property
+    def json(self):
+        """Returns a JSON representation of the object (if possible)
+        """
+
+        try:
+            return json.dumps(self.dict(json=True))
+        except TypeError as error:
+            log.err(str(error))
+            return {}
+
+    @property
+    def pickle(self):
+        """Returns a Pyhon Pickle representation of the object (if possible)
+        """
+
+        try:
+            return pickle.dumps(self.dict())
+        except TypeError as error:
+            log.err(str(error))
+            return ''
+
+    def dict(self, traverse=True, json=False, *parent):
+        """Returns the object as a dictionary
+
+        :param traverse: if True traverse over references
+        :type traverse: bool
+        :param json: if True we convert datetime to string and Decimal to float
+        :type json: bool
+        """
+
+        parent = list(parent)
+        parent.append(self)
+        values = self._storm_columns.values()
+        if json is True:
+            obj = {}
+            ins = (
+                TimeVariable, DateVariable, DateTimeVariable, TimeDeltaVariable
+            )
+            for p in values:
+                val = getattr(self, p.name)
+                if isinstance(p.variable_factory(), ins) and val is not None:
+                    obj[p.name] = str(val)
+                elif isinstance(p.variable_factory(), DecimalVariable) and val:
+                    obj[p.name] = float(val)
+                else:
+                    obj[p.name] = getattr(self, p.name)
+        else:
+            obj = dict([(p.name, getattr(self, p.name)) for p in values])
+
+        if traverse is True:
+
+            forbidden = [id(p) for p in parent]
+            for attr in inspect.classify_class_attrs(self.__class__):
+                if type(attr.object) is Reference:
+                    foreign_ref = getattr(self, attr.name)
+                    if id(foreign_ref) not in forbidden:
+                        obj[attr.name] = foreign_ref.dict(json=json, *parent)
+                elif type(attr.object) is ReferenceSet:
+                    foreign_ref = getattr(self, attr.name)
+                    if id(foreign_ref) not in forbidden:
+                        obj[attr.name] = [
+                            item.dict(json=json, *parent)
+                            for item in foreign_ref if id(self) != id(item)
+                        ]
+        return obj
 
     def copy(self, orig):
         """Copy this object properties and return it
