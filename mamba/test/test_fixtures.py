@@ -24,10 +24,14 @@ class FakeTesttableDatabase(object):
 class FixturesTest(unittest.TestCase):
 
     def setUp(self):
+
+        self._testable_database = fixtures.TestableDatabase
+        fixtures.TestableDatabase = FakeTesttableDatabase
         self.currdir = os.getcwd()
         self.fixture = fixtures.Fixture()
 
     def tearDown(self):
+        fixtures.TestableDatabase = self._testable_database
         os.chdir(self.currdir)
 
     def test_fixtures_constructs_empty_sets(self):
@@ -131,31 +135,23 @@ class FixturesTest(unittest.TestCase):
 
     def test_fixture_context_model_prepate_for_test_if_given(self):
 
-        fixtures.TestableDatabase = FakeTesttableDatabase
         with fixtures.Fixture(model=Model) as fxt:
             self.assertIsInstance(fxt._model.database, FakeTesttableDatabase)
             self.assertIs(fxt._model.database, Model.database)
-        fixtures.TestableDatabase = orig_testable
 
     def test_fixture_context_model_engine_is_set_if_given(self):
 
-        fixtures.TestableDatabase = FakeTesttableDatabase
         with fixtures.Fixture(
                 model=Model, engine=fixtures.ENGINE.NATIVE) as fxt:
             self.assertIs(fxt._model.database.engine, fixtures.ENGINE.NATIVE)
 
-        fixtures.TestableDatabase = orig_testable
-
     def test_fixture_context_model_database_come_back_on_leave(self):
 
-        database = None
-        fixtures.TestableDatabase = FakeTesttableDatabase
         with fixtures.Fixture(model=Model) as fxt:
             database = fxt._original_database
             self.assertIsInstance(fxt._model.database, FakeTesttableDatabase)
             self.assertIs(fxt._model.database, Model.database)
 
-        fixtures.TestableDatabase = orig_testable
         self.assertIs(Model.database, database)
 
     def test_fixture_context_path_comes_back_on_leave(self):
