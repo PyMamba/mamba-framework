@@ -85,4 +85,3 @@ class Converter(object):
             value = 'null'
 
         return value
-
