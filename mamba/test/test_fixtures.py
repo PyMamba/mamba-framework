@@ -11,6 +11,7 @@ from twisted.trial import unittest
 
 from mamba.unittest import fixtures
 from mamba.application.model import Model
+from mamba.test.test_model import DummyModel, DummyModelFive
 
 orig_testable = fixtures.TestableDatabase
 
@@ -148,7 +149,7 @@ class FixturesTest(unittest.TestCase):
     def test_fixture_context_model_database_come_back_on_leave(self):
 
         with fixtures.Fixture(model=Model) as fxt:
-            database = fxt._original_database
+            database = fxt._original_databases[id(Model)]
             self.assertIsInstance(fxt._model.database, FakeTesttableDatabase)
             self.assertIs(fxt._model.database, Model.database)
 
@@ -165,3 +166,26 @@ class FixturesTest(unittest.TestCase):
     def test_fixture_project_defaults_to_inmediate_directory(self):
         with fixtures.fixture_project():
             self.assertTrue(os.path.exists('./_trial_temp'))
+
+    def test_fixture_context_model_iterable_works(self):
+
+        with fixtures.Fixture(model=(DummyModel, DummyModelFive)) as fxt:
+            self.assertIsInstance(
+                fxt._model[0].database, FakeTesttableDatabase)
+            self.assertIsInstance(
+                fxt._model[1].database, FakeTesttableDatabase)
+            self.assertIs(fxt._model[0].database, DummyModel.database)
+            self.assertIs(fxt._model[1].database, DummyModelFive.database)
+
+    def test_fixture_context_model_iterable_comes_back_on_leave(self):
+
+        database = DummyModel.database
+        with fixtures.Fixture(model=(DummyModel, DummyModelFive)) as fxt:
+            self.assertIsInstance(
+                fxt._model[0].database, FakeTesttableDatabase)
+            self.assertIsInstance(
+                fxt._model[1].database, FakeTesttableDatabase)
+            self.assertIs(fxt._model[0].database, DummyModel.database)
+            self.assertIs(fxt._model[1].database, DummyModelFive.database)
+
+        self.assertIs(DummyModel.database, database)

@@ -33,12 +33,14 @@ class Fixture(schema.Schema):
 
         self._path = path
         self._model = model
-        self._original_database = None
+        self._original_databases = {}
         self.testable_database = TestableDatabase(engine)
 
         if self._model is not None:
-            self._original_database = self._model.database
-            self._model.database = self.testable_database
+            if type(self._model) in (tuple, list):
+                [self._swap_database(model) for model in self._model]
+            else:
+                self._swap_database(self._model)
 
     def __enter__(self):
         """Enter the fixture context
@@ -56,8 +58,11 @@ class Fixture(schema.Schema):
         """
 
         os.chdir(self._currdir)
-        if self._original_database is not None:
-            self._model.database = self._original_database
+        if len(self._original_databases) > 0:
+            if type(self._model) in (tuple, list):
+                [self._swap_database(model, True) for model in self._model]
+            else:
+                self._swap_database(self._model, True)
 
     @property
     def store(self):
@@ -148,6 +153,16 @@ class Fixture(schema.Schema):
         """
 
         return self.testable_database.store() if store is None else store
+
+    def _swap_database(self, model, restore=False):
+        """Swap the database
+        """
+
+        if restore is False:
+            self._original_databases[id(model)] = model.database
+            model.database = self.testable_database
+        else:
+            model.database = self._original_databases[id(model)]
 
 
 @contextmanager
