@@ -7,7 +7,6 @@ Tests for mamba.web
 """
 
 import sys
-import json
 import tempfile
 from cStringIO import StringIO
 from os import sep, getcwd, chdir
@@ -21,6 +20,7 @@ from twisted.web.test.test_web import DummyRequest
 from twisted.internet.error import ProcessTerminated
 from doublex import Stub, ProxySpy, Spy, called, assert_that
 
+from mamba.utils import json
 from mamba.core import packages, GNU_LINUX
 from mamba.application import route as decoroute
 from mamba.application import appstyles, controller, scripts

@@ -10,8 +10,6 @@
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 
 """
-
-import json
 try:
     import cPickle as pickle
 except:
@@ -33,7 +31,7 @@ from storm.variables import (
 )
 
 from mamba import plugin
-from mamba.utils import config
+from mamba.utils import config, json
 from mamba.core import interfaces, module
 from mamba.enterprise.database import Database, AdapterFactory, transact
 

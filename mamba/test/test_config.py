@@ -11,7 +11,7 @@ import tempfile
 from twisted.trial import unittest
 from twisted.python import filepath
 
-from mamba.utils import config
+from mamba.utils import config, json
 
 
 class DatabaseTest(unittest.TestCase):
