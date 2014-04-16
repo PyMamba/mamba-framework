@@ -6,11 +6,11 @@
 Tests for mamba.utils.converter
 """
 
-import json
 import decimal
 
 from twisted.trial import unittest
 
+from mamba.utils import json
 from mamba.utils.converter import Converter
 
 

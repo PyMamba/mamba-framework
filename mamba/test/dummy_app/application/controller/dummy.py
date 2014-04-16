@@ -6,11 +6,10 @@
 Test Dummy Controller
 """
 
-import json
-
 from twisted.internet import defer
 from zope.interface import implements
 
+from mamba.utils import json
 from mamba.web.response import Ok
 from mamba.core import interfaces
 from mamba.application import controller, route

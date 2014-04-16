@@ -11,7 +11,6 @@
 """
 
 import re
-import json
 import inspect
 import logging
 import functools
@@ -23,7 +22,7 @@ from twisted.internet import defer
 from twisted.web.http import parse_qs
 
 from mamba.web import response
-from mamba.utils import output, config
+from mamba.utils import output, config, json
 from mamba.application.model import Model
 from mamba.utils.converter import Converter
 from mamba.web.url_sanitizer import UrlSanitizer

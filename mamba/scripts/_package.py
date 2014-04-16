@@ -6,7 +6,6 @@ from __future__ import print_function
 
 import os
 import sys
-import json
 import zipfile
 import tarfile
 import getpass
@@ -25,6 +24,8 @@ from twisted.python import usage, filepath
 from mamba import copyright
 from mamba.scripts import commons
 from mamba._version import versions
+
+from maba.utils import json
 from mamba.utils.checkers import Checkers
 from mamba.utils.output import darkred, darkgreen
 
