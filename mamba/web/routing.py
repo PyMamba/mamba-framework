@@ -185,7 +185,7 @@ class Router(object):
                 # depending on the user code
                 result = defer.maybeDeferred(route, controller, request)
                 result.addCallback(self._process, request)
-                result.addErrback(self._process_error, request)
+                result.addErrback(self._process_error, request=request)
             elif route == 'NotImplemented':
                 result = defer.succeed(response.NotImplemented(
                     UrlSanitizer().sanitize_container(
@@ -323,17 +323,16 @@ class Router(object):
         try:
             return self._prepare_response(result, request)
         except Exception as error:
-            return self._process_error(result, request, error)
+            return self._process_error(error, result, request)
 
-    def _process_error(self, result, request, error=''):
+    def _process_error(self, error=None, result=None, request=None):
         """Process and sendback an error response
         """
 
         if isinstance(error, response.Response):
             error = error.subject
 
-        log.err('Deferred failed: {error}'.format(error=error))
-
+        log.err(error, 'Deferred failed:')
         return response.InternalServerError(
             'ERROR 500: Internal server error {}\n{}'.format(error, result)
         )

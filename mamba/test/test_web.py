@@ -895,7 +895,7 @@ class RouterTest(unittest.TestCase):
         router = Router()
         request = request_generator('/test')
 
-        resp = router._process_error('fake_result', request)
+        resp = router._process_error('fake_result', request=request)
         self.assertIsInstance(resp, response.InternalServerError)
         self.assertEqual(resp.code, 500)
 
