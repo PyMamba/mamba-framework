@@ -917,7 +917,7 @@ class TestRouteDispatcher(unittest.TestCase):
         router.install_routes(controller)
         route_dispatcher = RouteDispatcher(router, controller, request)
 
-        self.assertIsInstance(route_dispatcher.lookup(), Route)
+        self.assertIsInstance(route_dispatcher.lookup()[0], Route)
 
     def test_lookup_returns_none_on_invalid_controller_or_router(self):
 
@@ -925,7 +925,7 @@ class TestRouteDispatcher(unittest.TestCase):
             Router(), StubController(), DummyRequest(['/test'])
         )
 
-        self.assertEqual(route_dispatcher.lookup(), None)
+        self.assertEqual(route_dispatcher.lookup(), (None, None))
 
     def test_lookup_returns_not_implemented_on_valid_url_invalid_method(self):
 
@@ -935,7 +935,7 @@ class TestRouteDispatcher(unittest.TestCase):
         router.install_routes(controller)
         route_dispatcher = RouteDispatcher(router, controller, request)
 
-        self.assertEqual(route_dispatcher.lookup(), 'NotImplemented')
+        self.assertEqual(route_dispatcher.lookup()[0], 'NotImplemented')
 
 
 class Collaborator(object):
@@ -951,6 +951,7 @@ class StubController(object):
         self.path = ''
         self._router = Router()
         self._router.install_routes(self)
+        self.children = {}
 
     def render(self, request):
         return self._router.dispatch(self, request)

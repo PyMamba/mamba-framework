@@ -158,7 +158,8 @@ class Page(resource.Resource):
 
         for controller in self._controllers_manager.get_controllers().values():
             self._register_controller_module(controller)
-            self._controllers_manager.build_controller_tree(controller)
+
+        self._build_controllers_tree()
 
     def register_shared_controllers(self):
         """
@@ -184,7 +185,8 @@ class Page(resource.Resource):
 
             for controller in real_manager.get_controllers().values():
                 self._register_controller_module(controller, True)
-                real_manager.build_controller_tree(controller)
+
+            real_manager.build_controller_tree()
 
     def initialize_templating_system(self, template_paths, cache_size, loader):
         """Initialize the Jinja2 templating system for static HTML resources
@@ -296,6 +298,12 @@ class Page(resource.Resource):
                 controller.get('object').get_register_path(),
                 controller.get('object')
             )
+
+    def _build_controllers_tree(self):
+        """Build the full controllers tree
+        """
+
+        self._controllers_manager.build_controller_tree()
 
 
 __all__ = ['Page']

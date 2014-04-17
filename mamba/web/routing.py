@@ -122,8 +122,6 @@ class Route(object):
 
             return self
 
-        return None
-
     def __repr__(self):
         return 'Route({})'.format(', '.join(
             map(repr, [self.method, self.url, self.callback, self.arguments]))
@@ -178,12 +176,12 @@ class Router(object):
         """
 
         try:
-            route = RouteDispatcher(self, controller, request).lookup()
+            route, obj = RouteDispatcher(self, controller, request).lookup()
 
             if type(route) is Route:
                 # at this point we can get a Deferred or an inmediate result
                 # depending on the user code
-                result = defer.maybeDeferred(route, controller, request)
+                result = defer.maybeDeferred(route, obj, request)
                 result.addCallback(self._process, request)
                 result.addErrback(self._process_error, request)
             elif route == 'NotImplemented':
@@ -383,15 +381,22 @@ class RouteDispatcher(object):
     """Look for a route, compile/process if neccesary and return it
     """
 
-    def __init__(self, router, controller, request):
+    def __init__(self, router, controller, request, url=True):
         self.router = router
         self.request = request
         self.method = request.method
         self.controller_object = controller
         self.controller = controller.__class__.__name__
-        self.url = UrlSanitizer().sanitize_container(
-            [controller.get_register_path()] + request.postpath
-        )
+        if url is True:
+            self.url = UrlSanitizer().sanitize_container(
+                [controller.get_register_path()] + request.postpath
+            )
+        else:
+            i = 0
+            if controller.__parent__ in request.postpath:
+                i = request.postpath.index(controller.__parent__) + 1
+
+            self.url = UrlSanitizer().sanitize_container(request.postpath[i:])
 
     # @cache_dispatch
     def lookup(self):
@@ -405,26 +410,11 @@ class RouteDispatcher(object):
 
         # postpath '/' is not allowed when using mamba routing
         if len(self.request.postpath) and self.request.postpath[0] == '':
-            return None
+            return None, None
 
-        for controllers in self.router.routes[self.method].values():
-            if self.controller in controllers:
-                route = controllers.get(self.controller).validate(self)
-
-                if route:
-                    self._parse_request_args(route)
-                    return route
-            elif len(self.controller_object.children) > 0:
-                for _, child in self.controller_object.children.items():
-                    child_name = child.__class__.__name__
-                    if child_name in controllers:
-                        rd = RouteDispatcher(self.router, child, self.request)
-                        rd.url = rd.url.split(child.get_register_path(), 1)[1]
-                        route = controllers.get(child_name).validate(rd)
-
-                        if route:
-                            self._parse_request_args(route)
-                            return route
+        route, controller = self._lookup()
+        if route is not None:
+            return route, controller
 
         for url in self.router.routes.values():
             controllers = url.values()
@@ -433,9 +423,52 @@ class RouteDispatcher(object):
                     if self.controller in controllers[i]:
                         r = controllers[i].get(self.controller).validate(self)
                         if r:
-                            return 'NotImplemented'
+                            return 'NotImplemented', None
 
-        return None
+        return None, None
+
+    def _lookup(self):
+        """Lookup the route
+        """
+
+        for controllers in self.router.routes[self.method].values():
+            if self.controller in controllers:
+                route = controllers.get(self.controller).validate(self)
+                if route:
+                    self._parse_request_args(route)
+                    return route, self.controller_object
+
+        return self._lookup_children()
+
+    def _lookup_children(self, child=None, level=0):
+        """Lookup the route in children
+        """
+
+        found = None, None
+        if child is None:
+            for _, child in self.controller_object.children.items():
+                found = self._lookup_children(child, level + 1)
+                if found is not None:
+                    return found
+        else:
+            for controllers in self.router.routes[self.method].values():
+                if child.__class__.__name__ in controllers:
+                    rd = RouteDispatcher(
+                        self.router, child, self.request, False)
+                    route = controllers.get(
+                        child.__class__.__name__).validate(rd)
+
+                    if route is not None:
+                        self._parse_request_args(route)
+                        return route, child
+
+            if found[0] is None:
+                for _, next_child in child.children.items():
+                    found = self._lookup_children(next_child, level + 1)
+                    if found[0] is not None:
+                        return found
+
+        return found
 
     def _parse_request_args(self, route):
         """Parses JSON data and request form if present
