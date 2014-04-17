@@ -267,15 +267,24 @@ class ControllerManager(module.ModuleManager):
 
         return self._valid_file(normpath(file_path), 'mamba-controller')
 
-    def build_controller_tree(self, controller):
-        """Build the controller's tree
+    def lookup_path(self, path):
+        """Lookup for a controller using its path
 
-        :param controller: the controller to build the tree on
-        :type controller: :class:`~mamba.application.controller.Controller`
+        :param path: the path to lookup for
+        :type path: str
         """
 
-        module = controller.get('object')
-        if module.__parent__ is not None:
-            parent = self.lookup(module.__parent__).get('object')
-            if parent is not None:
-                parent.children[module.__route__] = module
+        for controller in self._modules.values():
+            if controller.get('object').__route__ == path:
+                return controller.get('object')
+
+    def build_controller_tree(self):
+        """Build the controller's tree
+        """
+
+        for controller in self._modules.values():
+            module = controller.get('object')
+            if module.__parent__ is not None:
+                parent = self.lookup_path(module.__parent__)
+                if parent is not None:
+                    parent.children[module.__route__] = module
