@@ -498,7 +498,9 @@ class RouteDispatcher(object):
         if len(request_args) > 0:
             for key, value in request_args.iteritems():
                 if key not in route.callback_args:
-                    route.callback_args.update({key: value[0]})
+                    route.callback_args.update(
+                        {key: value if len(value) > 1 else value[0]}
+                    )
         elif data_json:
             if type(data_json) is dict:
                 for key, value in data_json.iteritems():
