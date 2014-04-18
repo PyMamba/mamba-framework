@@ -11,7 +11,6 @@
 
 """
 
-import sys
 import inspect
 from singledispatch import singledispatch
 
@@ -55,30 +54,6 @@ class PostgreSQL(CommonSQL):
     """
 
     def __init__(self, model):
-        if '__pypy__' in sys.modules:
-            # try to use psycopg2ct if we are on PyPy
-            try:
-                from psycopg2ct import compat
-                compat.register()
-
-                # monkey patch to dont let Storm crash on register type
-                import psycopg2
-                psycopg2._psycopg = object
-
-                class _psycopg:
-                    UNICODEARRAY = psycopg2.extensions.UNICODEARRAY
-
-                from twisted.python.monkey import MonkeyPatcher
-                monkey_patcher = MonkeyPatcher(
-                    (psycopg2, '_psycopg', _psycopg))
-                monkey_patcher.patch()
-
-            except ImportError:
-                raise RuntimeError(
-                    'You are trying to use PostgreSQL with PyPy. Regular '
-                    'psycopg2 module don\'t work with PyPy, you may install '
-                    'psycopg2ct in order to can use psycopg2 with PyPy'
-                )
 
         self.model = model
 
