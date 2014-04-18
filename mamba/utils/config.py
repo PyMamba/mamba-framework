@@ -17,6 +17,7 @@ from twisted.python import filepath
 
 from mamba.utils import borg, output, json
 
+
 class BaseConfig(borg.Borg):
     """
     Base Configuration object
