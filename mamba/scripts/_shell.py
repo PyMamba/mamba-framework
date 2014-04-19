@@ -55,6 +55,9 @@ def postgres(uri):
     if uri.database:
         args.extend(['--dbname', uri.database])
 
+    if uri.password:
+        args.extend(['--password', uri.password])
+
     _run(args)
 
 

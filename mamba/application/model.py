@@ -12,7 +12,7 @@
 """
 try:
     import cPickle as pickle
-except:
+except ImportError:
     import pickle
 
 import inspect
@@ -95,6 +95,11 @@ class Model(ModelProvider):
     because those ones are created in a different thread and cannot be
     used outside.
 
+    If you don't want any of the methods in your model to run asynchronous
+    inside the transactor you can set the class property `__mamba_async__`
+    as `False` and them will run synchronous in the main thread (blocking
+    the reactor in the process).
+
     We don't care about the instantiation of the **Storm**
     :class:`~storm.locals.Store` because we use :class:`zope.transaction`
     through :class:`storm.zope.zstorm.ZStorm` that will take care of create
@@ -121,14 +126,11 @@ class Model(ModelProvider):
         list. It, then, replaces cls._storm_columns with the ordered
         one, in order to maintain full interface compatibility.
         """
+
         columns = inspect.getmembers(
             cls, lambda o: isinstance(o, PropertyColumn)
         )
-
-        creation_order = sorted(
-            columns, key=lambda i: i[1]._creation_order
-        )
-
+        creation_order = sorted(columns, key=lambda i: i[1]._creation_order)
         ordered_columns = OrderedDict()
 
         for _, ordered_property in creation_order:
@@ -150,6 +152,13 @@ class Model(ModelProvider):
         or '' (empty string), what is clearly wrong.
         """
         self._set_empty_properties_to_none()
+
+    @classmethod
+    def mamba_database(cls):
+        """Return back the configured underlying mamba database (if any)
+        """
+
+        return getattr(cls, '__mamba_database__', 'mamba')
 
     @property
     def uri(self):
@@ -228,6 +237,15 @@ class Model(ModelProvider):
                         ]
         return obj
 
+    def store(self, database=None):
+        """Return a valid Storm store for this model
+        """
+
+        if database is None:
+            database = self.mamba_database()
+
+        return self.database.store(database)
+
     def copy(self, orig):
         """Copy this object properties and return it
         """
@@ -243,7 +261,7 @@ class Model(ModelProvider):
         """Create a new register in the database
         """
 
-        store = self.database.store()
+        store = self.database.store(self.mamba_database())
         store.add(self)
         store.commit()
 
@@ -270,7 +288,7 @@ class Model(ModelProvider):
             )
             raise
 
-        store = obj.database.store()
+        store = obj.database.store(klass.mamba_database())
         data = store.get(klass, id)
 
         if data is not None:
@@ -285,7 +303,7 @@ class Model(ModelProvider):
         """Update a register in the database
         """
 
-        store = self.database.store()
+        store = self.database.store(self.mamba_database())
         primary_key = self.get_primary_key()
         if primary_key is None:
             raise InvalidModelSchema(
@@ -316,7 +334,7 @@ class Model(ModelProvider):
         """Delete a register from the database
         """
 
-        store = self.database.store()
+        store = self.database.store(self.mamba_database())
         store.remove(self)
 
     @classmethod
@@ -337,7 +355,8 @@ class Model(ModelProvider):
             obj = args[0]
 
         return Transactor(klass.database.pool).run(
-            klass.database.store().find, obj, *args, **kwargs
+            klass.database.store(
+                klass.mamba_database()).find, obj, *args, **kwargs
         )
 
     @classmethod
@@ -353,7 +372,7 @@ class Model(ModelProvider):
         """
 
         def inner_transaction():
-            store = klass.database.store()
+            store = klass.database.store(klass.mamba_database())
             data = store.find(klass)
             if order_by is not None:
                 data.order_by(Desc(order_by) if desc else order_by)
@@ -368,17 +387,20 @@ class Model(ModelProvider):
         """Create the table for this model in the underlying database system
         """
 
-        store = self.database.store()
+        store = self.database.store(self.mamba_database())
         store.execute(self.dump_table())
 
     @transact
-    def drop_table(self):
+    def drop_table(self, script=False):
         """Delete the table for this model in the underlying database system
         """
 
         adapter = self.get_adapter()
-        store = self.database.store()
-        store.execute(adapter.drop_table())
+        store = self.database.store(self.mamba_database())
+        if not script:
+            store.execute(adapter.drop_table())
+        else:
+            return '{};'.format(adapter.drop_table())
 
     def dump_table(self):
         """
@@ -386,17 +408,19 @@ class Model(ModelProvider):
 
         :param schema: the SQL schema, SQLite by default
         :type schema: str
+        :param force_drop: when True drop the tables always
+        :type force_drop: bool
         """
 
         adapter = self.get_adapter()
         return adapter.create_table()
 
-    def dump_data(self):
+    def dump_data(self, scheme=None):
         """Dumps the SQL data
         """
 
         adapter = self.get_adapter()
-        return adapter.insert_data()
+        return adapter.insert_data(scheme)
 
     def dump_references(self):
         """Dump SQL references (used by PostgreSQL)
@@ -419,7 +443,11 @@ class Model(ModelProvider):
         if self.uri is not None:
             uri = URI(self.uri)
         else:
-            uri = URI(config.Database().uri)
+            config_uri = config.Database().uri
+            if type(config_uri) is dict:
+                uri = URI(config_uri[self.mamba_database()])
+            else:
+                uri = URI(config_uri)
 
         return uri
 
@@ -462,16 +490,14 @@ class Model(ModelProvider):
             return self.__storm_primary__
 
     def _set_empty_properties_to_none(self):
-        """If a property is does not allow none and there is
-        no default value for it, Storm itself will raise a NoneError
-        when we set it to None.
+        """
+        If a property does not allow none and there is no default value for
+        it, Storm itself will raise a NoneError when we set it to None.
         """
         for column, property_ in self._storm_columns.items():
             variable = property_.variable_factory()
             has_default = not variable._value is Undef
-            value = getattr(
-                self, column._detect_attr_name(self.__class__), None
-            )
+            value = getattr(self, column._detect_attr_name(self.__class__))
             if not variable._allow_none and not has_default and value is None:
                 variable.set(None)
 
