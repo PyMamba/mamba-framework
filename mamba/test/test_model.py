@@ -154,6 +154,13 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelMambaOther()
         self.assertRaises(ZStormError, dummy.store)
 
+    def test_mamba_database_returns_mamba_as_default(self):
+        self.assertEqual(Model.mamba_database(), 'mamba')
+
+    def test_mamba_database_returns_right_database(self):
+        dummy = DummyModelMambaOther()
+        self.assertEqual(dummy.mamba_database(), 'mamba_other')
+
     def test_dict(self):
         dummy = DummyModel('Dummy')
         d = dummy.dict()
