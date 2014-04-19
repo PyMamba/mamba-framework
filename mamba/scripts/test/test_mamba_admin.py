@@ -34,7 +34,7 @@ from mamba.scripts._package import (
 # set me as True if you want to skip slow command line tests
 # I dont think you want this set as True unless you are adding
 # some tests to command line scripts
-skip_command_line_tests = True
+skip_command_line_tests = False
 
 
 class MambaAdminTest(unittest.TestCase):
@@ -400,10 +400,11 @@ class SqlDumpTest(unittest.TestCase):
 
         with fake_project():
             result = yield utils.getProcessOutput(
-                'python', ['../../scripts/mamba_admin.py', 'sql', 'dump'],
+                'mamba-admin', ['sql', 'dump'],
                 os.environ
             )
 
+        print(result)
         self.assertTrue("INSERT INTO 'dummy'" in result)
         self.assertTrue("INSERT INTO 'stubing'" in result)
         self.assertTrue('Test row 1' in result)
@@ -420,9 +421,7 @@ class SqlDumpTest(unittest.TestCase):
 
         with fake_project():
             yield utils.getProcessOutput(
-                'python', [
-                    '../../scripts/mamba_admin.py', 'sql', 'dump', 'test'],
-                os.environ
+                'mamba-admin', ['sql', 'dump', 'test'], os.environ
             )
 
             dump_file = filepath.FilePath('test.sql')
