@@ -199,6 +199,12 @@ class Model(ModelProvider):
         :type traverse: bool
         :param json: if True we convert datetime to string and Decimal to float
         :type json: bool
+        :param fields: If set we filter only the fields specified, 
+        mutually exclusive with exclude, having precedence if both are set.
+        :type fields: list
+        :param exclude: If set we exclude the fields specified, 
+        mutually exclusive with fields, not working if you also set fields.
+        :type exclude: list
         """
         parent = list(parent)
         parent.append(self)
@@ -208,29 +214,6 @@ class Model(ModelProvider):
             kwargs.get('fields', []),
             kwargs.get('exclude', []),
         )
-
-        # print fields
-        # print fk_fields
-        # print exclude
-        # print fk_exclude
-
-        # for name in fields:
-        #     if name.find('.') != -1:
-        #         key, value = name.split('.')
-        #         if key in fk_fields:
-        #             fk_fields[key].append(value)
-        #         else:
-        #             fk_fields[key] = [value]
-
-        # for name in exclude:
-        #     if name.find('.') != -1:
-        #         key, value = name.split('.')
-        #         if key in fk_fields:
-        #             fk_exclude[key].append(value)
-        #         else:
-        #             if key not in exclude:
-        #                 exclude.append(key)
-        #             fk_exclude[key] = [value]
 
         if json is True:
             obj = {}
@@ -250,14 +233,14 @@ class Model(ModelProvider):
                 else:
                     obj[p.name] = getattr(self, p.name)
         else:
-            if fields:
+            if not fields and not exclude:
+                obj = dict([(p.name, getattr(self, p.name)) for p in values])
+            elif fields:
                 obj = dict([(p.name, getattr(self, p.name))
                             for p in values if p.name in fields])
             elif exclude:
                 obj = dict([(p.name, getattr(self, p.name))
                             for p in values if p.name not in exclude])
-            else:
-                obj = dict([(p.name, getattr(self, p.name)) for p in values])
 
         if traverse is True:
 
