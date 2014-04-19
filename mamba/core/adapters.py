@@ -55,11 +55,11 @@ class MambaSQLAdapter:
 
         return self.original.drop_table()
 
-    def insert_data(self):
+    def insert_data(self, scheme):
         """Return the SQL syntax string to insert data that populate a table
         """
 
-        return self.original.insert_data()
+        return self.original.insert_data(scheme)
 
     def parse_references(self):
         """Return the SQL syntax to create foreign keys for PostgreSQL

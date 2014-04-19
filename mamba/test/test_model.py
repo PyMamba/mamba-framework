@@ -15,8 +15,10 @@ import transaction
 from collections import OrderedDict
 
 from storm.uri import URI
+from storm.store import Store
 from twisted.trial import unittest
 from twisted.python import filepath
+from storm.zope.interfaces import ZStormError
 from storm.exceptions import DatabaseModuleError, NoneError
 from storm.twisted.testing import FakeThreadPool
 from twisted.internet.defer import inlineCallbacks, Deferred
@@ -136,6 +138,21 @@ class ModelTest(unittest.TestCase):
         store = self.database.store()
         store.execute('DELETE FROM dummy')
         store.commit()
+
+    def test_model_store(self):
+        dummy = DummyModel('Dummy')
+        store = dummy.store()
+        self.assertIsInstance(store, Store)
+
+    def test_model_store_is_database_store(self):
+        dummy = DummyModel('Dummy')
+        store = dummy.store()
+        store2 = Model.database.store()
+        self.assertIs(store, store2)
+
+    def test_model_multiple_database_store(self):
+        dummy = DummyModelMambaOther()
+        self.assertRaises(ZStormError, dummy.store)
 
     def test_dict(self):
         dummy = DummyModel('Dummy')
@@ -914,10 +931,28 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModel()
         self.assertEqual(dummy.get_uri().scheme, URI('sqlite:').scheme)
 
+    def test_get_uri_multi_database(self):
+        cfg = config.Database('../mamba/test/dummy_app/config/database.json')
+        uri = cfg.uri
+        cfg.uri = {'mamba': 'sqlite:mamba.db', 'mamba_other': 'mysql://a@b/c'}
+        dummy = DummyModelMambaOther()
+        self.assertEqual(dummy.get_uri().scheme, 'mysql')
+        self.assertEqual(dummy.get_uri().host, 'b')
+        cfg.uri = uri
+
     def test_get_adapter(self):
         dummy = DummyModel()
         adapter = dummy.get_adapter()
         self.assertTrue(interfaces.IMambaSQL.providedBy(adapter))
+
+    def test_get_adapter_multi_database(self):
+        cfg = config.Database('../mamba/test/dummy_app/config/database.json')
+        uri = cfg.uri
+        cfg.uri = {'mamba': 'sqlite:mamba.db', 'mamba_other': 'mysql://a@b/c'}
+        dummy = DummyModelMambaOther()
+        adapter = dummy.get_adapter()
+        self.assertIsInstance(adapter.original, MySQL)
+        cfg.uri = uri
 
     def test_model_allow_none_false_raises_exception(self):
         dummy = DummyModel()
@@ -1544,6 +1579,16 @@ class NotPrimaryModel(Model):
     id = Int(primary=False)
     name = Unicode(size=64, allow_none=False)
     _storm_columns = {}
+
+
+class DummyModelMambaOther(Model):
+    """Model that uses another database
+    """
+
+    __mamba_database__ = 'mamba_other'
+    __storm_table__ = 'dummy_other'
+    id = Int(primary=True)
+    name = Unicode()
 
 
 class DummyThreadPool(FakeThreadPool):

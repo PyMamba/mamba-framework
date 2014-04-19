@@ -73,13 +73,16 @@ class CommonSQL(object):
     """I do nothing, my only purpose is serve as dummy object
     """
 
-    def insert_data(self):
+    def insert_data(self, scheme):
         """
         Return the SQL syntax needed to insert the data already present
         in the table.
         """
 
-        store = Store(create_database(config.Database().uri))
+        if scheme is not None:
+            store = Store(create_database(config.Database().uri[scheme]))
+        else:
+            store = Store(create_database(config.Database().uri))
         registers = []
         rows = store.find(self.model.__class__)
         fields = [

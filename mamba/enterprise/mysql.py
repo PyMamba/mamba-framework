@@ -446,7 +446,7 @@ class MySQL(CommonSQL):
         """
 
         existance = config.Database().drop_table_behaviours.get(
-            'drop_if_exists')
+            'drop_if_exists', True)
 
         query = 'DROP TABLE {}`{}`'.format(
             'IF EXISTS ' if existance else '',

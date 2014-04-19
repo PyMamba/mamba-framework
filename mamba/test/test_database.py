@@ -6,11 +6,17 @@
 Tests for mamba.enterprise.database
 """
 
+import functools
+from sqlite3 import sqlite_version_info
+
 from storm.locals import Store
 from twisted.trial import unittest
+from zope.component import getUtility
+from storm.zope.interfaces import IZStorm
 from storm.exceptions import DisconnectionError
 from twisted.python.threadpool import ThreadPool
 from doublex import Spy, ANY_ARG, assert_that, called
+
 
 from mamba.utils import config
 from mamba.core import GNU_LINUX
@@ -18,6 +24,21 @@ from mamba.enterprise import Database
 from mamba.enterprise.common import NativeEnum
 from mamba.application.model import ModelManager
 from mamba.enterprise.database import AdapterFactory
+
+
+def multiple_databases(func):
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        uri = config.Database().uri
+        config.Database().uri = {
+            'mamba': 'sqlite:', 'mamba2': 'mysql://root@localhost/mamba'
+        }
+        result = func(*args, **kwargs)
+        config.Database().uri = uri
+        return result
+
+    return wrapper
 
 
 class DatabaseTest(unittest.TestCase):
@@ -129,11 +150,53 @@ class DatabaseTest(unittest.TestCase):
     def test_database_backend(self):
         self.assertEqual(self.database.backend, 'sqlite')
 
+    @multiple_databases
+    def test_database_multiple_backend(self):
+        self.assertEqual(type(self.database.backend), list)
+        self.assertEqual(self.database.backend[0], {'mamba2': 'mysql'})
+        self.assertEqual(self.database.backend[1], {'mamba': 'sqlite'})
+
     def test_database_host(self):
         self.assertEqual(self.database.host, None)
 
+    @multiple_databases
+    def test_database_multiple_host(self):
+        self.assertEqual(type(self.database.host), list)
+        self.assertEqual(self.database.host[0], {'mamba2': 'localhost'})
+        self.assertEqual(self.database.host[1], {'mamba': None})
+
     def test_database_database(self):
         self.assertEqual(self.database.database, None)
+
+    @multiple_databases
+    def test_database_multiple_database(self):
+        self.assertEqual(type(self.database.database), list)
+        self.assertEqual(self.database.database[0], {'mamba2': 'mamba'})
+        self.assertEqual(self.database.database[1], {'mamba': None})
+
+    def test_patch_sqlite_uris(self):
+        if sqlite_version_info >= (3, 6, 19):
+            self.assertTrue('foreign_keys=1' in config.Database().uri)
+
+    @multiple_databases
+    def test_patch_multiple_sqlite_uris(self):
+        self.assertFalse('foreign_keys=1' in config.Database().uri['mamba'])
+        self.database._patch_sqlite_uris()
+        if sqlite_version_info >= (3, 6, 19):
+            self.assertTrue('foreign_keys=1' in config.Database().uri['mamba'])
+
+    def test_zstorm_default_uri(self):
+        zstorm = getUtility(IZStorm)
+        zstorm._default_uris = {}
+        self.database._set_zstorm_default_uris(zstorm)
+        self.assertEqual(
+            zstorm.get_default_uris(), {'mamba': config.Database().uri})
+
+    @multiple_databases
+    def test_multiple_zstorm_default_uri(self):
+        zstorm = getUtility(IZStorm)
+        self.database._set_zstorm_default_uris(zstorm)
+        self.assertEqual(zstorm.get_default_uris(), config.Database().uri)
 
     def test_database_dump(self):
         mgr = self.get_commons_for_dump()
@@ -186,7 +249,7 @@ class DatabaseTest(unittest.TestCase):
 
         mgr.load('../mamba/test/dummy_app/application/model/dummy.py')
         mgr.load('../mamba/test/dummy_app/application/model/stubing.py')
-        sql = self.database.dump(mgr, True)
+        sql = self.database.dump(mgr, full=True)
         self.assertTrue("INSERT INTO 'dummy'" in sql)
         self.assertTrue("INSERT INTO 'stubing'" in sql)
         self.assertTrue('Test row 1' in sql)
@@ -203,8 +266,6 @@ class DatabaseTest(unittest.TestCase):
         sql = self.database.reset(mgr)
         self.assertTrue('DROP TABLE IF EXISTS dummy;' in sql)
         self.assertTrue('DROP TABLE IF EXISTS stubing;' in sql)
-        self.assertTrue('CREATE TABLE dummy (' in sql)
-        self.assertTrue('CREATE TABLE stubing (' in sql)
 
     def test_database_reset_mamba_schema_false(self):
         mgr = self.get_commons_for_dump()
@@ -217,8 +278,6 @@ class DatabaseTest(unittest.TestCase):
         sql = self.database.reset(mgr)
         self.assertTrue('DROP TABLE IF EXISTS dummy;' in sql)
         self.assertTrue('DROP TABLE IF EXISTS stubing;' in sql)
-        self.assertTrue('CREATE TABLE dummy (' in sql)
-        self.assertTrue('CREATE TABLE stubing (' in sql)
         self.assertTrue('dummy_not_on_schema' not in sql)
 
     def test_database_reset_mysql(self):
@@ -231,8 +290,6 @@ class DatabaseTest(unittest.TestCase):
         sql = self.database.reset(mgr)
         self.assertTrue('DROP TABLE IF EXISTS `dummy`;' in sql)
         self.assertTrue('DROP TABLE IF EXISTS `stubing`;' in sql)
-        self.assertTrue('CREATE TABLE `dummy` (' in sql)
-        self.assertTrue('CREATE TABLE `stubing` (' in sql)
 
     def test_database_reset_mysql_mamba_schema_false(self):
         cfg = config.Database('../mamba/test/dummy_app/config/database.json')
@@ -247,8 +304,6 @@ class DatabaseTest(unittest.TestCase):
         sql = self.database.reset(mgr)
         self.assertTrue('DROP TABLE IF EXISTS `dummy`;' in sql)
         self.assertTrue('DROP TABLE IF EXISTS `stubing`;' in sql)
-        self.assertTrue('CREATE TABLE `dummy` (' in sql)
-        self.assertTrue('CREATE TABLE `stubing` (' in sql)
         self.assertTrue('dummy_not_on_schema' not in sql)
 
     def test_database_reset_postgres(self):
@@ -261,8 +316,6 @@ class DatabaseTest(unittest.TestCase):
         sql = self.database.reset(mgr)
         self.assertTrue('DROP TABLE IF EXISTS dummy RESTRICT;' in sql)
         self.assertTrue('DROP TABLE IF EXISTS stubing RESTRICT;' in sql)
-        self.assertTrue('CREATE TABLE dummy (' in sql)
-        self.assertTrue('CREATE TABLE stubing (' in sql)
 
     def test_database_reset_postgres_mamba_schema_false(self):
         cfg = config.Database('../mamba/test/dummy_app/config/database.json')
@@ -274,8 +327,6 @@ class DatabaseTest(unittest.TestCase):
         sql = self.database.reset(mgr)
         self.assertTrue('DROP TABLE IF EXISTS dummy RESTRICT;' in sql)
         self.assertTrue('DROP TABLE IF EXISTS stubing RESTRICT;' in sql)
-        self.assertTrue('CREATE TABLE dummy (' in sql)
-        self.assertTrue('CREATE TABLE stubing (' in sql)
         self.assertTrue('dummy_not_on_schema' not in sql)
 
     def test_ensure_connect_called_when_ensure_connect_is_true(self):

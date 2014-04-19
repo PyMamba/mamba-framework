@@ -319,7 +319,7 @@ class PostgreSQL(CommonSQL):
         """
 
         existance = config.Database().drop_table_behaviours.get(
-            'drop_if_exists')
+            'drop_if_exists', True)
         restrict = config.Database().drop_table_behaviours.get(
             'restrict', True)
         cascade = config.Database().drop_table_behaviours.get('cascade', False)

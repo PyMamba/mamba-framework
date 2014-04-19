@@ -122,6 +122,11 @@ class Database(BaseConfig):
 
         config.Database('default')
 
+    If the URI property is a dictionary, mamba will then create configuration
+    and conections for each element in the dictionary using the key as ZStorm
+    name and the value as the URI. Then you can get speific stores for specific
+    URI's using the store method in the database object.
+
     :param config_file: the file to load the configuration from, it can (and
                         should) be empty to get back the previous configured
                         data

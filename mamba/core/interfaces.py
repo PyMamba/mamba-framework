@@ -139,7 +139,7 @@ class IMambaSQL(Interface):
         underlying database system
         """
 
-    def insert_data(self):
+    def insert_data(self, scheme):
         """Return the SQL syntax string to insert data that populate a table
         """
 
