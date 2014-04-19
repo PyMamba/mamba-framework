@@ -34,7 +34,7 @@ from mamba.scripts._package import (
 # set me as True if you want to skip slow command line tests
 # I dont think you want this set as True unless you are adding
 # some tests to command line scripts
-skip_command_line_tests = False
+skip_command_line_tests = True
 
 
 class MambaAdminTest(unittest.TestCase):
