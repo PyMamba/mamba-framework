@@ -180,9 +180,10 @@ class PostgreSQL(CommonSQL):
 
                 query = (
                     'ALTER TABLE {table} ADD '
-                    'CONSTRAINT {remote_table}_ind FOREIGN KEY ({localkeys}) '
-                    'REFERENCES {remote_table}({remotekeys}) '
+                    'CONSTRAINT {field}_{remote_table}_ind FOREIGN KEY '
+                    '({localkeys}) REFERENCES {remote_table}({remotekeys}) '
                     'ON UPDATE {on_update} ON DELETE {on_delete};\n'.format(
+                        field=keys.get('local')[0].name,
                         table=self.model.__storm_table__,
                         remote_table=remote_table,
                         localkeys=localkeys,
