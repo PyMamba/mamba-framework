@@ -12,8 +12,8 @@ from storm.schema import schema, patch
 from storm.store import Store, AutoReload
 from storm.properties import TimeDelta, Pickle, JSON
 from storm.references import Reference, ReferenceSet, Proxy
-from storm.expr import Select, Insert, Update, Delete, Join, SQL
 from storm.properties import Bool, Int, Float, RawStr, Chars, Unicode
+from storm.expr import Select, Insert, Update, Delete, Join, SQL, Expr
 from storm.expr import Like, In, Asc, Desc, And, Or, Min, Max, Count, Not
 from storm.properties import List, Decimal, DateTime, Date, Time, Enum, UUID
 
@@ -30,7 +30,7 @@ __all__ = [
     'Reference', 'ReferenceSet', 'Proxy',
     'Store', 'AutoReload',
     'schema', 'patch',
-    'Select', 'Insert', 'Update', 'Delete', 'Join', 'SQL',
+    'Select', 'Insert', 'Update', 'Delete', 'Join', 'SQL', 'Expr',
     'Like', 'In', 'Asc', 'Desc', 'And', 'Or', 'Min', 'Max', 'Count', 'Not',
     'ClassAlias',
     'Storm'
