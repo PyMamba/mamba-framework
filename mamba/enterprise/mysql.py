@@ -259,9 +259,11 @@ class MySQL(CommonSQL):
                 )
 
                 query = (
-                    'INDEX `{remote_table}_fk_ind` ({localkeys}), FOREIGN KEY '
-                    '({localkeys}) REFERENCES `{remote_table}`({remotekeys}) '
-                    'ON UPDATE {on_update} ON DELETE {on_delete}'.format(
+                    'INDEX `{field}_{remote_table}_fk_ind` ({localkeys}), '
+                    'FOREIGN KEY ({localkeys}) REFERENCES `{remote_table}` '
+                    '({remotekeys}) ON UPDATE {on_update} '
+                    'ON DELETE {on_delete}'.format(
+                        field=keys.get('local')[0].name,
                         remote_table=remote_table,
                         localkeys=localkeys,
                         remotekeys=remotekeys,
