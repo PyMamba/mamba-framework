@@ -391,7 +391,7 @@ Connecting to more than one database
 
 Mamba allow our models to connect more than one database at the same time, to do that, we have to convert the `uri` database config setting into a dictionary where each key is a connection/database name and the value is the connection `URI`, so for example, if we want to use a PostgreSQL database for our operations but a MySQL to store logs we can do it as follows:
 
-  .. code-block:: json
+.. code-block:: json
 
     {
         "max_threads": 20,
@@ -429,7 +429,7 @@ Then we have to define which database is our models going to use, we can do it s
             ...
 
 The former model will read and write from the `operations` database that has been configured to use our PostgreSQL backend, we can define a model that write logs and reports into a MySQL backend as follows:
-    ..sourcecode:: python
+    .. sourcecode:: python
 
           from mamba.application import model
           from mamba.enteprise import Int, Unicode, transact
