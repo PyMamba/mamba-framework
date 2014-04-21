@@ -28,7 +28,7 @@ The command above will create a new ``dummy.py`` file in the ``application/model
     .. modelauthor:: user <user@localhost>
     """
 
-    from storm.locals import Int
+    from mamba.enterprise import Int
     from mamba.application import model
 
 
@@ -145,7 +145,7 @@ Mamba allows you to run queries synchronous or asynchronous by passing the param
 
 .. sourcecode:: python
 
-    from storm.locals import Int
+    from mamba.enterprise import Int
     from mamba.application import model
 
     class Dummy(model.Model):
@@ -171,7 +171,7 @@ To define a compound key we have to use the ``__storm_primary__`` class-level at
 
 .. sourcecode:: python
 
-    from storm.locals import Int
+    from mamba.enterprise import Int
     from mamba.application import model
 
     class Dummy(model.Model):
@@ -189,7 +189,7 @@ To define a compound unique we have to use the ``__mamba_unique__`` class-level 
 
 .. sourcecode:: python
 
-    from storm.locals import Int
+    from mamba.enterprise import Int
     from mamba.application import model
 
     class Dummy(model.Model):
@@ -207,7 +207,7 @@ To define a compound index we have to use the ``__mamba_index__`` class-level at
 
 .. sourcecode:: python
 
-    from storm.locals import Int
+    from mamba.enterprise import Int
     from mamba.application import model
 
     class Dummy(model.Model):
@@ -282,20 +282,20 @@ Create and insert a new object into the database is pretty straightforward, we j
 
     >>> dummy = Dummy()
     >>> dummy.name = u'The Dummy'
-    >>> dummy.create()
+    >>> dummy.create(async=False)
 
 Read a model instance (or row) from the database is as easy as using the ``read`` method of the :class:`~mamba.application.model.Model` class with the id of the row we want to get from the database:
 
 .. sourcecode:: python
 
-    >>> dummy = Dummy.read(1)
+    >>> dummy = Dummy.read(1, async=False)
 
 Update is performed in the same easy way, we just modify our object and call the ``update`` method on it:
 
 .. sourcecode:: python
 
     >>> dummy.name = u'Modified Dummy'
-    >>> dummy.update()
+    >>> dummy.update(async=False)
 
 The delete operation is no different, we just call the ``delete`` method from our object (note that this doesn't delete the object reference itself, only the databse row):
 
@@ -315,7 +315,7 @@ Mamba supports the ``find`` and ``all`` for your convenience.
 
 .. sourcecode:: python
 
-    >>> [c.name for c in Customer.all()]
+    >>> [c.name for c in Customer.all(async=False)]
     >>> [c.name for c in Customer.find(Customer.age >= 30)]
 
 .. note::
@@ -330,14 +330,15 @@ We can define references between models (and between tables by extension) instan
 
 .. sourcecode:: python
 
-    from storm.locals import Int, Reference
     from mamba.application import model
+    from mamba.enterprise import Int, Reference
 
     from application.model.dojo import Dojo
 
     class Fighter(model.Model):
 
         __storm_table__ = 'fighter'
+        __mamba_async__ = False  # we don't want go asynchronous as we are on terminal
 
         id = Int(primary=True, auto_increment=True, unsigned=True)
         dojo_id = Int(unsigned=True)
@@ -358,8 +359,8 @@ Many-to-many relationships are a bit more complex than the last example. Let's c
 .. sourcecode:: python
 
     from mamba.application import model
-    from storm.expr import Join, Select, Not
-    from storm.locals import Int, Unicode, Reference, ReferenceSet
+    from mamba.enterprise import Join, Select, Not
+    from mamba.enterprise import Int, Unicode, Reference, ReferenceSet
 
     from application.model.dojo import Dojo
     from application.model.tournament import Tournament
@@ -368,6 +369,7 @@ Many-to-many relationships are a bit more complex than the last example. Let's c
     class Fighter(model.Model):
 
         __storm_table__ = 'fighter'
+        __mamba_async__ = False  # we don't want go asynchronous as we are on terminal
 
         id = Int(primary=True, auto_increment=True, unsigned=True)
         name = Unicode(size=128)
@@ -382,6 +384,7 @@ Many-to-many relationships are a bit more complex than the last example. Let's c
 
         __storm_table__ = 'tournament_fighter'
         __storm_primary__ = 'tournament_id', 'fighter_id'
+        __mamba_async__ = False  # we don't want go asynchronous as we are on terminal
 
         tournament_id = Int(unsigned=True)
         fighter_id = Int(unsigned=True)
@@ -607,7 +610,7 @@ To do that, we have to inherit our classes from the ``Storm`` base class as well
 
 .. sourcecode:: python
 
-    from storm.locals import Int, Unicode, Reference, ReferenceSet
+    from mamba.enterprise import Int, Unicode, Reference, ReferenceSet
 
     class Fighter(model.Model, Storm):
 
