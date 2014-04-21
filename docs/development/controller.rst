@@ -210,7 +210,9 @@ Nested Controllers
 
 Sometimes we want to group different controllers under the same path (user, cart and actions under the `api` path for example), controllers can be attached to other controllers setting the `__parent__` property to the route of the controller that we want to arrach it.
 
-A container can (and should) define a controller's `__route__` just like any other controller. If the `__route__` property is not set in an attached controller, this can lead to totally unprdictable and hard to debug weird behaviour in your routes dispatching.
+A container can (and should) define a controller's `__route__` just like any other controller. If the `__route__` property is not set in an attached controller, this can lead to totally unpredictable and hard to debug weird behaviour in your routes dispatching.
+
+You can add as much nested level as you wish.
 
 How to use it?
 ~~~~~~~~~~~~~~
