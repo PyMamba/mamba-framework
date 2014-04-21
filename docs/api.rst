@@ -496,12 +496,6 @@ It's probable that you never use those ones by yourself
     :members:
 
 
-Monkey Patches
-..............
-
-.. autoclass:: mamba.enterprise.database.PropertyColumnMambaPatch
-    :members:
-
 
 Extension Point
 ---------------

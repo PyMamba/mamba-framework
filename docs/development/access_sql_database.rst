@@ -413,38 +413,36 @@ Mamba allow our models to connect more than one database at the same time, to do
     }
 
 Then we have to define which database is our models going to use, we can do it setting the `__mamba_database__` that by default is `mamba`:
+    .. sourcecode:: python
 
-  .. sourcecode:: python
-
-      from mamba.application import model
-      from mamba.enteprise import Int, Unicode, transact
+        from mamba.application import model
+        from mamba.enteprise import Int, Unicode, transact
 
 
-      class Dummy(model.Model):
+        class Dummy(model.Model):
 
-          __storm_table__ = 'dummy'
-          __mamba_database__ = 'operations'
+            __storm_table__ = 'dummy'
+            __mamba_database__ = 'operations'
 
-          id = Int(primary=True)
-          name = Unicode()
-          ...
+            id = Int(primary=True)
+            name = Unicode()
+            ...
 
 The former model will read and write from the `operations` database that has been configured to use our PostgreSQL backend, we can define a model that write logs and reports into a MySQL backend as follows:
+    ..sourcecode:: python
 
-  ..sourcecode:: python
-
-      from mamba.application import model
-      from mamba.enteprise import Int, Unicode, transact
+          from mamba.application import model
+          from mamba.enteprise import Int, Unicode, transact
 
 
-      class DummyLogs(model.Model):
+          class DummyLogs(model.Model):
 
-          __storm_table__ = 'dummy_logs'
-          __mamba_database__ = 'reports'
+              __storm_table__ = 'dummy_logs'
+              __mamba_database__ = 'reports'
 
-          id = Int(primary=True)
-          name = Unicode()
-          ...
+              id = Int(primary=True)
+              name = Unicode()
+              ...
 
 This last model will read and write into our MySQL backend.
 
@@ -459,19 +457,18 @@ How to connect to different databases from the same model?
 Even mamba doesn't provide any out of the box mechanism to connect to multiple databases from the same model, this can be done relatively easy.
 
 Every model has a `database` property that is the object that create the model stores in a lower level layer. As the models, the `database` class defines a `store` method that can be used to generate stores in whatever database that we configured, so for example and following our latest code, if we want to create a method in the `Dummy` class that writes something into the `DummyLogs` table in the MySQL backend we can easily access the MySQL database using the `database.store` method to do it:
+    .. sourcecode:: python
 
-  .. sourcecode:: python
+        ...
+        def create_and_log(self, log_name):
+            """Create a new Dummy and write a new DummyLog
+            """
 
-      ...
-      def create_and_log(self, log_name):
-          """Create a new Dummy and write a new DummyLog
-          """
-
-          self.create(async=False)
-          log_store = self.database.store('reports')
-          dummy_log = DummyLogs()
-          dummy_log.name = u'This is a new log that uses MySQL from Dummy'
-          log_store.add(dummy_log)
-          log_store.commit()
+            self.create(async=False)
+            log_store = self.database.store('reports')
+            dummy_log = DummyLogs()
+            dummy_log.name = u'This is a new log that uses MySQL from Dummy'
+            log_store.add(dummy_log)
+            log_store.commit()
 
 |
