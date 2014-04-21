@@ -255,17 +255,17 @@ The Store object
 
 |storm| (and Mamba by extension) uses *stores* to operate with the underlying database. You can take a look at the `Storm API documentation <http://people.canonical.com/~therve/storm/storm.store.Store.html>`_ to retrieve a complete list of Store methods and properties.
 
-The mamba's enterprise system initialize a valid |storm| Store object for us always that we need it using the ``database`` model property ``store()`` method:
+The mamba's enterprise system initialize a valid |storm| Store object for us always that we need it using the ``model`` model property ``store()`` method:
 
 .. sourcecode:: python
 
-    store = self.database.store()
+    store = self.store()
 
 .. note::
 
     If you are planning to use stores outside `transacted` methods wil be a good idea to use the named parameter ``ensure_connect=True`` to make sure storm is connected to your database before try to use the store.
 
-Every model object has a copy of the ``database`` object that can be used to retrieve stores and other database related information.
+Every model object has a copy of the ``database`` object that can be used to retrieve stores and other database related information. Normally we don't want to use the `database` store method directly unless we want to use multiple databases from the same model class (more on that later).
 
 Stores are used to retrieve objects from the database, to insert and update objects on it and of course to execute SQL queries directly to the database. Store is like a traditional ``cursor`` but much more flexible and powerful.
 
@@ -276,7 +276,7 @@ If we need to create and insert a new row into the database we just instantiate 
     peter = User()
     peter.name = u'Peter Griffin'
 
-    store = self.database.store()
+    store = self.store()
     store.add(peter)
 
 Once an object is added or retrieved from a store, we can verify if it is bound or related to an store easily:
@@ -300,7 +300,7 @@ Of course we can use the store object to find rows already inserted on the datab
 
 .. sourcecode:: python
 
-    store = self.database.store()
+    store = self.store()
     user = store.find(User, User.name == u'Peter Griffin').one()
 
 We can also retrieve the object using its primary key:
@@ -335,8 +335,8 @@ Just decorate your model methods with the ``@transact`` decorator and make sure 
 .. sourcecode:: python
 
     from mamba.application import model
-    from storm.locals import Int, Unicode
-    from storm.twisted.transact import transact
+    from mamba.enteprise import Int, Unicode, transact
+
 
     class Dummy(model.Model):
 
@@ -354,7 +354,7 @@ Just decorate your model methods with the ``@transact`` decorator and make sure 
             Get the last inserted row from the database.
             This is not thread safe
             """
-            store = self.database.store()
+            store = self.store()
             return store.find(Dummy).order_by(Dummy.id).last()
 
 The ``get_last`` method above will retrieve the last inserted row in the database. As we are using the ``@transact`` decorator we can't use ``Reference`` or ``ReferenceSet`` in the returned object because those are lazy evaluated and the object was created in a different thread. If we ever try to do that we will get an exception from |storm| ZStore module.
@@ -374,7 +374,7 @@ If you think that you need to use a store object from outside your model class,t
 
         from application.model.dummy import Dummy
 
-        store = Dummy.database.store()
+        store = Dummy.store()
         dummy = store.get(Dummy, 1)
 
 .. warning::
@@ -385,5 +385,93 @@ Should I share stores between threads?
 --------------------------------------
 
 No. Everytime that you call the ``database.store()`` method in the model object, Mamba gives you a ready to use Store for the thread that you are calling the method from. Don't even try to share stores between threads. This means that you are not able to share stores between methods if they are decorated with the ``@transact`` decorator.
+
+Connecting to more than one database
+------------------------------------
+
+Mamba allow our models to connect more than one database at the same time, to do that, we have to convert the `uri` database config setting into a dictionary where each key is a connection/database name and the value is the connection `URI`, so for example, if we want to use a PostgreSQL database for our operations but a MySQL to store logs we can do it as follows:
+
+  .. code-block:: json
+
+    {
+        "max_threads": 20,
+        "min_threads": 5,
+        "auto_adjust_pool_size": true,
+        "drop_table_behaviours": {
+            "drop_if_exists": false,
+            "restrict": true,
+            "cascade": true
+        },
+        "uri": {
+          "operations": "postgres://user:password@host/dbname",
+          "reports": "mysql://user:password@host/dbname"
+        },
+        "create_table_behaviours": {
+            "create_table_if_not_exists": false,
+            "drop_table": false
+        }
+    }
+
+Then we have to define which database is our models going to use, we can do it setting the `__mamba_database__` that by default is `mamba`:
+
+  .. sourcecode:: python
+
+      from mamba.application import model
+      from mamba.enteprise import Int, Unicode, transact
+
+
+      class Dummy(model.Model):
+
+          __storm_table__ = 'dummy'
+          __mamba_database__ = 'operations'
+
+          id = Int(primary=True)
+          name = Unicode()
+          ...
+
+The former model will read and write from the `operations` database that has been configured to use our PostgreSQL backend, we can define a model that write logs and reports into a MySQL backend as follows:
+
+  ..sourcecode:: python
+
+      from mamba.application import model
+      from mamba.enteprise import Int, Unicode, transact
+
+
+      class DummyLogs(model.Model):
+
+          __storm_table__ = 'dummy_logs'
+          __mamba_database__ = 'reports'
+
+          id = Int(primary=True)
+          name = Unicode()
+          ...
+
+This last model will read and write into our MySQL backend.
+
+.. note::
+
+    If you don't want to define the `__mamba_database__` property in each of your models you can define the key of your `default` database as `mamba` as the models `store` method try to connect to the `mamba` named database by default.
+
+
+How to connect to different databases from the same model?
+----------------------------------------------------------
+
+Even mamba doesn't provide any out of the box mechanism to connect to multiple databases from the same model, this can be done relatively easy.
+
+Every model has a `database` property that is the object that create the model stores in a lower level layer. As the models, the `database` class defines a `store` method that can be used to generate stores in whatever database that we configured, so for example and following our latest code, if we want to create a method in the `Dummy` class that writes something into the `DummyLogs` table in the MySQL backend we can easily access the MySQL database using the `database.store` method to do it:
+
+  .. sourcecode:: python
+
+      ...
+      def create_and_log(self, log_name):
+          """Create a new Dummy and write a new DummyLog
+          """
+
+          self.create(async=False)
+          log_store = self.database.store('reports')
+          dummy_log = DummyLogs()
+          dummy_log.name = u'This is a new log that uses MySQL from Dummy'
+          log_store.add(dummy_log)
+          log_store.commit()
 
 |
