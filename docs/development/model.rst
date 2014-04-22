@@ -570,6 +570,34 @@ You can also assign what in the |storm| project they call a "*lazy expression*" 
     >>> steven.name
     u'Steven Seagal'
 
+Serialize
+================
+
+You can serialize Model objects either to a dictionary or to JSON. All references will be serialized correctly and you can specify, if you like, specify only the fields you'd like in a ``fields`` parameter or fields to exclude in a ``exclude`` parameter.
+
+The json property is very simple, it returns a JSON representation of the model instance.
+
+.. sourcecode:: python
+
+    >>> customer = Customer.find(Customer.id == 2, async=False)
+    >>> customer.json
+    '{"name": "Austin Powers", "id": 2, "adresses": [{"street": "Memory Lane", "postcode": 60}]}'
+
+The dict function supports more options, however.
+
+.. sourcecode:: python
+
+    >>> customer = Customer.find(Customer.id == 2, async=False)
+    >>> customer.dict(json=True)  # json property uses dict method internally
+    '{"name": "Austin Powers", "id": 2, "adresses": [{"street": "Memory Lane", "postcode": 60}]}'
+    >>> customer.dict(traverse=False, json=True)  # We don't want references
+    '{"name": "Austin Powers", "id": 2}'
+    >>> customer.dict(traverse=False, json=True, exclude=['name'])
+    '{"id": 2}'
+    >>> customer.dict(traverse=False, json=True, fields=['id', 'adresses.street'])  # Specify a single field in the reference
+    '"id": 2, "adresses": [{"street": "Memory Lane"}]}'
+
+
 Queries debug
 =============
 
