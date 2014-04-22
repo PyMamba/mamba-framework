@@ -170,7 +170,7 @@ class Model(ModelProvider):
 
         return None
 
-    @property
+
     def json(self):
         """Returns a JSON representation of the object (if possible)
         """
@@ -192,24 +192,39 @@ class Model(ModelProvider):
             log.err(str(error))
             return ''
 
-    def dict(self, traverse=True, json=False, *parent):
+    def dict(self, traverse=True, json=False, *parent, **kwargs):
         """Returns the object as a dictionary
 
         :param traverse: if True traverse over references
         :type traverse: bool
         :param json: if True we convert datetime to string and Decimal to float
         :type json: bool
+        :param fields: If set we filter only the fields specified, 
+        mutually exclusive with exclude, having precedence if both are set.
+        :type fields: list
+        :param exclude: If set we exclude the fields specified, 
+        mutually exclusive with fields, not working if you also set fields.
+        :type exclude: list
         """
-
         parent = list(parent)
         parent.append(self)
         values = self._storm_columns.values()
+
+        fields, fk_fields, exclude, fk_exclude = self._generate_format_lists(
+            kwargs.get('fields', []),
+            kwargs.get('exclude', []),
+        )
+
         if json is True:
             obj = {}
             ins = (
                 TimeVariable, DateVariable, DateTimeVariable, TimeDeltaVariable
             )
             for p in values:
+                if fields and p.name not in fields:
+                    continue
+                elif exclude and p.name in exclude:
+                    continue
                 val = getattr(self, p.name)
                 if isinstance(p.variable_factory(), ins) and val is not None:
                     obj[p.name] = str(val)
@@ -218,21 +233,45 @@ class Model(ModelProvider):
                 else:
                     obj[p.name] = getattr(self, p.name)
         else:
-            obj = dict([(p.name, getattr(self, p.name)) for p in values])
+            if not fields and not exclude:
+                obj = dict([(p.name, getattr(self, p.name)) for p in values])
+            elif fields:
+                obj = dict([(p.name, getattr(self, p.name))
+                            for p in values if p.name in fields])
+            elif exclude:
+                obj = dict([(p.name, getattr(self, p.name))
+                            for p in values if p.name not in exclude])
 
         if traverse is True:
 
             forbidden = [id(p) for p in parent]
             for attr in inspect.classify_class_attrs(self.__class__):
+                if fields and attr.name not in fields:
+                    continue
+                if exclude and attr.name in exclude:
+                    continue
+
+                ref_fk_fields = fk_fields.get(attr.name, [])
+                ref_fk_exclude = fk_exclude.get(attr.name, [])
+
                 if type(attr.object) is Reference:
                     foreign_ref = getattr(self, attr.name)
                     if id(foreign_ref) not in forbidden:
-                        obj[attr.name] = foreign_ref.dict(json=json, *parent)
+                        obj[attr.name] = foreign_ref.dict(
+                            json=json,
+                            *parent,
+                            fields=ref_fk_fields,
+                            exclude=ref_fk_exclude
+                        )
                 elif type(attr.object) is ReferenceSet:
                     foreign_ref = getattr(self, attr.name)
                     if id(foreign_ref) not in forbidden:
                         obj[attr.name] = [
-                            item.dict(json=json, *parent)
+                            item.dict(
+                                json=json,
+                                *parent,
+                                fields=ref_fk_fields,
+                                exclude=ref_fk_exclude)
                             for item in foreign_ref if id(self) != id(item)
                         ]
         return obj
@@ -488,6 +527,34 @@ class Model(ModelProvider):
                     return column.name
         else:
             return self.__storm_primary__
+
+    def _generate_format_lists(self, fields, exclude):
+        if not fields and not exclude:
+            return [], {}, [], {}
+
+        fk_fields, fk_exclude = {}, {}
+
+        for name in fields:
+            if name.find('.') != -1:
+                key, value = name.split('.')
+                if key not in fields:
+                    fields.append(key)
+                if key in fk_fields:
+                    fk_fields[key].append(value)
+                else:
+                    fk_fields[key] = [value]
+
+        for name in exclude:
+            if name.find('.') != -1:
+                key, value = name.split('.')
+                if key in fk_exclude:
+                    fk_exclude[key].append(value)
+                else:
+                    # if key not in exclude:
+                        # fields.append(key)
+                    fk_exclude[key] = [value]
+
+        return fields, fk_fields, exclude, fk_exclude
 
     def _set_empty_properties_to_none(self):
         """
