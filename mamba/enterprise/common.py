@@ -220,10 +220,11 @@ class CommonSQL(object):
         :type column: :class:`storm.properties.Property`
         """
 
-        property_column = column._get_column(self.model.__class__)
-        variable = property_column.variable_factory()
+        if column._variable_kwargs.get('value') is not Undef:
+            property_column = column._get_column(self.model.__class__)
+            variable = property_column.variable_factory()
 
-        if variable._value is not Undef:
-            return ' default {}'.format(variable._value)
+            if variable._value is not Undef:
+                return ' default {}'.format(variable._value)
 
         return ''

@@ -458,23 +458,24 @@ class PostgreSQL(CommonSQL):
         :type column: :class:`storm.properties.Property`
         """
 
-        property_column = column._get_column(self.model.__class__)
-        variable = property_column.variable_factory()
+        if column._variable_kwargs.get('value') is not Undef:
+            property_column = column._get_column(self.model.__class__)
+            variable = property_column.variable_factory()
 
-        if type(variable._value) is bool:
-            variable._value = 'TRUE' if variable._value else 'FALSE'
+            if type(variable._value) is bool:
+                variable._value = 'TRUE' if variable._value else 'FALSE'
 
-        if variable._value is None:
-            variable._value = 'NULL'
+            if variable._value is None:
+                variable._value = 'NULL'
 
-        if (column.variable_class is variables.DateTimeVariable
-                or column.variable_class is variables.TimeVariable
-                or column.variable_class is variables.DateVariable):
+            if (column.variable_class is variables.DateTimeVariable
+                    or column.variable_class is variables.TimeVariable
+                    or column.variable_class is variables.DateVariable):
+                if variable._value is not Undef:
+                    variable._value = "'" + str(variable._value) + "'"
+
             if variable._value is not Undef:
-                variable._value = "'" + str(variable._value) + "'"
-
-        if variable._value is not Undef:
-            return ' default {}'.format(variable._value)
+                return ' default {}'.format(variable._value)
 
         return ''
 
