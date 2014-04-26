@@ -1192,9 +1192,10 @@ class ModelTest(unittest.TestCase):
         adapter = self.get_adapter(reference=True)
         script = adapter.create_table()
 
-        self.assertTrue('INDEX `dummy_two_fk_ind` (`remote_id`)' in script)
         self.assertTrue(
-            'FOREIGN KEY (`remote_id`) REFERENCES `dummy_two`(`id`)' in script
+            'INDEX `remote_id_dummy_two_fk_ind` (`remote_id`)' in script)
+        self.assertTrue(
+            'FOREIGN KEY (`remote_id`) REFERENCES `dummy_two` (`id`)' in script
         )
         self.assertTrue('ON UPDATE RESTRICT ON DELETE RESTRICT' in script)
 
@@ -1205,12 +1206,13 @@ class ModelTest(unittest.TestCase):
         script = adapter.create_table()
 
         self.assertTrue(
-            ('INDEX `dummy_four_fk_ind` '
+            ('INDEX `remote_id_dummy_four_fk_ind` '
                 '(`remote_id`, `remote_second_id`)') in script
         )
+
         self.assertTrue(
             ('FOREIGN KEY (`remote_id`, `remote_second_id`) REFERENCES'
-                ' `dummy_four`(`id`, `second_id`)') in script
+                ' `dummy_four` (`id`, `second_id`)') in script
         )
         self.assertTrue('ON UPDATE RESTRICT ON DELETE RESTRICT' in script)
 
@@ -1234,7 +1236,8 @@ class ModelTest(unittest.TestCase):
         script = adapter.parse_references()
 
         self.assertTrue(
-            'CONSTRAINT dummy_two_ind FOREIGN KEY (remote_id)' in script
+            'CONSTRAINT remote_id_dummy_two_ind FOREIGN KEY (remote_id)'
+            in script
         )
         self.assertTrue(
             'REFERENCES dummy_two(id) ON UPDATE RESTRICT ON DELETE RESTRICT'
@@ -1248,7 +1251,7 @@ class ModelTest(unittest.TestCase):
         script = adapter.parse_references()
 
         self.assertTrue(
-            ('CONSTRAINT dummy_four_ind FOREIGN KEY '
+            ('CONSTRAINT remote_id_dummy_four_ind FOREIGN KEY '
                 '(remote_id, remote_second_id)') in script
         )
         self.assertTrue(

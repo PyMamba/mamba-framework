@@ -170,7 +170,7 @@ class Model(ModelProvider):
 
         return None
 
-
+    @property
     def json(self):
         """Returns a JSON representation of the object (if possible)
         """
@@ -199,10 +199,10 @@ class Model(ModelProvider):
         :type traverse: bool
         :param json: if True we convert datetime to string and Decimal to float
         :type json: bool
-        :param fields: If set we filter only the fields specified, 
+        :param fields: If set we filter only the fields specified,
         mutually exclusive with exclude, having precedence if both are set.
         :type fields: list
-        :param exclude: If set we exclude the fields specified, 
+        :param exclude: If set we exclude the fields specified,
         mutually exclusive with fields, not working if you also set fields.
         :type exclude: list
         """
