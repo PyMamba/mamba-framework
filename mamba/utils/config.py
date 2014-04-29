@@ -12,10 +12,11 @@
 """
 
 import os
+import json  # use stadard library json here
 
 from twisted.python import filepath
 
-from mamba.utils import borg, output, json
+from mamba.utils import borg, output
 
 
 class BaseConfig(borg.Borg):
