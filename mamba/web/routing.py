@@ -479,11 +479,11 @@ class RouteDispatcher(object):
         if self.request.method in ['POST', 'PUT', 'PATCH']:
             ct = self.request.requestHeaders.getRawHeaders('content-type')
             try:
-                if 'application/json' in ct:
+                if ct is not None and 'application/json' in ct:
                     data_json = json.loads(data)
                     self.request.json = data_json
             except ValueError:
-                data_json = {}
+                pass
 
         request_args = self.request.args
         request_headers = self.request.requestHeaders.getRawHeaders(
