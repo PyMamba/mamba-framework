@@ -1,0 +1,5 @@
+#!/bin/bash
+find mamba -name '*.pyc' -exec rm {} \;
+coverage run $(which trial) mamba &&
+coverage report --include='mamba/*' --omit='mamba/test/*,mamba/scripts/test/*'
+coverage html -d mamba/test/reports --include='mamba/*' --omit='mamba/test/*,mamba/scripts/test/*'
