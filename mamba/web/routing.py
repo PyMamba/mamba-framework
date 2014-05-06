@@ -483,7 +483,7 @@ class RouteDispatcher(object):
                     data_json = json.loads(data)
                     self.request.json = data_json
             except ValueError:
-                pass
+                self.request.json = {}
 
         request_args = self.request.args
         request_headers = self.request.requestHeaders.getRawHeaders(
