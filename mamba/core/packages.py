@@ -61,13 +61,13 @@ class PackagesManager(object):
 
             path = os.path.dirname(os.path.normpath(module.__file__))
             self.packages[package] = {'path': path}
+            self.packages[package].update({
+                'model': ModelManager('{}/model'.format(path), package)
+            })
 
             if data.get('autoimport', False):
                 self.packages[package].update({
                     'controller': ControllerManager(
                         '{}/controller'.format(path), package
-                    ),
-                    'model': ModelManager(
-                        '{}/model'.format(path), package
                     )
                 })
