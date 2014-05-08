@@ -141,6 +141,7 @@ class Database(BaseConfig):
     def _defaults(self):
         """Set default data to config"""
         self.uri = 'sqlite:'
+        # self.storm_debug = False
         self.min_threads = 5
         self.max_threads = 20
         self.auto_adjust_pool_size = False
@@ -175,7 +176,7 @@ class Database(BaseConfig):
     def __repr__(self):
         return 'config.Database(%s)' % (
             ', '.join(map(repr, [
-                self.uri, self.min_threads, self.max_threads,
+                self.uri, self.storm_debug, self.min_threads, self.max_threads,
                 self.auto_adjust_pool_size, self.create_table_behaviours,
                 self.drop_table_behaviours]))
         )

@@ -29,10 +29,10 @@ class DeployerExtensionTest(unittest.TestCase):
     """
 
     def test_deployment_extension_points(self):
-        for deployer in DummyDeployerTest.plugins:
-            if deployer().identify() != 'Dumb':
+        for deployer_ in DummyDeployerTest.plugins:
+            if deployer_().identify() != 'Dumb':
                 continue
 
-            self.assertEqual(deployer().deploy(), 'OMG! I am deploying')
-            self.assertEqual(deployer(), 'Dumb Deployer System')
-            self.assertIdentical(deployer().operation_mode(), 'local')
+            self.assertEqual(deployer_().deploy(), 'OMG! I am deploying')
+            self.assertEqual(deployer_(), 'Dumb Deployer System')
+            self.assertIdentical(deployer_().operation_mode(), 'local')

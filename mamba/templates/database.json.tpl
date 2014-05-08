@@ -11,5 +11,6 @@
         "drop_if_exists": ${drop_if_exists},
         "restrict": ${restrict},
         "cascade": ${cascade}
-    }
+    },
+    "debug_storm": false
 }

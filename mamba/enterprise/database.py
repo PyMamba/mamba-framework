@@ -55,6 +55,10 @@ from mamba.enterprise.sqlite import SQLite
 from mamba.enterprise.common import CommonSQL
 from mamba.enterprise.postgres import PostgreSQL
 
+if config.Database().storm_debug is True:
+    from mamba.utils.logger import StormDebugLogFile
+    StormDebugLogFile.start()
+
 
 class Database(object):
     """
