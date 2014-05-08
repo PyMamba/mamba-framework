@@ -141,7 +141,7 @@ class Database(BaseConfig):
     def _defaults(self):
         """Set default data to config"""
         self.uri = 'sqlite:'
-        # self.storm_debug = False
+        self.storm_debug = False
         self.min_threads = 5
         self.max_threads = 20
         self.auto_adjust_pool_size = False
