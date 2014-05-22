@@ -99,6 +99,7 @@ class MySQL(CommonSQL):
         single_query = []
         for column, property_ in self.get_storm_columns():
             wrap_column = column._get_column(self.model.__class__)
+
             index = wrap_column.index
             unique = wrap_column.unique
 
@@ -245,6 +246,11 @@ class MySQL(CommonSQL):
 
             if type(attr.object) is Reference:
                 relation = attr.object._relation
+
+                if relation.on_remote is True:
+                    # Don't create an index for this as is defined on remote.
+                    continue
+
                 keys = {
                     'remote': relation.remote_key,
                     'local': relation.local_key
