@@ -118,10 +118,12 @@ class ModelTest(unittest.TestCase):
         self.database.store().reset()
         transaction.manager.free(transaction.get())
 
-    def get_adapter(self, reference=False, compound=False):
+    def get_adapter(self, reference=False, compound=False, on_remote=False):
 
         if reference and compound:
             return DummyModelFive().get_adapter()
+        elif reference and on_remote:
+            return DummyModelNine().get_adapter()
         elif reference:
             return DummyModelThree().get_adapter()
 
@@ -1131,6 +1133,14 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('ON DELETE NO ACTION ON UPDATE NO ACTION' in script)
 
     @common_config(engine='sqlite:')
+    def test_sqlite_reference_generates_nothing_on_remote(self):
+
+        adapter = self.get_adapter(reference=True, on_remote=True)
+        script = adapter.create_table()
+
+        self.assertTrue('FOREIGN KEY' not in script)
+
+    @common_config(engine='sqlite:')
     def test_sqlite_reference_generates_compound_foreign_keys(self):
 
         adapter = self.get_adapter(reference=True, compound=True)
@@ -1200,6 +1210,15 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('ON UPDATE RESTRICT ON DELETE RESTRICT' in script)
 
     @common_config(engine='mysql:')
+    def test_mysql_reference_on_remote_generate_nothing(self):
+
+        adapter = self.get_adapter(reference=True, on_remote=True)
+        script = adapter.create_table()
+
+        self.assertTrue('INDEX' not in script)
+        self.assertTrue('FOREIGN KEY' not in script)
+
+    @common_config(engine='mysql:')
     def test_mysql_reference_generates_compound_foreign_keys(self):
 
         adapter = self.get_adapter(reference=True, compound=True)
@@ -1243,6 +1262,16 @@ class ModelTest(unittest.TestCase):
             'REFERENCES dummy_two(id) ON UPDATE RESTRICT ON DELETE RESTRICT'
             in script
         )
+
+    @common_config(engine='postgres:')
+    def test_postgres_reference_on_remote_generate_nothing(self):
+
+        adapter = self.get_adapter(reference=True, on_remote=True)
+        script = adapter.parse_references()
+        print script
+
+        self.assertTrue('REFERENCES' not in script)
+        self.assertTrue('FOREIGN KEY' not in script)
 
     @common_config(engine='postgres:')
     def test_postgres_reference_generates_compound_foreign_keys(self):
@@ -1556,6 +1585,15 @@ class DummyModelEight(Model):
     second_id = Int()
     third_id = Int()
     fourth_id = Int()
+
+
+class DummyModelNine(Model):
+    """Dummy Model for testing purposes"""
+
+    __storm_table__ = 'dummy_nine'
+    id = Int(primary=True)
+    remote_id = Int()
+    dummy_two = Reference(remote_id, DummyModelTwo.id, on_remote=True)
 
 
 class DummyModelEnum(Model):

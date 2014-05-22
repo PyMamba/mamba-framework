@@ -169,6 +169,11 @@ class PostgreSQL(CommonSQL):
 
             if type(attr.object) is Reference:
                 relation = attr.object._relation
+
+                if relation.on_remote is True:
+                    # Don't create a FK for this as is defined on remote.
+                    continue
+
                 keys = {
                     'remote': relation.remote_key,
                     'local': relation.local_key
