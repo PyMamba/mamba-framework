@@ -247,6 +247,11 @@ class Application(object):
             '{}/application/model/__init__.py'.format(self.app_dir))
         script.open('w').write('# Models should be placed here\n')
 
+        # lib level
+        script = filepath.FilePath(
+            '{}/application/lib/__init__.py'.format(self.app_dir))
+        script.open('w').write('# Libs should be placed here\n')
+
     def _load_template_from_mamba(self, template):
         """
         Load a template from the installed mamba directory
