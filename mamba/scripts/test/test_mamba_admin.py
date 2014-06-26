@@ -147,6 +147,7 @@ class ApplicationTest(unittest.TestCase):
         self.assertTrue(filepath.exists('test/logs'))
         self.assertTrue(filepath.exists('test/application'))
         self.assertTrue(filepath.exists('test/application/lib'))
+        self.assertTrue(filepath.exists('test/application/lib/__init__.py'))
         self.assertTrue(filepath.exists('test/application/controller'))
         self.assertTrue(filepath.exists('test/application/model'))
         self.assertTrue(filepath.exists('test/application/view'))

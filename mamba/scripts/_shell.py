@@ -2,6 +2,7 @@
 # See LICENSE for more details
 import os
 import sys
+import subprocess
 
 from mamba._version import versions
 
@@ -74,6 +75,6 @@ def sqlite(uri):
 
 def _run(args):
     if os.name != 'nt':
-        os.execvp(args[0], args[1:])
+        subprocess.call(args)
     else:
         sys.exit(os.system(' '. join(args)))

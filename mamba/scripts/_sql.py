@@ -466,9 +466,9 @@ class Sql(object):
         sys.stdout = capture
 
         if mgr is None:
-            print(db.dump(ModelManager(), True))
+            print(db.dump(ModelManager(), None, True))
         else:
-            print(db.dump(mgr, True))
+            print(db.dump(mgr, None, True))
 
         sys.stdout = stdout
 
