@@ -54,7 +54,7 @@ setup(
     install_requires=[
         'twisted>=10.2.0', 'storm', 'jinja2>=2.4', 'singledispatch'],
     requires=[
-        'twisted(>=10.2.0)', 'storm', 'zope.component', 'transaction',
+        'twisted(>=10.2.0)', 'storm', 'zope.component(>=4.1.0)', 'transaction',
         'jinja2(>=2.4)', 'singledispatch'
     ],
     dependency_links=[
