@@ -461,7 +461,7 @@ Enterprise
 
 This is the package that give you access to Database layers. You can use traditional Open Source SQL solutions as `PostgreSQL <http://www.postgresql.org/>`_ PostgreSQL, `MySQL <http://www.mysql.com/>`_ or `SQLite <http://www.sqlite.org/>`_ as well as No-SQL Open Source solutions as `MongoDB <http://www.mongodb.org/>`_ (work in progress).
 
-The SQL database access is performed through `Storm <http://storm.canonical.com>`_ with some monkey patching to make possible database creation from the Pthon defined model.
+The SQL database access is performed through `Storm <http://storm.canonical.com>`_ with some monkey patching to make possible database creation from the Python defined model.
 
 Mamba is supossed to work fine with Storm since revision 223 of the bazaar repository in Storm-0.12 but we only tested it with version 0.19.
 
