@@ -43,12 +43,14 @@ class ConverterTest(unittest.TestCase):
                 )
             elif t is tuple:
                 self.assertEqual(
-                    json.dumps(self.test_data[t]),
-                    str(list(self.test_data[t]))
+                    json.dumps(self.test_data[t]).replace(' ', ''),
+                    str(list(self.test_data[t])).replace(' ', '')
                 )
             else:
                 self.assertEqual(
-                    json.dumps(self.test_data[t]), str(self.test_data[t]))
+                    json.dumps(self.test_data[t]).replace(' ', ''),
+                    str(self.test_data[t]).replace(' ', '')
+                )
 
     def test_convert_object_to_json(self):
 

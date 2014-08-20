@@ -172,7 +172,7 @@ class ModelTest(unittest.TestCase):
     def test_json(self):
         dummy = DummyModel('Dummy')
         j = dummy.json
-        self.assertEqual(j, '{"id": null, "name": "Dummy"}')
+        self.assertEqual(j.replace(' ', ''), '{"id":null,"name":"Dummy"}')
 
     def test_pickle(self):
         dummy = DummyModel('Dummy')
