@@ -14,10 +14,10 @@
 import inspect
 from singledispatch import singledispatch
 
-from storm.expr import Undef
 from twisted.python import components
 from storm.references import Reference
 from storm import properties, variables
+from storm.expr import Undef, compile as storm_compile
 
 from mamba.utils import config
 from mamba.core.interfaces import IMambaSQL
@@ -95,10 +95,11 @@ class PostgreSQL(CommonSQL):
                 continue
 
             query = (
-                'CREATE INDEX {}_ind ON {} ({});'.format(
+                'CREATE INDEX {}_ind_{} ON {} ({});'.format(
                     property_.name,
                     self.model.__storm_table__,
-                    property_.name
+                    self.model.__storm_table__,
+                    self._parse_column_name(property_.name)
                 )
             )
             indexes.append(query)
@@ -123,10 +124,11 @@ class PostgreSQL(CommonSQL):
         compound_query = []
         for compound in compound_indexes:
             query = (
-                'CREATE INDEX {}_ind ON {} ({});'.format(
+                'CREATE INDEX {}_ind_{} ON {} ({});'.format(
                     '_'.join(compound),
                     self.model.__storm_table__,
-                    ', '.join([c for c in compound])
+                    self.model.__storm_table__,
+                    ', '.join([self._parse_column_name(c) for c in compound])
                 )
             )
 
@@ -215,7 +217,7 @@ class PostgreSQL(CommonSQL):
         :type column: :class:`storm.properties`
         """
 
-        column_type = '{} {}{}{}{}'.format(
+        column_type = '"{}" {}{}{}{}'.format(
             column._detect_attr_name(self.model.__class__),
             self.parse(column),
             self._null_allowed(column),
@@ -236,6 +238,9 @@ class PostgreSQL(CommonSQL):
         created using ``CREATE TYPE <name> AS ENUM (<values>);`` format so
         we need to parse it separeted from regular column parsing.
 
+        We have to add the table name to the enum name as we can't define
+        more than one enum with the same name.
+
         :param column: the Storm properties column to parse
         :type column: :class:`storm.properties`
         """
@@ -247,7 +252,10 @@ class PostgreSQL(CommonSQL):
 
         data = column._variable_kwargs.get('_set', set())
         return 'CREATE TYPE {} AS ENUM {};\n'.format(
-            'enum_{}'.format(column._detect_attr_name(self.model.__class__)),
+            'enum_{}_{}'.format(
+                column._detect_attr_name(self.model.__class__),
+                self.model.__storm_table__
+            ),
             '({})'.format(', '.join(["'{}'".format(i) for i in data]))
         )
 
@@ -339,6 +347,30 @@ class PostgreSQL(CommonSQL):
 
         return query
 
+    def detect_uniques(self):
+        """Checks if the model has an __mamba_unique__ property.
+        If so, we create a compound unique with the fields specified inside
+        __mamba_unique__. This variable must be a tuple of tuples.
+
+        Example: (
+            ('field1', 'field2'),
+            ('field3', 'field4', 'field5')
+        )
+        """
+        compound_uniques = getattr(self.model, '__mamba_unique__', None)
+
+        if compound_uniques is None:
+            return ''
+
+        compound_query = []
+        for compound in compound_uniques:
+            query = 'UNIQUE ({})'.format(
+                ', '.join(compound)
+            )
+            compound_query.append(query)
+
+        return ', '.join(compound_query)
+
     def _parse_int(self, column):
         """
         Parse an specific integer type for PostgreSQL, for example:
@@ -419,7 +451,10 @@ class PostgreSQL(CommonSQL):
     def _parse_enum(self, column):
         """Simple parse enum helper function
         """
-        return 'enum_' + column._detect_attr_name(self.model.__class__)
+        return 'enum_{}_{}'.format(
+            column._detect_attr_name(self.model.__class__),
+            self.model.__storm_table__
+        )
 
     def _unique(self, column):
         """
@@ -430,30 +465,6 @@ class PostgreSQL(CommonSQL):
         """
         wrap_column = column._get_column(self.model.__class__)
         return ' UNIQUE' if wrap_column.unique else ''
-
-    def detect_uniques(self):
-        """Checks if the model has an __mamba_unique__ property.
-        If so, we create a compound unique with the fields specified inside
-        __mamba_unique__. This variable must be a tuple of tuples.
-
-        Example: (
-            ('field1', 'field2'),
-            ('field3', 'field4', 'field5')
-        )
-        """
-        compound_uniques = getattr(self.model, '__mamba_unique__', None)
-
-        if compound_uniques is None:
-            return ''
-
-        compound_query = []
-        for compound in compound_uniques:
-            query = 'UNIQUE ({})'.format(
-                ', '.join(compound)
-            )
-            compound_query.append(query)
-
-        return ', '.join(compound_query)
 
     def _default(self, column):
         """
@@ -475,14 +486,25 @@ class PostgreSQL(CommonSQL):
 
             if (column.variable_class is variables.DateTimeVariable
                     or column.variable_class is variables.TimeVariable
-                    or column.variable_class is variables.DateVariable):
+                    or column.variable_class is variables.DateVariable
+                    or column.variable_class is NativeEnumVariable):
                 if variable._value is not Undef:
-                    variable._value = "'" + str(variable._value) + "'"
+                    if variable._value != 'NULL':
+                        variable._value = "'" + str(variable._value) + "'"
 
             if variable._value is not Undef:
                 return ' default {}'.format(variable._value)
 
         return ''
+
+    def _parse_column_name(self, column_name):
+        """Parse a column name to make sure we quote resrerved words
+        """
+
+        if not storm_compile.is_reserved_word(column_name):
+            return column_name
+
+        return '"{}"'.format(column_name.replace('"', '""'))
 
     @staticmethod
     def register():

@@ -767,8 +767,8 @@ class ModelTest(unittest.TestCase):
 
         self.assertTrue('CREATE TABLE IF NOT EXISTS dummy' in script)
         self.assertTrue('PRIMARY KEY(id)' in script)
-        self.assertTrue('name varchar(64)' in script)
-        self.assertTrue('id serial' in script)
+        self.assertTrue('"name" varchar(64)' in script)
+        self.assertTrue('"id" serial' in script)
 
     @common_config(engine='postgres:')
     def test_model_dump_table_with_postgres_unique_field(self):
@@ -776,9 +776,9 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelSeven()
         script = dummy.dump_table()
 
-        self.assertTrue('id int' in script)
-        self.assertTrue('second_id int UNIQUE' in script)
-        self.assertTrue('fourth_id int UNIQUE' in script)
+        self.assertTrue('"id" int' in script)
+        self.assertTrue('"second_id" int UNIQUE' in script)
+        self.assertTrue('"fourth_id" int UNIQUE' in script)
 
     @common_config(engine='postgres:')
     def test_model_dump_table_with_postgres_index_field(self):
@@ -786,12 +786,13 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelSeven()
         script = dummy.dump_table() + dummy.dump_indexes()
 
-        self.assertTrue('id int' in script)
-        self.assertTrue('second_id int UNIQUE' in script)
-        self.assertTrue('fourth_id int UNIQUE' in script)
+        self.assertTrue('"id" int' in script)
+        self.assertTrue('"second_id" int UNIQUE' in script)
+        self.assertTrue('"fourth_id" int UNIQUE' in script)
 
         self.assertTrue(
-            'CREATE INDEX third_id_ind ON dummy_seven (third_id)' in script
+            'CREATE INDEX third_id_ind_dummy_seven ON dummy_seven (third_id)'
+            in script
         )
 
     @common_config(engine='postgres:')
@@ -800,12 +801,12 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelEight()
         script = dummy.dump_table() + dummy.dump_indexes()
 
-        self.assertTrue('id int' in script)
-        self.assertTrue('second_id int,' in script)
-        self.assertTrue('fourth_id int,' in script)
+        self.assertTrue('"id" int' in script)
+        self.assertTrue('"second_id" int,' in script)
+        self.assertTrue('"fourth_id" int,' in script)
 
         self.assertTrue((
-            'CREATE INDEX second_id_fourth_id_ind ON'
+            'CREATE INDEX second_id_fourth_id_ind_dummy_eight ON'
             ' dummy_eight (second_id, fourth_id)') in script
         )
 
@@ -815,9 +816,9 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelEight()
         script = dummy.dump_table()
 
-        self.assertTrue('id int' in script)
-        self.assertTrue('second_id int,' in script)
-        self.assertTrue('fourth_id int,' in script)
+        self.assertTrue('"id" int' in script)
+        self.assertTrue('"second_id" int,' in script)
+        self.assertTrue('"fourth_id" int,' in script)
         self.assertTrue('UNIQUE (second_id, third_id)' in script)
 
     @common_config(engine='postgres:')
@@ -827,7 +828,7 @@ class ModelTest(unittest.TestCase):
         script = dummy.dump_table()
 
         self.assertTrue(
-            'id serial' in script.split(',')[0]
+            '"id" serial' in script.split(',')[0]
         )
 
     @common_config(engine='postgres:')
@@ -836,8 +837,8 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelSix()
         script = dummy.dump_table()
 
-        self.assertTrue('id int' in script.split(',')[0])
-        self.assertTrue('second_id int' in script.split(',')[1])
+        self.assertTrue('"id" int' in script.split(',')[0])
+        self.assertTrue('"second_id" int' in script.split(',')[1])
 
     @common_config(engine='postgres:')
     def test_model_dump_table_with_postgres_and_enum(self):
@@ -845,18 +846,18 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelEnum()
         script = dummy.dump_table()
 
-        self.assertTrue('mood integer' in script)
+        self.assertTrue('"mood" integer' in script)
 
     @common_config(engine='postgres:')
     def test_model_dump_table_with_postgres_and_native_enum(self):
         dummy = DummyModelNativeEnum()
         script = dummy.dump_table()
 
-        self.assertTrue("CREATE TYPE enum_mood AS ENUM" in script)
+        self.assertTrue("CREATE TYPE enum_mood_dummy_enum AS ENUM" in script)
         self.assertTrue(
             'sad' in script and 'ok' in script and 'happy' in script
         )
-        self.assertTrue("mood enum_mood" in script)
+        self.assertTrue('"mood" enum_mood' in script)
 
     @common_config(engine='postgres:')
     def test_model_dump_table_with_postgres_and_array(self):
@@ -864,21 +865,21 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelArray()
         script = dummy.dump_table()
 
-        self.assertTrue('this_array integer[3][3],' in script)
+        self.assertTrue('"this_array" integer[3][3],' in script)
 
     @common_config(engine='postgres:')
     def test_model_dump_table_with_postgres_and_bool_with_default_value(self):
 
         dummy = DummyModelBool()
         script = dummy.dump_table()
-        self.assertTrue('  test bool default TRUE' in script)
+        self.assertTrue('  "test" bool default TRUE' in script)
 
     @common_config(engine='postgres:')
     def test_model_dump_table_with_postgres_and_default_value_none(self):
 
         dummy = DummyModelNone()
         script = dummy.dump_table()
-        self.assertTrue('  name varchar(64) default NULL,' in script)
+        self.assertTrue('  "name" varchar(64) default NULL,' in script)
 
     @common_config(engine='postgres:')
     def test_model_dump_table_with_postgres_and_datetime_default(self):
@@ -886,7 +887,7 @@ class ModelTest(unittest.TestCase):
         dummy = DummyModelDatetime()
         script = dummy.dump_table()
         self.assertTrue(
-            "  time timestamp default '2013-01-01 00:00:00'," in script)
+            "  \"time\" timestamp default '2013-01-01 00:00:00'," in script)
 
     @inlineCallbacks
     def test_model_create_table(self):
