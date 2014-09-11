@@ -419,10 +419,11 @@ def transact(method):
         kwargs['async'] = kwargs.pop(
             'async', getattr(self, '__mamba_async__', True))
         kwargs['auto_commit'] = kwargs.pop('auto_commit', True)
-        try:
+        if "transactor" in dir(self):
             return self.transactor.run(method, self, *args, **kwargs)
-        except AttributeError:
+        else:
             return self.database.transactor.run(method, self, *args, **kwargs)
+     
     return wrapper
 
 
