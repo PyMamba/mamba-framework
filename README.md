@@ -1,6 +1,7 @@
 ===============
 Mamba Framework
 ===============
+[![Build Status](https://travis-ci.org/PyMamba/mamba-framework.svg?branch=master)](https://travis-ci.org/PyMamba/mamba-framework)
 
 Mamba is a high-level Web Applications framework based on Twisted, Storm and Jinja2.
 
@@ -41,82 +42,29 @@ There are other requirements in order to run the test suite or build the documen
 Build Status
 ============
 
-Mamba uses [buildbot](http://buildbot.net/ "BuildBot") as CI solution. At the moment we provide build tests for the following systems and Python implementations:
+Mamba uses [Travis CI](https://travis-ci.org) as CI solution. We offered a custom Buildbot solution but recently we run into problems to maintain it's infrastrcuture so we move our architecture to a more comfortable 3rd party hosted service as Travis CI is.
 
 Known platforms where Mamba runs
 --------------------------------
-Altough mamba is hardly tested on GNU/Linux, we don't have full uptime `buildbot slaves` to
-test it on Windows or Mac OS X (we don't have `buildbot slave` at all). Mamba is maintained
-as most compatible as we can we every operating system but any contribution on this field
-is really welcome.
+Mamba has been hardly tested on GNU/Linux and OS X. It is maintained as most compatible as we can with the following operating systems:
 
-<table>
-  <tr>
-    <td></td>
-    <td align="center">
-      <strong>Ubuntu 12.04</strong>
-    </td>
-    <td align="center">
-      <strong>Ubuntu 10.04</strong>
-    </td>
-    <td align="center">
-      <strong>Gentoo 2013</strong>
-    </td>
-    <td align="center">
-      <strong>FreeBSD 9.1</strong>
-    </td>
-    <td align="center">
-      <strong>Windows7</strong>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <strong>CPython</strong>
-    </td>
-    <td align="center">
-        <img align="center" src="http://buildbot.pymamba.com/png?builder=Ubuntu-12.04-python2.7.3&size=large" />
-    </td>
-    <td align="center">
-        <img align="center" src="http://buildbot.pymamba.com/png?builder=Ubuntu-10.04-CPython2.7.4&size=large" />
-    </td>
-    <td align="center">
-        <img align="center" src="http://buildbot.pymamba.com/png?builder=Gentoo-2013-Python2.7&size=large" />
-    </td>
-    <td align="center">
-        <img align="center" src="http://buildbot.pymamba.com/png?builder=FreeBSD-9.1_amd64_python2.7&size=large" />
-    </td>
-    <td align="center">
-        <img align="center" src="http://buildbot.pymamba.com/png?builder=Windows7-Python2.7&size=large" />
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <strong>PyPy</strong>
-    </td>
-    <td align="center">
-        <img src="http://buildbot.pymamba.com/png?builder=Ubuntu-12.04-pypy&size=large" />
-    </td>
-    <td align="center">
-        <img src="http://buildbot.pymamba.com/png?builder=Ubuntu-10.04-pypy1.9&size=large" />
-    </td>
-    <td align="center">
-        <img align="center" src="http://buildbot.pymamba.com/png?builder=Gentoo-2013-PyPy2.0&size=large" />
-    </td>
-    <td align="center">
-        <img align="Center" src="http://buildbot.pymamba.com/png?builder=FreeBSD-9.1_amd64_pypy&size=large" />
-    </td>
-    <td align="center">
-        <img align="center" src="http://buildbot.pymamba.com/png?builder=Windows7-PyPy&size=large" />
-    </td>
-  </tr>
-  <tr>
-    <td align="center"><strong>NOTES</strong></td>
-    <td colspan="6">All the platforms listed here are supported by Mamba. We are looking for volunteers
-    that want to contribute with a buildbot slave for all the 'unknown' listed platforms here and new operating systems.
-  </tr>
-</table>
+  * GNU/Linux
+  * FreeBSD
+  * OS X
+  * Windows
 
-If you want to know more about Mamba's buildbot you can check our [BuildBot Waterfall](http://buildbot.pymamba.com).
+Altough is untested, mamba will probably work in also in other BSDs and Plan 9.
+
+Known Python implementations where Mamba runs
+---------------------------------------------
+
+Mamba can also run in the following Python implementations, please take care of the note in the list
+
+  * CPython
+  * PyPy
+  * Stackless Python
+
+When running in PyPy psycopg2ct has to be installed to make PostgreSQL work, you can experience random crashes of the PyPy interpreter under MySQL and PostgreSQL big loads, SQLite seems to work fine.
 
 Project Documentation
 =====================
