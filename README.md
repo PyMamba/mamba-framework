@@ -10,7 +10,7 @@ Mamba is a high-level Web Applications framework based on Twisted, Storm and Jin
   </tr>
 </table>
 
-[![Build Status](https://travis-ci.org/PyMamba/mamba-framework.svg?branch=master)](https://travis-ci.org/PyMamba/mamba-framework) [![Downloads](https://pypip.in/d/mamba-framework/badge.png)](https://crate.io/packages/mamba-framework/)
+[![Build Status](https://travis-ci.org/PyMamba/mamba-framework.svg?branch=master)](https://travis-ci.org/PyMamba/mamba-framework) [![Downloads](https://pypip.in/d/mamba-framework/badge.png)](https://crate.io/packages/mamba-framework/) [![Supported Python versions](https://pypip.in/py_versions/mamba-framework/badge.svg)](https://pypi.python.org/pypi/mamba-framework/) [![Supported Python implementations](https://pypip.in/implementation/mamba-framework/badge.svg)](https://pypi.python.org/pypi/mamba-framework/) [![License](https://pypip.in/license/mamba-framework/badge.svg)](https://pypi.python.org/pypi/mamba-framework/)
 
 Minimum Dependencies
 ====================
