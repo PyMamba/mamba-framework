@@ -459,19 +459,19 @@ class HyBi07Frame(object):
 
 class WebSocketProtocol(ProtocolWrapper):
     """
-    Wrapped protocol to handle Websockaet transport layer. Thw websocket
-    protocol just wrap another protocol to provide a WebSocket transport.
+    Wrapped protocol to handle Websockaet transport layer. The websocket
+    protocol just wraps another protocol to provide a WebSocket transport.
 
     warning::
         This protocol is  not HTTP
 
-    How to use it?::
+    How is it used?::
 
         from twisted.internet import protocol
 
         from mamba.web import websocket
 
-        class EchoFactory(protocol.Protocol):
+        class EchoProtocol(protocol.Protocol):
 
             def dataReceived(self, data):
                 # this is the websocket data frame
